@@ -30,3 +30,4 @@ HH model | Class name
 -- | --
 Selection | 
    a |   b.m 
+   c |   `d.m`
