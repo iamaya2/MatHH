@@ -26,8 +26,7 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
 ## Currently supported hyper-heuristics
 The following kinds of hyper-heuristics (HHs) are currently supported:
 
-HH model | Class name
--- | --
-Selection | 
----- a |   b.m 
---------     c |   `d.m`
+HH model 		| Class name 				| Description
+-- 				| -- 						| --
+- Selection 	| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
+---- Rule-based | `ruleBasedSelectionHH.m` 	| Class for rule-based selection hyper-heuristics
