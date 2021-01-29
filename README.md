@@ -29,5 +29,5 @@ The following kinds of hyper-heuristics (HHs) are currently supported:
 HH model | Class name
 -- | --
 Selection | 
-   a |\   b.m 
-   c |   `d.m`
+---- a |   b.m 
+--------     c |   `d.m`
