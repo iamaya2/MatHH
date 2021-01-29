@@ -13,11 +13,11 @@ In order to properly use `MatHH`, the following packages are required:
 Seeking to facilitate the maintenance of the required packages, the root folder of each package should be located at the same level. Hence, the following structure is suggested:
 
 ```
-- `JSSP-Matlab-OOP`
-- `MatHH`
-   - `src`   
-- `Utils`
-   - `distance`
+- JSSP-Matlab-OOP
+- MatHH
+   - src
+- Utils
+   - distance
    - ...
 ```   
    
