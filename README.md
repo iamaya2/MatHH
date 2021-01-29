@@ -28,5 +28,5 @@ The following kinds of hyper-heuristics (HHs) are currently supported:
 
 HH model 		| Class name 				| Description
 -- 				| -- 						| --
-- Selection 	| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
----- Rule-based | `ruleBasedSelectionHH.m` 	| Class for rule-based selection hyper-heuristics
+Selection 		| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
+--- Rule-based 	| `ruleBasedSelectionHH.m` 	| Class for rule-based selection hyper-heuristics
