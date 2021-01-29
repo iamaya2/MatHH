@@ -30,3 +30,10 @@ HH model 		| Class name 				| Description
 -- 				| -- 						| --
 Selection 		| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
 --- Rule-based 	| `ruleBasedSelectionHH.m` 	| Class for rule-based selection hyper-heuristics
+
+## Upcoming functionality
+
+[ ] Sequence-based selection hyper-heuristics
+[ ] Support for balanced partition problems 
+
+## Example
