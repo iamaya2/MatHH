@@ -27,5 +27,5 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
 The following kinds of hyper-heuristics (HHs) are currently supported:
 
 HH model | Class name
-- | -
+-- | --
 a | b 
