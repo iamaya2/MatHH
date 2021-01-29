@@ -21,4 +21,4 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
    ...
 ```   
    
-*Note: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
+***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
