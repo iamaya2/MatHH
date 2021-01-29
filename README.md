@@ -12,11 +12,13 @@ In order to properly use `MatHH`, the following packages are required:
 ### File organization
 Seeking to facilitate the maintenance of the required packages, the root folder of each package should be located at the same level. Hence, the following structure is suggested:
 
+```
 - `JSSP-Matlab-OOP`
 - `MatHH`
    - `src`   
 - `Utils`
    - `distance`
    - ...
+```   
    
 *Note: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
