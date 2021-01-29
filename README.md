@@ -22,3 +22,10 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
 ```   
    
 ***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
+
+## Currently supported hyper-heuristics
+The following kinds of hyper-heuristics (HHs) are currently supported:
+
+HH model | Class name
+a | b 
+-- | --
