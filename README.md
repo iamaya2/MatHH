@@ -33,7 +33,7 @@ Selection 		| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
 
 ## Upcoming functionality
 
-[ ] Sequence-based selection hyper-heuristics
-[ ] Support for balanced partition problems 
+- [ ] Sequence-based selection hyper-heuristics
+- [ ] Support for balanced partition problems 
 
 ## Example
