@@ -1,63 +1,11 @@
-# MatHH: A Matlab-based Hyper-Heuristic framework
----
-This repository contains a description of `MatHH`, a framework developed in Matlab for coding and testing hyper-heuristics.
-
-## Required packages
-In order to properly use `MatHH`, the following packages are required:
-
-- `Utils`: a set of diverse utility functions to better organize the code; available at: [Github](https://github.com/iamaya2/Utils)
-- *Problem domains:* different packages can be developed/used for providing domain-specific capabilities. So far, the following packages have been tested:
-   - `JSSP-Matlab-OOP`: an object-oriented class for handling Job-Shop scheduling problems; available at: [Github](https://github.com/iamaya2/JSSP-Matlab-OOP)
-   
-It is also necessary to define the training instances that will be used. To this end, we suggest using the `BaseInstances` package (available at: [Github](https://github.com/iamaya2/BaseInstances)), which contains some instances that can be used with this framework.   
-
-### File organization
-Seeking to facilitate the maintenance of the required packages, the root folder of each package should be located at the same level. Hence, the following structure is suggested:
-
-```
-\BaseInstances
-\JSSP-Matlab-OOP
-\MatHH
-   \src
-\Utils
-   \distance
-   ...
-```   
-   
-***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
-
-## Currently supported hyper-heuristics
-The following kinds of hyper-heuristics (HHs) are currently supported:
-
-HH model 		| Class name 				| Description
--- 				| -- 						| --
-Selection 		| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
---- Rule-based 	| `ruleBasedSelectionHH.m` 	| Class for rule-based selection hyper-heuristics
-
-## Upcoming functionality
-
-- [ ] Sequence-based selection hyper-heuristics
-- [ ] Support for balanced partition problems 
-
-## Example
-The following example is also provided in the file `example.m` so that you can run it directly into Matlab. This example shows how to create a simple HH and associate it to the Job-Shop Scheduling problem. Besides, we also provide some examples about how to train the HH model and about how to use it for solving a set of new instances. Some details about the information that can be used are also provided. 
-
-### Cleanup
-The first thing is to make sure that the workspace is pristine:
-
-```
+%% Cleanup
 clc
 clear
 close all
-```
 
-### Package loading 
-Then, the required packages must be added to the search path:
-
-```
+%% Loads required packages
 addpath(genpath("..\..\JSSP-Matlab-OOP")); % Adds JSSP functionality
 addpath(genpath("..\..\Utils")); % Adds assorted utilities
-```
 
 %% HH creation
 % --- Basic parameters
