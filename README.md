@@ -59,21 +59,37 @@ addpath(genpath("..\..\JSSP-Matlab-OOP")); % Adds JSSP functionality
 addpath(genpath("..\..\Utils")); % Adds assorted utilities
 ```
 
-%% HH creation
-% --- Basic parameters
-nbRules = 4;
-nbFeatures = 3; 
-nbSolvers = 4;
-targetProblem = "job shop scheduling";
+### HH creation
+Before creating the hyper-heuristic, we must first define some basic parameters:
+
+```
+nbRules = 4; % Number of rules for the model 
+targetProblem = "job shop scheduling"; % String representing the problem domain 
+```
+
+Now, we can create a basic HH: 
+
+```
+testHH = ruleBasedSelectionHH(nbRules, targetProblem); % Initializes to random model
+```
+
+We can also define our own model by providing the rule matrix:
+
+```
 userModel = [0.2 0.4 0.6 1;...
              0.1 0.3 0.9 3;...
              0.8 0.7 0.2 1;...
-             0.5 0.5 0.5 2];
+             0.5 0.5 0.5 2];  % User-defined rule matrix 
+testHH.value = userModel; % Sets the user-defined model			 
+```			 
 
-% --- Main process
-testHH = ruleBasedSelectionHH(nbRules, targetProblem); % Initializes to random model
-testHH.value = userModel; % Sets a user-defined model
-testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Sets a random model
+Similarly, we can create a random model with fixed parameters: 
+
+```			 
+nbFeatures = 3; % Number of features for the model 
+nbSolvers = 4; % Number of solvers that will be available 
+testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Generates a random model
+```			 
 
 % --- Instance assignment
 % ------ Load first set of training instances
