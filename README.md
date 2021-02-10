@@ -39,7 +39,7 @@ Selection 		| `selectionHH.m`		 	| Parent class for selection hyper-heuristics
 - [ ] Sequence-based selection hyper-heuristics
 - [ ] Support for balanced partition problems 
 
-## Example
+## Examples
 The following example is also provided in the file `example.m` so that you can run it directly into Matlab. This example shows how to create a simple HH and associate it to the Job-Shop Scheduling problem. Besides, we also provide some examples about how to train the HH model and about how to use it for solving a set of new instances. Some details about the information that can be used are also provided. 
 
 ### Cleanup
@@ -91,61 +91,94 @@ nbSolvers = 4; % Number of solvers that will be available
 testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Generates a random model
 ```			 
 
-% --- Instance assignment
-% ------ Load first set of training instances
+## Instance assignment
+In order to train the HH model we need to define a set of training instances. For the sake of simplicity, in this example we use already available instances from the `BaseInstances` package.
+
+### Instance loading 
+Load the first set of instances from the E02 folder: 
+
+```
 instanceDataset = '..\..\BaseInstances\JobShopScheduling\files\mat\Instances\E02\instanceDataset.mat';
 load(instanceDataset);
 trainInstances1 = num2cell(allInstances); % Stores instances as cell array
+```
 
-% ------ Load second set of training instances
+Load the second set of instances from the E01 folder: 
+
+```
 instanceDataset = '..\..\BaseInstances\JobShopScheduling\files\mat\Instances\E01\instanceDataset.mat';
 load(instanceDataset);
 trainInstances2 = num2cell(allInstances); % Stores as cell array
+```
 
+### Linking instances with the HH
+Now, we only need to point the HH towards the set of instances it should use for training: 
+
+```
 testHH.trainingInstances = trainInstances1; % Assigns first set to HH
+```
 
-%% HH training
-% --- Required variables:
+## Training the model 
+The training process has a required parameter that represents the stop criterion. Currently, only `criterion=1` is supported, which indicates that the training should be done for a fixed number of iterations. So, in order to train with the default parameters simply use: 
+
+```
 criterion = 1;  % Train for a fixed number of iterations
+testHH.train(criterion); % Trains using default parameters
+```
 
-% --- Train using default parameters:
-testHH.train(criterion);
+Training can also be done with custom parameters and they must be called in the following order (some feasible values are shown): 
 
-% --- Define training parameters (for training a HH with UPSO)
-maxIter = 10;
-populationSize = 20;
-selfConf = 2.1;
-globalConf = 2.1;
-unifyFactor = 0.5;
-visualMode = false;
+```
+maxIter = 100; % Maximum number of iterations for training 
+populationSize = 20; % Number of search agents (particles)
+selfConf = 2.1; % Self-confidence constant (UPSO parameter) 
+globalConf = 2.1; % Global confidence constant (UPSO parameter)
+unifyFactor = 0.5; % Unification factor (UPSO parameter)
+visualMode = false; % Flag for indicating if fitness evolution should be plotted
+```
 
-% --- Training process:
-% ------ position: vector containing the HH model
-% ------ fitness: best fitness value found by UPSO
-% ------ details: structure with extra information about the process
-testHH2 = ruleBasedSelectionHH(nbRules, targetProblem); % Creates a new HH
-testHH2.trainingInstances = trainInstances1; % Assigns first set of instances to HH
+The training process returns three elements: `position`, a vector containing the HH model; `fitness`, best fitness value found by UPSO; `details`, structure with extra information about the training process. So, we can create a new HH and train it with the custom parameters:
+
+```
+testHH2 = ruleBasedSelectionHH(nbRules, targetProblem); % Creates the new HH
+testHH2.trainingInstances = trainInstances1; % Assigns the first set of instances to the HH
 [position, fitness, details] = testHH2.train(criterion, maxIter, populationSize, selfConf, globalConf, unifyFactor, visualMode);
+```
 
-% --- Use training information, e.g. to plot performance evolution across
-% iterations:
+We can use training information, e.g. to plot performance evolution across iterations:
+
+```
 figure, plot(details.procedureEvolution.fitness.raw)
+```
 
-%% HH usage after training
-% --- Solve a set of new instances
+## Using the trained model 
+We can use the trained model for different actions. For example, we can use it for solving a new set of instances: 
+
+```
 solvedInstances = testHH2.solveInstanceSet(trainInstances2);
+```
 
-% --- Display the initial feature values when solving the second instance
+Bear in mind that `solveInstanceSet` clones the instances before solving them. In this way, `trainInstances2` is preserved and the solved instances are located within `solvedInstances`. 
+
+After solving a set of instances we can analyze performance data by accessing directly from the HH. For example, we can display the initial feature values when solving the second instance:
+
+```
 selectedStep = 1;
 selectedInstance = 2;
 testHH2.performanceData{selectedInstance}{selectedStep}.featureValues
+```
 
-% --- Plot the final solution of the third instance
+Or we can plot the final solution of the third instance:
+
+```
 selectedInstance = 3;
 testHH2.performanceData{selectedInstance}{end}.solution.plot()
+```
 
-% --- Plot the solution of the third instance before taking the fourth
-% decision
+Similarly, we can plot the solution of the third instance before taking the fourth decision:
+
+```
 selectedStep = 4;
 selectedInstance = 3;
 testHH2.performanceData{selectedInstance}{selectedStep}.solution.plot()
+```
