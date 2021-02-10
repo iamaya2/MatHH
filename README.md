@@ -160,7 +160,7 @@ solvedInstances = testHH2.solveInstanceSet(trainInstances2);
 
 Bear in mind that `solveInstanceSet` clones the instances before solving them. In this way, `trainInstances2` is preserved and the solved instances are located within `solvedInstances`. 
 
-After solving a set of instances we can analyze performance data by accessing directly from the HH. For example, we can display the initial feature values when solving the second instance:
+After solving a set of instances we can analyze performance data by accessing it directly from the HH. For example, we can display the initial feature values when solving the second instance:
 
 ```
 selectedStep = 1;
