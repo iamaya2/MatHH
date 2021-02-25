@@ -5,6 +5,7 @@ This repository contains a description of `MatHH`, a framework developed in Matl
 ## Required packages
 In order to properly use `MatHH`, the following packages are required:
 
+- `BaseInstances`: a set of instances for different problem domains; available at: [Github](https://github.com/iamaya2/BaseInstances)
 - `Utils`: a set of diverse utility functions to better organize the code; available at: [Github](https://github.com/iamaya2/Utils)
 - *Problem domains:* different packages can be developed/used for providing domain-specific capabilities. So far, the following packages have been tested:
    - `JSSP-Matlab-OOP`: an object-oriented class for handling Job-Shop scheduling problems; available at: [Github](https://github.com/iamaya2/JSSP-Matlab-OOP)
