@@ -28,7 +28,7 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
    
 ***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
 
-## Currently supported hyper-heuristics
+## Currently supported hyper-heuristic models
 The following kinds of hyper-heuristics (HHs) are currently supported:
 
 HH model 		| Class name 				| Description
@@ -184,3 +184,6 @@ selectedStep = 4;
 selectedInstance = 3;
 testHH2.performanceData{selectedInstance}{selectedStep}.solution.plot()
 ```
+
+# Contact information
+Should you require more information about `MatHH`, or if you want some feature to be developed, feel free to reach us at: iamaya2@tec.mx
