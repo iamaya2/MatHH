@@ -44,7 +44,7 @@ criterion = 1;  % Train for a fixed number of iterations
 testHH.train(criterion);
 
 % --- Define training parameters (for training a HH with UPSO)
-maxIter = 10;
+maxIter = 100;
 populationSize = 20;
 selfConf = 2.1;
 globalConf = 2.1;
