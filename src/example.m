@@ -4,8 +4,8 @@ clear
 close all
 
 %% Loads required packages
-addpath(genpath("..\..\JSSP-Matlab-OOP")); % Adds JSSP functionality
-addpath(genpath("..\..\Utils")); % Adds assorted utilities
+addpath(genpath('extended\Domains\JSSP')); % Adds JSSP functionality
+addpath(genpath('extended\Utils')); % Adds assorted utilities
 
 %% HH creation
 % --- Basic parameters
