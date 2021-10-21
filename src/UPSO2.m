@@ -181,7 +181,7 @@ end
 
 % Check if visual mode is activated
 if ~isfield(par,'visualMode'), par.visualMode = false; 
-else
+elseif par.visualMode == true
     % Initialise the figure to plot the fitness visualisation
     fitnessEvolutionFig = figure('Name',[mfilename,' - Fitness Visualisation'],...
         'Color','White');
