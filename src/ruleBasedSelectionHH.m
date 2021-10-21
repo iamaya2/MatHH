@@ -546,7 +546,8 @@ classdef ruleBasedSelectionHH < selectionHH
                     % Call to the optimizer
                     [position,fitness,details] = UPSO2(fh, flim, properties);
                     obj.evaluateCandidateSolution(position,obj.trainingInstances);
-                    obj.status = 'Trained'
+                    obj.status = 'Trained';
+                    obj.trainingMethod = 'UPSO';
                 otherwise
                     error("a criterion must be set: 1.-number of iterations")
             end
