@@ -349,10 +349,20 @@ classdef ruleBasedSelectionHH < selectionHH
 %             fprintf('\n');
 %         end
 
-function plotRules(obj, varargin)
-    figure
-    PlotRules(obj.value, varargin{:})
-end
+        function plotRules(obj, varargin)
+            figure
+            PlotRules(obj.value, varargin{:})
+        end
+
+        function plotZones(obj, varargin)
+            figure
+            PlotZones(obj.value, varargin{:})
+        end
+        
+        function plotZones3D(obj, varargin)
+            figure
+            PlotZones3D(obj.value, varargin{:})
+        end
 
         function setDescription(obj, description)
             obj.description = description
