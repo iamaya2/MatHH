@@ -46,7 +46,7 @@ for idx = 1 : length(RuleX)
     if forCIM, ActionSize = 5; else, ActionSize = 15; end
     if toGrayscale
         ActionMarker = "h";        
-        switch (ColorID)
+        switch (Action(idx))            
             case 1
                 ActionColor = [0 0 0];
             case 2
