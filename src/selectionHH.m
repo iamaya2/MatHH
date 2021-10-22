@@ -22,6 +22,7 @@ classdef selectionHH < handle
         trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update)
         trainingParameters           ; % Parameters associated to the training method (for running)
         trainingPerformance          ; % Same as testingPerformance, but for the training set
+        trainingSolution             ; % Data for the best solution provided by the last training stage
         trainingStats                ; % Statistical parameters of the last training batch, as reported by the training method
         value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector                
     end
@@ -125,6 +126,15 @@ classdef selectionHH < handle
             end
             
         end 
+        
+        
+        function plotFitnessEvolution(obj)
+            figure
+            plot(obj.trainingStats.procedureEvolution.fitness.raw);
+            xlabel('Iteration')
+            ylabel('Fitness')
+        end
+        
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)

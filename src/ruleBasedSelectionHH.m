@@ -349,6 +349,8 @@ classdef ruleBasedSelectionHH < selectionHH
 %             fprintf('\n');
 %         end
 
+        
+        
         function plotRules(obj, varargin)
             figure
             PlotRules(obj.value, varargin{:})
@@ -563,6 +565,9 @@ classdef ruleBasedSelectionHH < selectionHH
                     obj.evaluateCandidateSolution(position,obj.trainingInstances);
                     obj.status = 'Trained';
                     obj.trainingMethod = 'UPSO';
+                    obj.trainingSolution = position;
+                    obj.trainingPerformance = fitness;
+                    obj.trainingStats = details;
                 otherwise
                     error("a criterion must be set: 1.-number of iterations")
             end
