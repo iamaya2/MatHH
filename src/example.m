@@ -81,3 +81,13 @@ testHH2.performanceData{selectedInstance}{end}.solution.plot()
 selectedStep = 4;
 selectedInstance = 3;
 testHH2.performanceData{selectedInstance}{selectedStep}.solution.plot()
+
+%% Visualize resulting zones of influence
+% --- Using default values:
+points             = 0:0.01:1;
+selectedFeatures   = 1:2;
+selectedFeatures2  = 3:4;
+useEuclid          = true; % Use Euclidean distance
+doRules            = true; % Plot rules along with zones
+testHH2.plotZones(points, useEuclid, selectedFeatures, doRules)
+testHH2.plotZones(points, useEuclid, selectedFeatures2, doRules)

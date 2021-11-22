@@ -72,7 +72,8 @@ ActionSize = 12;
 [X, Y] = meshgrid(points);
 vX = X(:);
 vY = Y(:);
-allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
+% allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
+allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
 
 allActionIDs = getActionIDs([vX vY], Rules(:,[rX rY end]), toEuclid ); % Evaluate all points
 
@@ -93,4 +94,9 @@ end
 plot([0 0 1 1 0],[0 1 1 0 0],'-k','LineWidth',0.25);
 
 if plotRules, PlotRules(Rules,[rX rY]); end % Plots rules (if desired)
+
+xlabel(['F_' num2str(rX)])
+ylabel(['F_' num2str(rY)])
+axis equal
+axis square
 end
