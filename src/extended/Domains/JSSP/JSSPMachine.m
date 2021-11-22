@@ -15,12 +15,12 @@ classdef JSSPMachine < handle
     %   All JSSPMachine Methods are for dependent properties.
     properties
         activities = JSSPActivity;
+        makespan = NaN; % Current machine makespan (total time)
         jobList
     end
     
     properties (Dependent)
         emptyRangeInMachine % Returns matrix with empty slots within the machine
-        makespan % Returns current machine makespan (total time)
     end
     
     methods
@@ -36,7 +36,30 @@ classdef JSSPMachine < handle
             newMachine = JSSPMachine();
             newMachine.activities = obj.activities;
             newMachine.jobList = obj.jobList;
+            newMachine.makespan = obj.makespan;
         end
+        
+        
+        % Testing...
+        function scheduleJob(obj, selectedActivity, jobID, timeslot)
+            % scheduleJob   Schedule upcoming activity of job with given ID at the given time slot                        
+            selectedActivity.startTime = timeslot;
+            selectedActivity.updateEndTime();
+            if isempty(obj.makespan) || isnan(obj.makespan)
+                obj.activities = selectedActivity; % First activity
+                obj.jobList = jobID;
+                obj.makespan = selectedActivity.endTime; 
+            else
+                obj.activities = [obj.activities selectedActivity]; % Other activities
+                obj.jobList = [obj.jobList jobID];
+                if selectedActivity.endTime > obj.makespan
+                    obj.makespan = selectedActivity.endTime;
+                end
+            end
+            selectedActivity.isScheduled = true; % Activity successfully scheduled
+        end
+        
+        
         
         function ranges = get.emptyRangeInMachine(obj)
             % get.emptyRangeInMachine   Returns matrix with empty slots
@@ -44,9 +67,6 @@ classdef JSSPMachine < handle
             ranges = [0 sort([obj.activities(:).endTime]); sort([obj.activities(:).startTime]) obj.makespan];
         end
         
-        function makespan = get.makespan(obj)
-            % get.makespan   Returns current machine makespan (total time)
-            makespan = max([obj.activities.endTime]);
-        end
+
     end
 end

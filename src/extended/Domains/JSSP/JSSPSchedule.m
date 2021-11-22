@@ -22,14 +22,15 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         
     properties               
         nbMachines % number of machines
-        schedule = JSSPMachine(); % Matrix of scheduled activities. Rows: Machines. Columns: Scheduled activities
-        nbMaxJobs = nan; % Number of maximum jobs
-        schColorMap % Colormap used for differentiating jobs within the schedule
+        nbMaxJobs = NaN; % Number of maximum jobs
+        makespan = NaN; % Time taken to complete all jobs
+        schedule = JSSPMachine(); % Matrix of scheduled activities. Rows: Machines. Columns: Scheduled activities        
+        schColorMap % Colormap used for differentiating jobs within the schedule       
     end        
     
-    properties (Dependent)
-        makespan % The time taken to complete all jobs
-    end
+%     properties (Dependent)
+% 
+%     end
     
     methods
         % ----- ---------------------------------------------------- -----
@@ -62,6 +63,7 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
                 newSchedule.schedule(idx,1) = obj.schedule(idx,1).clone(); % Empty column of actitivities
             end
             newSchedule.schColorMap = obj.schColorMap;
+            newSchedule.makespan = obj.makespan;
         end
         
         %function timeIndex = getTimeslot(obj, machineID, activityLength)            
@@ -156,19 +158,15 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         
         function scheduleJob(obj, targetJob, timeslot)
             % scheduleJob   Schedule upcoming activity of job with given ID at the given time slot
-            selAct = targetJob.popActivity();
-            machineID = selAct.machineID;
-            thisMachine = obj.schedule(machineID);            
-            selAct.startTime = timeslot;
-            if isempty(thisMachine.makespan) || isnan(thisMachine.makespan)
-                thisMachine.activities = selAct; % First activity
-                thisMachine.jobList = targetJob.jobID;
-            else
-                thisMachine.activities = [thisMachine.activities selAct]; % Others
-                thisMachine.jobList = [thisMachine.jobList targetJob.jobID];
+            selectedActivity = targetJob.popActivity();
+            machineID = selectedActivity.machineID;            
+            obj.schedule(machineID).scheduleJob(selectedActivity, targetJob.jobID, timeslot);
+            targetJob.updateLastActivity(selectedActivity, selectedActivity.endTime);
+            
+            % Update makespan
+            if isnan(obj.makespan) || obj.schedule(machineID).makespan > obj.makespan
+                obj.makespan = obj.schedule(machineID).makespan;
             end
-            selAct.isScheduled = true;
-            targetJob.updateLastActivity(selAct, selAct.endTime);
         end
         
         % ----- ---------------------------------------------------- -----
@@ -212,20 +210,7 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----
-        function makespan = get.makespan(obj)
-            % get.makespan   Returns the makespan of the current schedule
             
-%             makespan = size(obj.schedule,2);
-            
-
-%             tempVals = zeros(obj.nbMachines,1);
-%             for idx = 1:obj.nbMachines
-%                 thisObj = obj.schedule(idx,:);
-%                 tempVals(idx) = thisObj(end).endTime;
-%             end
-%             makespan = max(tempVals);
-                makespan = max([obj.schedule(:).makespan]);
-        end               
         
     end
 end

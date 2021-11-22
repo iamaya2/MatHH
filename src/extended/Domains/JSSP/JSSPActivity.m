@@ -26,14 +26,15 @@ classdef JSSPActivity < handle
     %  See also: JSSPJOB, JSSPMACHINE
     properties
         machineID %This property contains a vector with the order in which machines will be scheduled
-        processingTime = nan;%This property contains a vector with the processing times of the operations within every job
+        processingTime = NaN;%This property contains a vector with the processing times of the operations within every job
         isScheduled = false;
-        startTime = nan;
+        startTime = NaN;
+        endTime = NaN;
     end
     
-    properties (Dependent)
-        endTime;
-    end
+%     properties (Dependent)
+% 
+%     end
     
     methods
         function activityObj = JSSPActivity(machID, procTime)
@@ -56,10 +57,11 @@ classdef JSSPActivity < handle
             end
         end
         
-        function endTime = get.endTime(obj)
-            % get.endTime   Method for calculating the dependent property
-            % endTime.
+        function endTime = updateEndTime(obj)
+            % updateEndTime   Method for updating the endTime property
             endTime = obj.startTime + obj.processingTime;
+            obj.endTime = endTime;
         end
+       
     end
 end
