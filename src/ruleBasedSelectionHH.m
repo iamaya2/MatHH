@@ -365,9 +365,15 @@ classdef ruleBasedSelectionHH < selectionHH
             figure
             PlotZones3D(obj.value, varargin{:});
         end
+        
+        function printExtraPerformanceData(obj, selectedInstance, selectedStep)
+            fprintf('\tFeature values at this step: ')
+            fprintf('\t%.4f', obj.performanceData{selectedInstance}{selectedStep}.featureValues)
+            fprintf('\n')
+        end
 
         function setDescription(obj, description)
-            obj.description = description
+            obj.description = description;
             disp(obj.description)
         end
 		                

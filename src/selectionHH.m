@@ -235,11 +235,26 @@ classdef selectionHH < handle
             fprintf('\tNumber of instances: %d (training) | %d (testing)\n', length(obj.trainingInstances), length(obj.testingInstances))
         end
         
+        function printCommonPerformanceData(obj, selectedInstance, selectedStep)
+            fprintf('Displaying performance data for instance %d in step %d:\n', selectedInstance, selectedStep)
+            fprintf('\tSolver selected at this step:\t%d\n', obj.performanceData{selectedInstance}{selectedStep}.selectedSolver)
+        end
+        
         function printExtraData(obj)
             % Replace this with the HH specific information
             %fprintf('\tCurrent model:       %s\n', obj.value)
             disp("Current method:")
             disp(obj.value)
+        end
+        
+        function printExtraPerformanceData(obj, selectedInstance, selectedStep)
+            % Overload this method with HH-specific performance data
+            disp("Overload this method with HH-specific performance data...")
+        end
+        
+        function printPerformanceData(obj, selectedInstance, selectedStep)
+            obj.printCommonPerformanceData(selectedInstance, selectedStep);
+            obj.printExtraPerformanceData(selectedInstance, selectedStep);
         end
         
     end
