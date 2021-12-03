@@ -207,6 +207,11 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
 %             end
         end
         
+        
+        function disp(obj)
+            
+        end
+        
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----
