@@ -67,6 +67,14 @@ classdef JSSPMachine < handle
             ranges = [0 sort([obj.activities(:).endTime]); sort([obj.activities(:).startTime]) obj.makespan];
         end
         
+        % ----- ---------------------------------------------------- -----
+        % Methods for overloading functionality
+        % ----- ---------------------------------------------------- -----
+        function disp(obj, varargin)     
+            fprintf("Jobs scheduled in this machine:")
+            fprintf("\t%d", obj.jobList);
+            fprintf("\tMakespan: %.2f\n", obj.makespan);
+        end
 
     end
 end

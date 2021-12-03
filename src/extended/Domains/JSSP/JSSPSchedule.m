@@ -208,12 +208,23 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         end
         
         
-        function disp(obj)
+        function disp(obj, varargin)            
+            if nargin == 2, toPlot = varargin{1}; else, toPlot = false; end            
+            fprintf("-----------------------------------------------------------------------\n")
             fprintf("Displaying information about the current solution (schedule object):\n")
-            fprintf("\t Machines:\t%d\n",obj.nbMachines);
-            fprintf("\t Jobs to schedule:\t%d\n",obj.nbMaxJobs);
-%             fprintf("\t Jobs scheduled:\t%d\n",obj.nbCurrJobs); % ToDo: implement property
-            fprintf("\t Machines:\t%d\n",obj.nbMachines);
+            fprintf("-----------------------------------------------------------------------\n")
+            fprintf("\tMachines:\t%d\n",obj.nbMachines);
+            fprintf("\tJobs to schedule:\t%d\n",obj.nbMaxJobs);
+%             fprintf("\tJobs scheduled:\t%d\n",obj.nbCurrJobs); % ToDo: implement property
+            fprintf("\tMakespan:\t%d\n",obj.makespan);
+            fprintf("-----------------------------------------------------------------------\n")
+            fprintf("\nJob information per machine:\n")
+            for idx = 1 : obj.nbMachines
+                fprintf("%d. ",idx);
+                disp(obj.schedule(idx));
+            end
+            fprintf("-----------------------------------------------------------------------\n")
+            if toPlot, obj.plot(); end % Plots the schedule, if desired
         end
         
         % ----- ---------------------------------------------------- -----
