@@ -40,12 +40,12 @@ classdef JSSPJob < handle
             %  object JSSPActivity, and creates the corresponding job
             if nargin > 0        
                 nbAct = length(machIDs); 
-                jobObj.activities(nbAct) = JSSPActivity(machIDs(end),procTimes(end)); 
+                jobObj.activities(nbAct) = JSSPActivity(machIDs(end),procTimes(end),nbAct); 
                 for idx = 1 : nbAct-1
                     %This loop will save in the object Job the activities
                     %to process (the machine to schedule and the time it
                     %will be operating)
-                    jobObj.activities(idx) = JSSPActivity(machIDs(idx),procTimes(idx));
+                    jobObj.activities(idx) = JSSPActivity(machIDs(idx),procTimes(idx), idx);
 %                     jobObj.activities(idx).machineID = machID(idx);
 %                     jobObj.activities(idx).processingTime = procTime(idx);                
                 end                

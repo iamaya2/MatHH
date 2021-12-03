@@ -25,6 +25,7 @@ classdef JSSPActivity < handle
     %    
     %  See also: JSSPJOB, JSSPMACHINE
     properties
+        activityID = NaN; % Property for linking this activity with its position within a job
         machineID %This property contains a vector with the order in which machines will be scheduled
         processingTime = NaN;%This property contains a vector with the processing times of the operations within every job
         isScheduled = false;
@@ -37,13 +38,14 @@ classdef JSSPActivity < handle
 %     end
     
     methods
-        function activityObj = JSSPActivity(machID, procTime)
+        function activityObj = JSSPActivity(machID, procTime, varargin)
             % JSSPActivity   Constructor. Receives ID and processing time.
             %  This method should work properly if given vectors of IDs
             %  and processing times. In this case, it should return a
             %  vector of JSSPActivity objects.
-            if nargin > 0
+            if nargin > 0                
                 nbAct = length(machID);
+                if nargin == 3, allIDs = varargin{1}; else, allIDs = nan(1,nbAct); end
 %                 activityObj(nbAct) = activityObj; % Leave this here just in
 %                 case something breaks with the update
                 activityObj(nbAct) = JSSPActivity(); % Dummy activity for reserving memory
@@ -53,6 +55,7 @@ classdef JSSPActivity < handle
                     activityObj(idx) = JSSPActivity();
                     activityObj(idx).machineID = machID(idx);
                     activityObj(idx).processingTime = procTime(idx);                
+                    activityObj(idx).activityID = allIDs(idx);
                 end                
             end
         end

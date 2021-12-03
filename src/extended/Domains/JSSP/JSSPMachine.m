@@ -71,8 +71,8 @@ classdef JSSPMachine < handle
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
         function disp(obj, varargin)     
-            fprintf("Jobs scheduled in this machine:")
-            fprintf("\t%d", obj.jobList);
+            fprintf("Job (activity) scheduled in this machine:")
+            fprintf("\t%d (%d)", [obj.jobList; [obj.activities(:).activityID]]);
             fprintf("\tMakespan: %.2f\n", obj.makespan);
         end
 
