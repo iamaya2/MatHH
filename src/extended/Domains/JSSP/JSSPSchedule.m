@@ -209,7 +209,11 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         
         
         function disp(obj)
-            
+            fprintf("Displaying information about the current solution (schedule object):\n")
+            fprintf("\t Machines:\t%d\n",obj.nbMachines);
+            fprintf("\t Jobs to schedule:\t%d\n",obj.nbMaxJobs);
+%             fprintf("\t Jobs scheduled:\t%d\n",obj.nbCurrJobs); % ToDo: implement property
+            fprintf("\t Machines:\t%d\n",obj.nbMachines);
         end
         
         % ----- ---------------------------------------------------- -----
