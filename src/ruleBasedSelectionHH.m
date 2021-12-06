@@ -38,17 +38,18 @@ classdef ruleBasedSelectionHH < selectionHH
     %   train(obj, criterion, varargin) -
     %    
     properties
-    % Most properties are inherited from the selectionHH superclass. Only
-    % the following properties are specific to this class:     
-    nbRules         = NaN; % Number of rules for the HH
-    nbFeatures      = NaN; % Number of features for the HH
-    nbSolvers       = NaN; % Number of available solvers for the HH
-	featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
-    featureIDs % Vector with the ID of the features that the model uses
-    heuristicVector % Stores information about heuristic usage (not yet implemented)
-    HHRules % TO-DO: Complete description
-    instances % Stores information returned by getInstances
-%     description            % shows training method, and instances used    
+        % Most properties are inherited from the selectionHH superclass. Only
+        % the following properties are specific to this class:
+        nbRules         = NaN; % Number of rules for the HH
+        nbFeatures      = NaN; % Number of features for the HH
+        nbSolvers       = NaN; % Number of available solvers for the HH
+        featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
+        featureIDs % Vector with the ID of the features that the model uses
+        heuristicVector % Stores information about heuristic usage (not yet implemented)
+        HHRules % TO-DO: Complete description
+        instances % Stores information returned by getInstances
+        %     description            % shows training method, and instances used
+        trainingParameters = NaN; % Structure with the parameters used for training
     end
     
     properties (Dependent)
@@ -104,10 +105,11 @@ classdef ruleBasedSelectionHH < selectionHH
             newHH.HHRules           = obj.HHRules; % TO-DO: Complete description
             newHH.instances         = obj.instances; % Stores information returned by getInstances
             newHH.trainingInstances = obj.trainingInstances;
+            newHH.trainingMethod    = obj.trainingMethod;
+            newHH.trainingParameters = obj.trainingParameters;
             newHH.testingInstances  = obj.testingInstances;
             newHH.performanceData   = obj.performanceData;
-            newHH.status            = obj.status;
-            newHH.trainingMethod    = obj.trainingMethod;
+            newHH.status            = obj.status;            
             newHH.value             = obj.value;
         end
         
@@ -572,6 +574,7 @@ classdef ruleBasedSelectionHH < selectionHH
                     obj.status = 'Trained';
                     obj.trainingMethod = 'UPSO';
                     obj.trainingSolution = position;
+                    obj.trainingParameters = properties;
                     obj.trainingPerformance = fitness;
                     obj.trainingStats = details;
                 otherwise
