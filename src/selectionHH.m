@@ -20,7 +20,7 @@ classdef selectionHH < handle
         testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances)
         trainingInstances            ; % Instances used for training. Vector of instances of the targetProblem        
         trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update)
-        trainingParameters           ; % Parameters associated to the training method (for running)
+        trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running) 
         trainingPerformance          ; % Same as testingPerformance, but for the training set
         trainingSolution             ; % Data for the best solution provided by the last training stage
         trainingStats                ; % Statistical parameters of the last training batch, as reported by the training method

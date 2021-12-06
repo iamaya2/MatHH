@@ -48,8 +48,7 @@ classdef ruleBasedSelectionHH < selectionHH
         heuristicVector % Stores information about heuristic usage (not yet implemented)
         HHRules % TO-DO: Complete description
         instances % Stores information returned by getInstances
-        %     description            % shows training method, and instances used
-        trainingParameters = NaN; % Structure with the parameters used for training
+        %     description            % shows training method, and instances used        
     end
     
     properties (Dependent)
