@@ -88,8 +88,9 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.nbRules = Rules;
             obj.assignProblem(targetProblem)
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
-            if defaultSolvers, end
+%             if defaultSolvers, end % toDo
             obj.assignFeatures(selectedFeatures); 
+%             obj.assignSolvers(selectedSolvers); % toDo
             obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
             %             obj.description = "description unset";
         end              
