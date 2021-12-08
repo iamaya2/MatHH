@@ -62,39 +62,49 @@ classdef ruleBasedSelectionHH < selectionHH
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function obj = ruleBasedSelectionHH(Rules, targetProblem)            
-            % Function for creating a rule-based selection hyper-heuristic
-            obj.hhType = 'Rule-based';
+        function obj = ruleBasedSelectionHH(varargin)
+            % Function for creating a rule-based selection hyper-heuristic.
+            % Default values: 2 rules for the JSSP with all available
+            % features.            
+            obj.hhType = 'Rule-based'; % Always true
+            targetProblem = "job shop scheduling"; % Default domain
+            Rules = 2;  % Default number of rules
+            defaultFeatures = true; % Flag for using default features
+            defaultSolvers = true; % Flag for using default solvers
+            if nargin >= 1                  % Pass arguments as a structure
+                if isstruct(varargin{1})
+                    properties = varargin{1};
+                    if isprop(properties,'nbRules'), Rules = properties.nbRules; end
+                    if isprop(properties,'targetProblem'), targetProblem = properties.targetProblem; end
+                    if isprop(properties,'selectedFeatures'), selectedFeatures = properties.selectedFeatures; defaultFeatures = false; end
+                    if isprop(properties,'selectedSolvers'), selectedSolvers = properties.selectedSolvers; defaultSolvers = false; warning('Custom solvers not yet implemented...\n'); end
+                else                        % Given for compatibility with older code
+                    Rules = varargin{1};
+                    if nargin >= 2, targetProblem = varargin{2}; end
+                    if nargin >= 3, selectedFeatures = varargin{3}; defaultFeatures = false; end
+                end
+            end
             obj.targetProblemText = targetProblem;
-            if nargin >= 1
-                obj.nbRules = Rules;
-            end
-            if nargin ==2
-                obj.assignProblem(targetProblem)
-                % ------------------------------------------------------
-                % Changed this...                
-%                 for x=1:length(obj.availableFeatures)
-%                     obj.featureIDs(x)=x;
-%                 end
-                % For this:
-                obj.assignFeatures(1:length(obj.availableFeatures)); % Assigns all features by default
-                % Test and delete the commented code if everything is OK...
-                % ------------------------------------------------------
-                obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
-            end
-%             obj.description = "description unset";
+            obj.nbRules = Rules;
+            obj.assignProblem(targetProblem)
+            if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
+            if defaultSolvers, end
+            obj.assignFeatures(selectedFeatures); 
+            obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
+            %             obj.description = "description unset";
         end              
-        
-		function assignFeatures(obj,featureArray)
-            % Method for assigning the feature IDs that the HH shall use
-             obj.featureIDs = featureArray;
-             obj.nbFeatures = length(featureArray);
-        end
+        		
         
         % ----- ---------------------------------------------------- -----
         % Other methods (sort them alphabetically)
         % ----- ---------------------------------------------------- -----
 
+        function assignFeatures(obj,featureArray)
+            % Method for assigning the feature IDs that the HH shall use
+             obj.featureIDs = featureArray;
+             obj.nbFeatures = length(featureArray);
+        end
+        
         function newHH = clone(obj)
             newHH = ruleBasedSelectionHH(obj.nbRules, obj.targetProblemText);            
             newHH.nbFeatures        = obj.nbFeatures; % Number of features for the HH
