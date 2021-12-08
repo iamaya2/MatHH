@@ -69,13 +69,15 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.hhType = 'Rule-based'; % Always true
             targetProblem = "job shop scheduling"; % Default domain
             Rules = 2;  % Default number of rules
-            defaultFeatures = false; % Flag for using default features
+            defaultFeatures = true; % Flag for using default features
+            defaultSolvers = true; % Flag for using default solvers
             if nargin >= 1                  % Pass arguments as a structure
                 if isstruct(varargin{1})
                     properties = varargin{1};
                     if isprop(properties,'nbRules'), Rules = properties.nbRules; end
                     if isprop(properties,'targetProblem'), targetProblem = properties.targetProblem; end
-                    if isprop(properties,'selectedFeatures'), selectedFeatures = properties.selectedFeatures; end
+                    if isprop(properties,'selectedFeatures'), selectedFeatures = properties.selectedFeatures; defaultFeatures = false; end
+                    if isprop(properties,'selectedSolvers'), selectedSolvers = properties.selectedSolvers; defaultSolvers = false; warning('Custom solvers not yet implemented...\n'); end
                 else                        % Given for compatibility with older code
                     Rules = varargin{1};
                     if nargin >= 2, targetProblem = varargin{2}; end
@@ -85,7 +87,9 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.targetProblemText = targetProblem;
             obj.nbRules = Rules;
             obj.assignProblem(targetProblem)
-            obj.assignFeatures(1:length(obj.availableFeatures)); % Assigns all features by default
+            if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
+            if defaultSolvers, end
+            obj.assignFeatures(selectedFeatures); 
             obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
             %             obj.description = "description unset";
         end              
