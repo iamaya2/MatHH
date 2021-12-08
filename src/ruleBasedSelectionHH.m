@@ -73,12 +73,13 @@ classdef ruleBasedSelectionHH < selectionHH
             defaultSolvers = true; % Flag for using default solvers
             if nargin >= 1                  % Pass arguments as a structure
                 if isstruct(varargin{1})
-                    properties = varargin{1};
-                    if isprop(properties,'nbRules'), Rules = properties.nbRules; end
-                    if isprop(properties,'targetProblem'), targetProblem = properties.targetProblem; end
-                    if isprop(properties,'selectedFeatures'), selectedFeatures = properties.selectedFeatures; defaultFeatures = false; end
-                    if isprop(properties,'selectedSolvers'), selectedSolvers = properties.selectedSolvers; defaultSolvers = false; warning('Custom solvers not yet implemented...\n'); end
+                    props = varargin{1};
+                    if isfield(props,'nbRules'), Rules = props.nbRules; end
+                    if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
+                    if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
+                    if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; warning('Custom solvers not yet implemented...'); end
                 else                        % Given for compatibility with older code
+                    warning('Using deprecated constructor. Consider changing to a structure-based approach...')
                     Rules = varargin{1};
                     if nargin >= 2, targetProblem = varargin{2}; end
                     if nargin >= 3, selectedFeatures = varargin{3}; defaultFeatures = false; end
@@ -88,8 +89,9 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.nbRules = Rules;
             obj.assignProblem(targetProblem)
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
-            if defaultSolvers, end
+%             if defaultSolvers, end % toDo
             obj.assignFeatures(selectedFeatures); 
+%             obj.assignSolvers(selectedSolvers); % toDo
             obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
             %             obj.description = "description unset";
         end              
@@ -223,26 +225,26 @@ classdef ruleBasedSelectionHH < selectionHH
             % INITIALIZEMODEL  Method for generating a random solution for
             % the current hh model
             % --------------- ANALYZE/IMPROVE THIS CODE ------------
-			switch obj.problemType
-                case 'JSSP'  
+            switch obj.problemType
+                case 'JSSP'
                     for f=1:obj.nbFeatures
                         featureValues(f)=normalizeFeature(CalculateFeature(instance, obj.featureIDs(f)),obj.featureIDs(f));
                     end
                     instance.features=featureValues;
-          end          
-		  %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
+            end
+            %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
             for i = 1:size(obj.value,1)
-      
-                  dist(i)  = sqrt(sum((obj.value(i,1:end-1) - instance.features) .^ 2));
-            end 
+                
+                dist(i)  = sqrt(sum((obj.value(i,1:end-1) - instance.features) .^ 2));
+            end
             [~, closestRule] = min(dist);
             %disp(dist)
-		  
-		  % --------------- CONFLICTING VERSION: ------------
+            
+            % --------------- CONFLICTING VERSION: ------------
             %allDistances = distRadialKernel(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-%             allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            %[~, closestRule] = min(allDistances);            
-        end 
+            %             allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
+            %[~, closestRule] = min(allDistances);
+        end
         
         function selectedRule = getRouletteRule(obj, instance, type)
             % getRouletteRule  Method for selecting a rule. Uses a
