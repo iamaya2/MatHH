@@ -135,6 +135,17 @@ classdef selectionHH < handle
             ylabel('Fitness')
         end
         
+        function [fH, aH] = plotSolution(obj, selectedInstance, selectedStep)
+            % PLOTSOLUTION  Method for plotting the solution of a given
+            % instance at a given step. Use 'end' as a step to plot the
+            % final solution. Returns figure and axes handle
+            if strcmpi(selectedStep,'end')
+                [fH, aH] = obj.performanceData{selectedInstance}{end}.solution.plot();
+            else
+                [fH, aH] = obj.performanceData{selectedInstance}{selectedStep}.solution.plot();
+            end
+        end
+        
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)

@@ -172,12 +172,13 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         % ----- ---------------------------------------------------- -----
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
-        function plot(obj, varargin)
-            % plot    Plots the schedule representation
+        function [fH, aH] = plot(obj, varargin)
+            % plot    Plots the schedule representation. Returns figure and
+            % axes handle
             
 %             disp('Not yet implemented...')
 %             heatmap(obj.schedule); % temp... change this to make similar effect with decimal values            
-            figure, colormap(obj.schColorMap)
+            fH = figure; colormap(obj.schColorMap)
             axis([-0.1 obj.makespan+0.1 -obj.nbMachines-0.1 0.1])
             set(gca,'CLim',[1 obj.nbMaxJobs]);            
             colorbar('Ticks', 1:obj.nbMaxJobs) % Create colorbar
@@ -198,6 +199,7 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
             xlabel('Time units')
             ylabel('Machine ID')
             set(gca,'YTickLabel', num2cell(obj.nbMachines:-1:1), 'YTick', -obj.nbMachines+0.5:-0.5)
+            aH = gca;
             
 %             boxwidth = 1;
 %             for idx = 1 : obj.makespan
