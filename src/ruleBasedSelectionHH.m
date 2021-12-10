@@ -622,6 +622,14 @@ classdef ruleBasedSelectionHH < selectionHH
 %         end
 %         
 
+        function printExtraData(obj)
+            % Rule-based Selection HH informationo            
+            fprintf('Model-specific information:\n')
+            fprintf('\tNumber of rules:\t%d\n', obj.nbRules)
+            fprintf('\tUsable features:\t%d (toDo: Include here the ID of each feature, in order)\n', obj.nbFeatures)
+            fprintf('\tUsable solvers:\t%d (toDo: Include here the ID of each solver, in order)\n', obj.nbSolvers)            
+        end
+
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----

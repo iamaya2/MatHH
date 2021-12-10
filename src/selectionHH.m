@@ -221,6 +221,7 @@ classdef selectionHH < handle
             end
             obj.printCommonData();
             obj.printExtraData();
+            obj.printModel();
         end
 
         % ----- ---------------------------------------------------- -----
@@ -242,8 +243,17 @@ classdef selectionHH < handle
                 fprintf('\tTarget problem:      %s\n', obj.targetProblem.problemType)
             end
             fprintf('\tType:                %s\n', obj.hhType)
-            fprintf('\tTraining method:     %s\n', obj.trainingMethod)
-            fprintf('\tNumber of instances: %d (training) | %d (testing)\n', length(obj.trainingInstances), length(obj.testingInstances))
+            fprintf('Training information:\n')
+            fprintf('\tMethod:     %s\n', obj.trainingMethod)
+            fprintf('\tNumber of instances: %d (training) | %d (testing)\n', length(obj.trainingInstances), length(obj.testingInstances))            
+            fprintf('\tParameters:\n')
+            disp(obj.trainingParameters)
+            fprintf('\tPerformance achieved:\t%.2f\n', obj.trainingPerformance)
+            fprintf('\tTime taken:\t%.2f\n', obj.trainingStats.elapsedTime)
+            fprintf('\tEvaluations taken:\t%d\n', obj.trainingStats.functionEvaluations)
+            fprintf('\tIterations performed:\t%d\n', obj.trainingStats.performedIterations)
+            fprintf('\tStatus of stop criteria:\n')
+            disp(obj.trainingStats.stoppingCriteria)
         end
         
         function printCommonPerformanceData(obj, selectedInstance, selectedStep)
@@ -252,9 +262,13 @@ classdef selectionHH < handle
         end
         
         function printExtraData(obj)
-            % Replace this with the HH specific information
-            %fprintf('\tCurrent model:       %s\n', obj.value)
-            disp("Current method:")
+            % Replace this with the HH specific information            
+            fprintf('To be overloaded by each specific HH model...\n')
+        end
+        
+        function printModel(obj)
+            % Replace this with the HH specific information            
+            fprintf("\tCurrent model:\n")
             disp(obj.value)
         end
         
