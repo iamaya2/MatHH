@@ -18,7 +18,7 @@ function allArea = PlotZones(Rules, varargin)
 %  Optional inputs:
 %    1 - Vector with the points that will be evaluated (per dimension)
 %    2 - Flag indicating if Euclidean distance will be used
-%    3 - Vector with three elements containing the IDs of the features
+%    3 - Vector with two elements containing the IDs of the features
 %    (columns) to use when plotting
 %    4 - Flag for indicating if the rules should be plotted as well
 %
