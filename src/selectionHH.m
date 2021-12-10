@@ -23,7 +23,7 @@ classdef selectionHH < handle
         trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running) 
         trainingPerformance          ; % Same as testingPerformance, but for the training set
         trainingSolution             ; % Data for the best solution provided by the last training stage
-        trainingStats                ; % Statistical parameters of the last training batch, as reported by the training method
+        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method
         value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector                
     end
     
@@ -41,8 +41,9 @@ classdef selectionHH < handle
         function obj = selectionHH()
             % Function for creating a raw selection hyper-heuristic            
 %             addpath(genpath('..\')) % This line should be moved from here and put into the main code
+            obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
             if nargin > 0
-                % Put something here in case a constructor is required...
+                % Put something here in case a constructor is required...                
             end
         end              
         
