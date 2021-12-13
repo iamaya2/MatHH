@@ -178,6 +178,26 @@ classdef selectionHH < handle
             fA = gca;
         end
         
+        function [fA,vH] = plotStepSolutionDistributionComparison(obj, selectedSteps)
+            % plotStepSolutionDistributionComparison  Method for plotting the distribution
+            % of the solution performance indicator (e.g. makespan for the JSSP)
+            % for all instances at selected steps, using violins. 
+            % Returns axes and violinplot handles.                        
+            nbInstances = length(obj.performanceData);     
+            nbStepComparisons = length(selectedSteps);
+            allMetrics = nan(nbInstances, nbStepComparisons);            
+            for idx = 1 : nbInstances
+                for idy = 1 : nbStepComparisons
+                    allMetrics(idx,idy) = obj.performanceData{idx}{selectedSteps(idy)}.solution.getSolutionPerformanceMetric();
+                end
+            end             
+            vH = violinplot(allMetrics);            
+            xlabel('Selected steps')
+            xticklabels({selectedSteps})
+            ylabel(obj.performanceData{1}{1}.solution.getSolutionPerformanceMetricName())
+            fA = gca;
+        end
+        
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)
