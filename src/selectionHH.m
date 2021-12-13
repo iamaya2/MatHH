@@ -87,6 +87,11 @@ classdef selectionHH < handle
             
         end 
         
+        function allMetrics = getSolversUsed(obj,selectedInstance)
+            thisInstance = obj.performanceData{selectedInstance};
+            selectedSteps = [thisInstance{:}];
+            allMetrics = [selectedSteps.selectedSolver];
+        end
         % ----- Model initializer
         function initializeModel(obj)
             % INITIALIZEMODEL  Method for generating a random solution for
@@ -162,6 +167,62 @@ classdef selectionHH < handle
             fA = gca;
         end
         
+        function fA = plotSolverUsage(obj,selectedInstance)
+            % PLOTSOLVERUSAGE   Method for plotting the solver used at each
+            % step of the solution for a given instance. Returns axes
+            % handle.
+            allMetrics = obj.getSolversUsed(selectedInstance);
+            plot(allMetrics)
+            xlabel('Steps')
+            ylabel('Solver selected')
+            fA = gca;
+        end
+        
+        function fA = plotSolverUsageDistribution(obj,selectedInstance)
+            % PLOTSOLVERUSAGEDISTRIBUTION   Method for plotting the distribution 
+            % of solvers used at each step of the solution for a given instance. Returns axes
+            % handle.            
+            allMetrics = obj.getSolversUsed(selectedInstance);
+            histogram(allMetrics)            
+            xlabel('Solver selected')
+            ylabel('Frequency')
+            fA = gca;
+        end
+        
+        function [fA, fV] = plotSolverUsageDistributionMulti(obj,selectedInstances, varargin)
+            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the distribution 
+            % of solvers used at each step of the solution for multiple instances. 
+            % Optional input: Accumulation flag. True: Pie chart with
+            % accumulated information; False (default): violinplot with distribution
+            % per instance. 
+            %
+            % Returns axes and violin/pie handles.            
+            toAccumulate = false;
+            nbInstances = length(selectedInstances);
+            nbSteps = length(obj.performanceData{1});
+            allMetrics = nan(nbSteps,nbInstances);
+            for idx = 1 : nbInstances
+                allMetrics(:,idx) = obj.getSolversUsed(selectedInstances(idx));
+            end
+            if length(varargin) == 1, toAccumulate = varargin{1}; end
+            if toAccumulate                
+                existingIDs = unique(allMetrics);
+                IDUsage = zeros(1,length(existingIDs));
+                allLabels = cell(1,length(existingIDs));
+                for idx = 1:length(existingIDs)
+                    IDUsage(idx) = sum(sum(allMetrics==existingIDs(idx)));
+                    allLabels{idx} = ['H_' num2str(existingIDs(idx))];
+                end
+                fV = pie(IDUsage, allLabels);
+            else
+                fV = violinplot(allMetrics);
+                xlabel('Instances')
+                xticklabels({selectedInstances})
+                ylabel('Solver selected')
+            end
+            fA = gca;
+        end
+        
         function fA = plotStepSolutionDistribution(obj, selectedStep)
             % plotStepSolutionDistribution  Method for plotting the distribution
             % of the solution performance indicator (e.g. makespan for the JSSP)
@@ -218,6 +279,7 @@ classdef selectionHH < handle
         function solvedInstances = solveInstanceSet(obj, instanceSet)
             % SOLVEINSTANCESET  Method for solving a given set of instances with the current version of the HH            
             nbInstances = length(instanceSet);
+            if nbInstances == 0, error('No training instances have been assigned yet. Aborting!'); end
             solvedInstances{nbInstances} = obj.targetProblem.createDummyInstance();
             for idx = 1 : nbInstances
                 instance = obj.targetProblem.cloneInstance(instanceSet{idx});
