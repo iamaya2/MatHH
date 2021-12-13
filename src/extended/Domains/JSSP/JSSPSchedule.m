@@ -172,43 +172,18 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         % ----- ---------------------------------------------------- -----
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
-        function [fH, aH] = plot(obj, varargin)
-            % plot    Plots the schedule representation. Returns figure and
-            % axes handle
-            
-%             disp('Not yet implemented...')
-%             heatmap(obj.schedule); % temp... change this to make similar effect with decimal values            
-            fH = figure; colormap(obj.schColorMap)
-            axis([-0.1 obj.makespan+0.1 -obj.nbMachines-0.1 0.1])
-            set(gca,'CLim',[1 obj.nbMaxJobs]);            
-            colorbar('Ticks', 1:obj.nbMaxJobs) % Create colorbar
-            box on
-            hold on            
-            for idM = 1 : obj.nbMachines %length(obj.schedule)
-                eachMachine = obj.schedule(idM);
-                if ~isempty(eachMachine.jobList)
-                    for idx = 1 : length([eachMachine.activities])
-                        eachActivity = eachMachine.activities(idx);
-                        boxwidth = eachActivity.processingTime;
-                        rectangle('Position', [eachActivity.startTime -eachActivity.machineID boxwidth 1], ...
-                            'FaceColor', obj.schColorMap(eachMachine.jobList(idx),:))
-                    end
-                end
-            end
-            
-            xlabel('Time units')
-            ylabel('Machine ID')
-            set(gca,'YTickLabel', num2cell(obj.nbMachines:-1:1), 'YTick', -obj.nbMachines+0.5:-0.5)
-            aH = gca;
-            
-%             boxwidth = 1;
-%             for idx = 1 : obj.makespan
-%                 for idy = 1 : obj.nbMachines
-%                     rectangle('Position', [idx-1 -idy boxwidth boxwidth], 'FaceColor', obj.schColorMap(1+obj.schedule(idy,idx),:))
-%                 end
-%             end
+        function makespan = getSolutionPerformanceMetric(obj)
+            % GETSOLUTIONPERFORMANCEMETRIC   Returns the performance metric
+            % of a solution for the JSSP, i.e. the makespan of the
+            % schedule. Overloads method from SELECTIONHH.
+            makespan = obj.makespan;
         end
         
+        function metricName = getSolutionPerformanceMetricName(obj)
+            % GETSOLUTIONPERFORMANCEMETRICNAME   Returns the JSSP string. 
+            % Overloads method from SELECTIONHH.
+            metricName = 'Makespan';
+        end
         
         function disp(obj, varargin)            
             if nargin == 2, toPlot = varargin{1}; else, toPlot = false; end            
@@ -227,6 +202,32 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
             end
             fprintf("-----------------------------------------------------------------------\n")
             if toPlot, obj.plot(); end % Plots the schedule, if desired
+        end
+        
+        function [fH, aH] = plot(obj, varargin)
+            % plot    Plots the schedule representation. Returns figure and
+            % axes handle          
+            fH = figure; colormap(obj.schColorMap)
+            axis([-0.1 obj.makespan+0.1 -obj.nbMachines-0.1 0.1])
+            set(gca,'CLim',[1 obj.nbMaxJobs]);            
+            colorbar('Ticks', 1:obj.nbMaxJobs) % Create colorbar
+            box on
+            hold on            
+            for idM = 1 : obj.nbMachines %length(obj.schedule)
+                eachMachine = obj.schedule(idM);
+                if ~isempty(eachMachine.jobList)
+                    for idx = 1 : length([eachMachine.activities])
+                        eachActivity = eachMachine.activities(idx);
+                        boxwidth = eachActivity.processingTime;
+                        rectangle('Position', [eachActivity.startTime -eachActivity.machineID boxwidth 1], ...
+                            'FaceColor', obj.schColorMap(eachMachine.jobList(idx),:))
+                    end
+                end
+            end            
+            xlabel('Time units')
+            ylabel('Machine ID')
+            set(gca,'YTickLabel', num2cell(obj.nbMachines:-1:1), 'YTick', -obj.nbMachines+0.5:-0.5)
+            aH = gca;     
         end
         
         % ----- ---------------------------------------------------- -----

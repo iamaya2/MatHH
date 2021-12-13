@@ -147,6 +147,37 @@ classdef selectionHH < handle
             end
         end
         
+        function fA = plotSolutionEvolution(obj, selectedInstance)
+            % PLOTSOLUTIONEVOLUTION  Method for plotting the evolution of the solution performance indicator
+            % (e.g. makespan for the JSSP) of a given instance. Returns axes handle.            
+            thisInstance = obj.performanceData{selectedInstance};
+            nbSteps = length(thisInstance);
+            allMetrics = nan(1,nbSteps);
+            for idx = 1 : nbSteps
+                allMetrics(idx) = thisInstance{idx}.solution.getSolutionPerformanceMetric();
+            end             
+            plot(allMetrics)
+            xlabel('Steps')
+            ylabel(thisInstance{1}.solution.getSolutionPerformanceMetricName())
+            fA = gca;
+        end
+        
+        function fA = plotStepSolutionDistribution(obj, selectedStep)
+            % plotStepSolutionDistribution  Method for plotting the distribution
+            % of the solution performance indicator (e.g. makespan for the JSSP)
+            % for all instances at a given step. Returns axes handle.                        
+            nbInstances = length(obj.performanceData);            
+            allMetrics = nan(1,nbInstances);
+            if strcmpi(selectedStep,'end'), selectedStep = length(obj.performanceData{1}); end
+            for idx = 1 : nbInstances
+                allMetrics(idx) = obj.performanceData{idx}{selectedStep}.solution.getSolutionPerformanceMetric();
+            end             
+            histogram(allMetrics)            
+            xlabel(obj.performanceData{1}{1}.solution.getSolutionPerformanceMetricName())
+            ylabel('Frequency')
+            fA = gca;
+        end
+        
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)
@@ -235,6 +266,22 @@ classdef selectionHH < handle
         % ----- ---------------------------------------------------- -----
         % Extra methods 
         % ----- ---------------------------------------------------- -----
+        function metric = getSolutionPerformanceMetric(obj)
+            % GETSOLUTIONPERFORMANCEMETRIC  Method for returning the
+            % performance metric of a solution. Must be overloaded for each
+            % domain. To be coded by the end user.
+            warning('This method must be implemented by the end user for each domain')
+            metric = nan;
+        end
+        
+        function metric = getSolutionPerformanceMetricName(obj)
+            % GETSOLUTIONPERFORMANCEMETRICNAME  Method for returning the
+            % string of the performance metric of a solution. Must be overloaded for each
+            % domain. To be coded by the end user.
+            warning('This method must be implemented by the end user for each domain')
+            metric = 'metric';
+        end
+        
         function printCommonData(obj)
             % Define here dependent properties
             fprintf('Displaying information about the %s HH:\n', obj.status)
