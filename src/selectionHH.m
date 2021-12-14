@@ -11,6 +11,7 @@ classdef selectionHH < handle
         availableFeatures            ; % String vector of features that can be used for analyzing the problem state
         availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
+        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
         performanceData                % Information about the performance on the test set.
 		problemType     = 'Undefined'; % Problem type name
         status          = 'New'; % HH status. Can be: New, Trained
@@ -285,7 +286,8 @@ classdef selectionHH < handle
                 instance = obj.targetProblem.cloneInstance(instanceSet{idx});
                 [solvedInstances{idx}, perfData] = obj.solveInstance(instance);
                 obj.performanceData{idx} = perfData;
-            end            
+            end         
+            obj.lastSolvedInstances = solvedInstances;
         end 
         
         % ----- Instance splitter
