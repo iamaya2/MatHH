@@ -707,7 +707,8 @@ classdef ruleBasedSelectionHH < selectionHH
             bestSolverPerInstance = selectedSolvers(bestSolversID);
             oraclePerformance = mean(individualSolutions);            
             obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions, ...
-                'lastBestSolvers',bestSolverPerInstance', 'unsolvedInstances', {instanceSet'});
+                'lastBestSolvers',bestSolverPerInstance', 'lastHeuristics', selectedSolvers, 'lastHeuristicSolutions', performanceAllSolvers, ...
+                'unsolvedInstances', {instanceSet'});
         end
         
         function printExtraData(obj)
