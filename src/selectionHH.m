@@ -44,7 +44,7 @@ classdef selectionHH < handle
             % Function for creating a raw selection hyper-heuristic            
 %             addpath(genpath('..\')) % This line should be moved from here and put into the main code
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
-            obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN);
+            obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0
                 % Put something here in case a constructor is required...                
             end
@@ -350,8 +350,18 @@ classdef selectionHH < handle
 %         end
 
         % ----- ---------------------------------------------------- -----
-        % Extra methods 
+        % Extra methods (mainly those that will be overloaded by children)
         % ----- ---------------------------------------------------- -----
+        
+        function compareVsOracle(obj, instanceSet, varargin)
+            % compareVsOracle  Method for comparing the current HH against
+            % the Oracle. Default: uses all available solvers. Optional
+            % input: vector with solver IDs that will be used for the
+            % Oracle.
+            % To be coded by the end user.
+            warning('This method must be implemented by the end user for each model. Nothing will be run here')
+        end
+        
         function [oraclePerformance, individualSolutions, lastBestSolvers] = getOracle(obj, instanceSet)
             % GETORACLE  Method for calculating the Oracle. This method
             % must use each available solver to solve instanceSet. It must
@@ -366,6 +376,8 @@ classdef selectionHH < handle
             %  - lastInstanceSolutions: Same as performance for each            
             %  instance
             %  - lastBestSolvers: Same as the ID of best solvers
+            %  - unsolvedInstances: A copy of the instances used for the
+            %  oracle
             %
             % To be coded by the end user.
             warning('This method must be implemented by the end user for each model')
@@ -373,7 +385,7 @@ classdef selectionHH < handle
             individualSolutions = nan(1, length(instanceSet));
             lastBestSolvers = individualSolutions;
             obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions,...
-                'lastBestSolvers',lastBestSolvers);
+                'lastBestSolvers',lastBestSolvers,'unsolvedInstances', instanceSet);
         end
         
         function metric = getSolutionPerformanceMetric(obj)
