@@ -122,6 +122,13 @@ classdef ruleBasedSelectionHH < selectionHH
             newHH.performanceData   = obj.performanceData;
             newHH.status            = obj.status;            
             newHH.value             = obj.value;
+            
+            % ToDo: Change this by a for-loop that iterates across
+            % properties... in the meantime: 
+            newHH.oracle            = obj.oracle;    
+            newHH.trainingPerformance = obj.trainingPerformance;
+            newHH.trainingSolution  = obj.trainingSolution;
+            newHH.trainingStats     = obj.trainingStats;            
         end
         
         % ----- Instance seeker
@@ -245,6 +252,18 @@ classdef ruleBasedSelectionHH < selectionHH
             %             allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
             %[~, closestRule] = min(allDistances);
         end
+        
+        function performanceMetrics = getPerformanceDataMetrics(obj)
+            % getPerformanceDataMetrics  Method that returns the final
+            % performance metric values for each one of the instances
+            % associated with performanceData.
+            nbInstances = length(obj.performanceData);
+            performanceMetrics = nan(nbInstances,1);
+            for idx = 1 : nbInstances
+                performanceMetrics(idx) = obj.performanceData{idx}{end}.solution.getSolutionPerformanceMetric();
+            end
+        end
+        
         
         function selectedRule = getRouletteRule(obj, instance, type)
             % getRouletteRule  Method for selecting a rule. Uses a
@@ -622,6 +641,84 @@ classdef ruleBasedSelectionHH < selectionHH
 %         end
 %         
 
+        
+        function outputMetrics = compareVsOracle(obj, instanceSet, varargin)
+            % compareVsOracle  Method for comparing the current rule-based
+            % HH against the Oracle. 
+            %  Default: uses all available solvers. 
+            %  Optional input: vector with solver IDs that will be used for the
+            %                  Oracle.            
+            nbInstances = length(instanceSet);
+            obj.getOracle(instanceSet, varargin{:}); % Calculate the Oracle for this set of instances
+            obj.solveInstanceSet(instanceSet); % Solve with the current HH
+            oracleSolutions = obj.oracle.lastInstanceSolutions;
+            HHSolutions = obj.getPerformanceDataMetrics();
+            
+            % Metrics calculation
+            wholeMetrics = [oracleSolutions HHSolutions];
+            meanMetrics = mean(wholeMetrics);
+            winRatio = sum(oracleSolutions > HHSolutions) / nbInstances;
+            tieRatio = sum(oracleSolutions == HHSolutions) / nbInstances;
+            loseRatio = sum(oracleSolutions < HHSolutions) / nbInstances;
+            
+            % Plotting comparisons
+            figure, histogram(obj.oracle.lastInstanceSolutions)
+            hold on, histogram(obj.getPerformanceDataMetrics())
+            legend({'Oracle','HH'})
+            xlabel(obj.performanceData{1}{1}.solution.getSolutionPerformanceMetricName)
+            ylabel('Frequency')
+            
+            % Output preparation
+            outputMetrics = struct('instanceMetrics',wholeMetrics, 'meanMetrics', meanMetrics, ...
+                                    'HHWinRatio', winRatio, 'HHTieRatio', tieRatio, 'HHLoseRatio', loseRatio);
+        end
+        
+        function [oraclePerformance, individualSolutions, bestSolverPerInstance] = getOracle(obj, instanceSet, varargin)
+            % GETORACLE  Method for calculating the Oracle using a
+            % rule-based selection HH. By default, it compares against all
+            % the available solvers (based on the domain class). Custom
+            % solver IDs can be given as an optional input argument (as a
+            % vector).
+            %
+            % The method creates a HH with a single rule targetting a given 
+            % heuristic, which is used to solve the set of instances.
+            % Then, it repeats for the remaining solvers. 
+            % Afterward, it selects the best solution
+            % for each instance and builds the Oracle with that
+            % information. The method returns the average performance
+            % and the performance for each solution. It also sets the oracle property                        
+            dummyProps = struct('nbRules',1,'targetProblem',obj.targetProblemText);
+            dummyHH = ruleBasedSelectionHH(dummyProps);
+            % Check if custom heuristic IDs were given:
+            if length(varargin) == 1                % they were
+                selectedSolvers = varargin{1};                
+            else                                    % they were not
+                selectedSolvers = 1:length(obj.targetProblem.problemSolvers);
+            end
+            nbClassSolvers = length(selectedSolvers);
+            nbInstances = length(instanceSet);
+            performanceAllSolvers = nan(nbInstances,nbClassSolvers);
+            for idy = 1 : nbClassSolvers
+                dummyHH.value(:,end) = selectedSolvers(idy);
+                dummyHH.solveInstanceSet(instanceSet);
+                performanceAllSolvers(:,idy) = dummyHH.getPerformanceDataMetrics();
+            end
+            [individualSolutions, bestSolversID] = min(performanceAllSolvers,[],2);
+            bestSolverPerInstance = selectedSolvers(bestSolversID);
+            oraclePerformance = mean(individualSolutions);            
+            obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions, ...
+                'lastBestSolvers',bestSolverPerInstance', 'unsolvedInstances', {instanceSet'});
+        end
+        
+        function printExtraData(obj)
+            % Rule-based Selection HH informationo            
+            fprintf('Model-specific information:\n')
+            fprintf('\tNumber of rules:\t%d\n', obj.nbRules)
+            fprintf('\tUsable features:\t%d (toDo: Include here the ID of each feature, in order)\n', obj.nbFeatures)
+            fprintf('\tUsable solvers:\t%d (toDo: Include here the ID of each solver, in order)\n', obj.nbSolvers)            
+        end
+
+        
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----

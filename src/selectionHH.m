@@ -11,6 +11,8 @@ classdef selectionHH < handle
         availableFeatures            ; % String vector of features that can be used for analyzing the problem state
         availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
+        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
+        oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
         performanceData                % Information about the performance on the test set.
 		problemType     = 'Undefined'; % Problem type name
         status          = 'New'; % HH status. Can be: New, Trained
@@ -23,7 +25,7 @@ classdef selectionHH < handle
         trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running) 
         trainingPerformance          ; % Same as testingPerformance, but for the training set
         trainingSolution             ; % Data for the best solution provided by the last training stage
-        trainingStats                ; % Statistical parameters of the last training batch, as reported by the training method
+        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method
         value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector                
     end
     
@@ -41,8 +43,10 @@ classdef selectionHH < handle
         function obj = selectionHH()
             % Function for creating a raw selection hyper-heuristic            
 %             addpath(genpath('..\')) % This line should be moved from here and put into the main code
+            obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
+            obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0
-                % Put something here in case a constructor is required...
+                % Put something here in case a constructor is required...                
             end
         end              
         
@@ -86,6 +90,11 @@ classdef selectionHH < handle
             
         end 
         
+        function allMetrics = getSolversUsed(obj,selectedInstance)
+            thisInstance = obj.performanceData{selectedInstance};
+            selectedSteps = [thisInstance{:}];
+            allMetrics = [selectedSteps.selectedSolver];
+        end
         % ----- Model initializer
         function initializeModel(obj)
             % INITIALIZEMODEL  Method for generating a random solution for
@@ -135,6 +144,124 @@ classdef selectionHH < handle
             ylabel('Fitness')
         end
         
+        function [fH, aH] = plotSolution(obj, selectedInstance, selectedStep)
+            % PLOTSOLUTION  Method for plotting the solution of a given
+            % instance at a given step. Use 'end' as a step to plot the
+            % final solution. Returns figure and axes handle
+            if strcmpi(selectedStep,'end')
+                [fH, aH] = obj.performanceData{selectedInstance}{end}.solution.plot();
+            else
+                [fH, aH] = obj.performanceData{selectedInstance}{selectedStep}.solution.plot();
+            end
+        end
+        
+        function fA = plotSolutionEvolution(obj, selectedInstance)
+            % PLOTSOLUTIONEVOLUTION  Method for plotting the evolution of the solution performance indicator
+            % (e.g. makespan for the JSSP) of a given instance. Returns axes handle.            
+            thisInstance = obj.performanceData{selectedInstance};
+            nbSteps = length(thisInstance);
+            allMetrics = nan(1,nbSteps);
+            for idx = 1 : nbSteps
+                allMetrics(idx) = thisInstance{idx}.solution.getSolutionPerformanceMetric();
+            end             
+            plot(allMetrics)
+            xlabel('Steps')
+            ylabel(thisInstance{1}.solution.getSolutionPerformanceMetricName())
+            fA = gca;
+        end
+        
+        function fA = plotSolverUsage(obj,selectedInstance)
+            % PLOTSOLVERUSAGE   Method for plotting the solver used at each
+            % step of the solution for a given instance. Returns axes
+            % handle.
+            allMetrics = obj.getSolversUsed(selectedInstance);
+            plot(allMetrics)
+            xlabel('Steps')
+            ylabel('Solver selected')
+            fA = gca;
+        end
+        
+        function fA = plotSolverUsageDistribution(obj,selectedInstance)
+            % PLOTSOLVERUSAGEDISTRIBUTION   Method for plotting the distribution 
+            % of solvers used at each step of the solution for a given instance. Returns axes
+            % handle.            
+            allMetrics = obj.getSolversUsed(selectedInstance);
+            histogram(allMetrics)            
+            xlabel('Solver selected')
+            ylabel('Frequency')
+            fA = gca;
+        end
+        
+        function [fA, fV] = plotSolverUsageDistributionMulti(obj,selectedInstances, varargin)
+            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the distribution 
+            % of solvers used at each step of the solution for multiple instances. 
+            % Optional input: Accumulation flag. True: Pie chart with
+            % accumulated information; False (default): violinplot with distribution
+            % per instance. 
+            %
+            % Returns axes and violin/pie handles.            
+            toAccumulate = false;
+            nbInstances = length(selectedInstances);
+            nbSteps = length(obj.performanceData{1});
+            allMetrics = nan(nbSteps,nbInstances);
+            for idx = 1 : nbInstances
+                allMetrics(:,idx) = obj.getSolversUsed(selectedInstances(idx));
+            end
+            if length(varargin) == 1, toAccumulate = varargin{1}; end
+            if toAccumulate                
+                existingIDs = unique(allMetrics);
+                IDUsage = zeros(1,length(existingIDs));
+                allLabels = cell(1,length(existingIDs));
+                for idx = 1:length(existingIDs)
+                    IDUsage(idx) = sum(sum(allMetrics==existingIDs(idx)));
+                    allLabels{idx} = ['H_' num2str(existingIDs(idx))];
+                end
+                fV = pie(IDUsage, allLabels);
+            else
+                fV = violinplot(allMetrics);
+                xlabel('Instances')
+                xticklabels({selectedInstances})
+                ylabel('Solver selected')
+            end
+            fA = gca;
+        end
+        
+        function fA = plotStepSolutionDistribution(obj, selectedStep)
+            % plotStepSolutionDistribution  Method for plotting the distribution
+            % of the solution performance indicator (e.g. makespan for the JSSP)
+            % for all instances at a given step. Returns axes handle.                        
+            nbInstances = length(obj.performanceData);            
+            allMetrics = nan(1,nbInstances);
+            if strcmpi(selectedStep,'end'), selectedStep = length(obj.performanceData{1}); end
+            for idx = 1 : nbInstances
+                allMetrics(idx) = obj.performanceData{idx}{selectedStep}.solution.getSolutionPerformanceMetric();
+            end             
+            histogram(allMetrics)            
+            xlabel(obj.performanceData{1}{1}.solution.getSolutionPerformanceMetricName())
+            ylabel('Frequency')
+            fA = gca;
+        end
+        
+        function [fA,vH] = plotStepSolutionDistributionComparison(obj, selectedSteps)
+            % plotStepSolutionDistributionComparison  Method for plotting the distribution
+            % of the solution performance indicator (e.g. makespan for the JSSP)
+            % for all instances at selected steps, using violins. 
+            % Returns axes and violinplot handles.                        
+            nbInstances = length(obj.performanceData);     
+            nbStepComparisons = length(selectedSteps);
+            allMetrics = nan(nbInstances, nbStepComparisons);            
+            for idx = 1 : nbInstances
+                for idy = 1 : nbStepComparisons
+                    allMetrics(idx,idy) = obj.performanceData{idx}{selectedSteps(idy)}.solution.getSolutionPerformanceMetric();
+                end
+            end             
+            vH = violinplot(allMetrics);            
+            xlabel('Selected steps')
+            xticklabels({selectedSteps})
+            ylabel(obj.performanceData{1}{1}.solution.getSolutionPerformanceMetricName())
+            fA = gca;
+        end
+        
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)
@@ -155,12 +282,14 @@ classdef selectionHH < handle
         function solvedInstances = solveInstanceSet(obj, instanceSet)
             % SOLVEINSTANCESET  Method for solving a given set of instances with the current version of the HH            
             nbInstances = length(instanceSet);
+            if nbInstances == 0, error('No training instances have been assigned yet. Aborting!'); end
             solvedInstances{nbInstances} = obj.targetProblem.createDummyInstance();
             for idx = 1 : nbInstances
                 instance = obj.targetProblem.cloneInstance(instanceSet{idx});
                 [solvedInstances{idx}, perfData] = obj.solveInstance(instance);
                 obj.performanceData{idx} = perfData;
-            end            
+            end         
+            obj.lastSolvedInstances = solvedInstances;
         end 
         
         % ----- Instance splitter
@@ -210,6 +339,7 @@ classdef selectionHH < handle
             end
             obj.printCommonData();
             obj.printExtraData();
+            obj.printModel();
         end
 
         % ----- ---------------------------------------------------- -----
@@ -220,8 +350,60 @@ classdef selectionHH < handle
 %         end
 
         % ----- ---------------------------------------------------- -----
-        % Extra methods 
+        % Extra methods (mainly those that will be overloaded by children)
         % ----- ---------------------------------------------------- -----
+        
+        function compareVsOracle(obj, instanceSet, varargin)
+            % compareVsOracle  Method for comparing the current HH against
+            % the Oracle. Default: uses all available solvers. Optional
+            % input: vector with solver IDs that will be used for the
+            % Oracle.
+            % To be coded by the end user.
+            warning('This method must be implemented by the end user for each model. Nothing will be run here')
+        end
+        
+        function [oraclePerformance, individualSolutions, lastBestSolvers] = getOracle(obj, instanceSet)
+            % GETORACLE  Method for calculating the Oracle. This method
+            % must use each available solver to solve instanceSet. It must
+            % return the overall performance of the Oracle (scalar) and the
+            % performance for each instance (vector), as well as the ID of 
+            % the best solvers. Finally, it must set the
+            % oracle property within the HH, which is a struct with the
+            % following fields: 
+            %  - isReady: Boolean indicating whether a Oracle has been
+            %  already calculated
+            %  - lastPerformance: Same as overall oracle performance
+            %  - lastInstanceSolutions: Same as performance for each            
+            %  instance
+            %  - lastBestSolvers: Same as the ID of best solvers
+            %  - unsolvedInstances: A copy of the instances used for the
+            %  oracle
+            %
+            % To be coded by the end user.
+            warning('This method must be implemented by the end user for each model')
+            oraclePerformance = nan;
+            individualSolutions = nan(1, length(instanceSet));
+            lastBestSolvers = individualSolutions;
+            obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions,...
+                'lastBestSolvers',lastBestSolvers,'unsolvedInstances', instanceSet);
+        end
+        
+        function metric = getSolutionPerformanceMetric(obj)
+            % GETSOLUTIONPERFORMANCEMETRIC  Method for returning the
+            % performance metric of a solution. Must be overloaded for each
+            % domain. To be coded by the end user.
+            warning('This method must be implemented by the end user for each domain')
+            metric = nan;
+        end
+        
+        function metric = getSolutionPerformanceMetricName(obj)
+            % GETSOLUTIONPERFORMANCEMETRICNAME  Method for returning the
+            % string of the performance metric of a solution. Must be overloaded for each
+            % domain. To be coded by the end user.
+            warning('This method must be implemented by the end user for each domain')
+            metric = 'metric';
+        end
+        
         function printCommonData(obj)
             % Define here dependent properties
             fprintf('Displaying information about the %s HH:\n', obj.status)
@@ -231,8 +413,17 @@ classdef selectionHH < handle
                 fprintf('\tTarget problem:      %s\n', obj.targetProblem.problemType)
             end
             fprintf('\tType:                %s\n', obj.hhType)
-            fprintf('\tTraining method:     %s\n', obj.trainingMethod)
-            fprintf('\tNumber of instances: %d (training) | %d (testing)\n', length(obj.trainingInstances), length(obj.testingInstances))
+            fprintf('Training information:\n')
+            fprintf('\tMethod:     %s\n', obj.trainingMethod)
+            fprintf('\tNumber of instances: %d (training) | %d (testing)\n', length(obj.trainingInstances), length(obj.testingInstances))            
+            fprintf('\tParameters:\n')
+            disp(obj.trainingParameters)
+            fprintf('\tPerformance achieved:\t%.2f\n', obj.trainingPerformance)
+            fprintf('\tTime taken:\t%.2f\n', obj.trainingStats.elapsedTime)
+            fprintf('\tEvaluations taken:\t%d\n', obj.trainingStats.functionEvaluations)
+            fprintf('\tIterations performed:\t%d\n', obj.trainingStats.performedIterations)
+            fprintf('\tStatus of stop criteria:\n')
+            disp(obj.trainingStats.stoppingCriteria)
         end
         
         function printCommonPerformanceData(obj, selectedInstance, selectedStep)
@@ -241,9 +432,13 @@ classdef selectionHH < handle
         end
         
         function printExtraData(obj)
-            % Replace this with the HH specific information
-            %fprintf('\tCurrent model:       %s\n', obj.value)
-            disp("Current method:")
+            % Replace this with the HH specific information            
+            fprintf('To be overloaded by each specific HH model...\n')
+        end
+        
+        function printModel(obj)
+            % Replace this with the HH specific information            
+            fprintf("\tCurrent model:\n")
             disp(obj.value)
         end
         
