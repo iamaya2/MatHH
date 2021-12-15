@@ -12,6 +12,7 @@ classdef selectionHH < handle
         availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
         lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
+        oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
         performanceData                % Information about the performance on the test set.
 		problemType     = 'Undefined'; % Problem type name
         status          = 'New'; % HH status. Can be: New, Trained
@@ -43,6 +44,7 @@ classdef selectionHH < handle
             % Function for creating a raw selection hyper-heuristic            
 %             addpath(genpath('..\')) % This line should be moved from here and put into the main code
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
+            obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN);
             if nargin > 0
                 % Put something here in case a constructor is required...                
             end
@@ -350,6 +352,30 @@ classdef selectionHH < handle
         % ----- ---------------------------------------------------- -----
         % Extra methods 
         % ----- ---------------------------------------------------- -----
+        function [oraclePerformance, individualSolutions, lastBestSolvers] = getOracle(obj, instanceSet)
+            % GETORACLE  Method for calculating the Oracle. This method
+            % must use each available solver to solve instanceSet. It must
+            % return the overall performance of the Oracle (scalar) and the
+            % performance for each instance (vector), as well as the ID of 
+            % the best solvers. Finally, it must set the
+            % oracle property within the HH, which is a struct with the
+            % following fields: 
+            %  - isReady: Boolean indicating whether a Oracle has been
+            %  already calculated
+            %  - lastPerformance: Same as overall oracle performance
+            %  - lastInstanceSolutions: Same as performance for each            
+            %  instance
+            %  - lastBestSolvers: Same as the ID of best solvers
+            %
+            % To be coded by the end user.
+            warning('This method must be implemented by the end user for each model')
+            oraclePerformance = nan;
+            individualSolutions = nan(1, length(instanceSet));
+            lastBestSolvers = individualSolutions;
+            obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions,...
+                'lastBestSolvers',lastBestSolvers);
+        end
+        
         function metric = getSolutionPerformanceMetric(obj)
             % GETSOLUTIONPERFORMANCEMETRIC  Method for returning the
             % performance metric of a solution. Must be overloaded for each

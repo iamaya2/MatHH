@@ -122,6 +122,13 @@ classdef ruleBasedSelectionHH < selectionHH
             newHH.performanceData   = obj.performanceData;
             newHH.status            = obj.status;            
             newHH.value             = obj.value;
+            
+            % ToDo: Change this by a for-loop that iterates across
+            % properties... in the meantime: 
+            newHH.oracle            = obj.oracle;    
+            newHH.trainingPerformance = obj.trainingPerformance;
+            newHH.trainingSolution  = obj.trainingSolution;
+            newHH.trainingStats     = obj.trainingStats;            
         end
         
         % ----- Instance seeker
@@ -630,6 +637,33 @@ classdef ruleBasedSelectionHH < selectionHH
             fprintf('\tUsable solvers:\t%d (toDo: Include here the ID of each solver, in order)\n', obj.nbSolvers)            
         end
 
+        function [oraclePerformance, individualSolutions, bestSolverPerInstance] = getOracle(obj, instanceSet)
+            % GETORACLE  Method for calculating the Oracle using a
+            % rule-based selection HH. The method creates a HH with a
+            % single rule targetting a given heuristic, which is used to
+            % solve the set of instances. Then, it repeats for the
+            % remaining solvers. Afterward, it selects the best solution
+            % for each instance and builds the Oracle with that
+            % information. The method returns the average performance
+            % and the performance for each solution. It also sets the oracle property                        
+            dummyProps = struct('nbRules',1,'targetProblem',obj.targetProblemText);
+            dummyHH = ruleBasedSelectionHH(dummyProps);
+            nbClassSolvers = length(obj.targetProblem.problemSolvers);
+            nbInstances = length(instanceSet);
+            performanceAllSolvers = nan(nbInstances,nbClassSolvers);
+            for idy = 1 : nbClassSolvers
+                dummyHH.value(:,end) = idy;
+                dummyHH.solveInstanceSet(instanceSet);
+                for idx = 1 : nbInstances
+                    performanceAllSolvers(idx,idy) = dummyHH.performanceData{idx}{end}.solution.getSolutionPerformanceMetric();
+                end
+            end
+            [individualSolutions, bestSolverPerInstance] = min(performanceAllSolvers,[],2);
+            oraclePerformance = mean(individualSolutions);            
+            obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions, ...
+                'lastBestSolvers',bestSolverPerInstance);
+        end
+        
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----
