@@ -71,8 +71,12 @@ classdef ruleBasedSelectionHH < selectionHH
             Rules = 2;  % Default number of rules
             defaultFeatures = true; % Flag for using default features
             defaultSolvers = true; % Flag for using default solvers
-            if nargin >= 1                  % Pass arguments as a structure
-                if isstruct(varargin{1})
+            if nargin >= 1                  
+                if isa(varargin{1},'ruleBasedSelectionHH')
+                    obj = ruleBasedSelectionHH();
+                    varargin{1}.cloneProperties(obj);
+                    return
+                elseif isstruct(varargin{1})    % Pass arguments as a structure
                     props = varargin{1};
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
                     if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
@@ -108,27 +112,34 @@ classdef ruleBasedSelectionHH < selectionHH
         end
         
         function newHH = clone(obj)
-            newHH = ruleBasedSelectionHH(obj.nbRules, obj.targetProblemText);            
-            newHH.nbFeatures        = obj.nbFeatures; % Number of features for the HH
-            newHH.nbSolvers         = obj.nbSolvers; % Number of available solvers for the HH
-            newHH.featurevalues     = obj.featurevalues; % Vector containing the current feature values. To-Do: Remove this if unused
-            newHH.featureIDs        = obj.featureIDs; % Vector with the ID of the features that the model uses            
-            newHH.HHRules           = obj.HHRules; % TO-DO: Complete description
-            newHH.instances         = obj.instances; % Stores information returned by getInstances
-            newHH.trainingInstances = obj.trainingInstances;
-            newHH.trainingMethod    = obj.trainingMethod;
-            newHH.trainingParameters = obj.trainingParameters;
-            newHH.testingInstances  = obj.testingInstances;
-            newHH.performanceData   = obj.performanceData;
-            newHH.status            = obj.status;            
-            newHH.value             = obj.value;
+            % clone   Method for providing a clone of a rule-based HH
+            warning('This method is deprecated. Use the constructor instead.')
             
-            % ToDo: Change this by a for-loop that iterates across
-            % properties... in the meantime: 
-            newHH.oracle            = obj.oracle;    
-            newHH.trainingPerformance = obj.trainingPerformance;
-            newHH.trainingSolution  = obj.trainingSolution;
-            newHH.trainingStats     = obj.trainingStats;            
+%             % -- Old code -- ... leaving it commented in case something breaks... 
+%             newHH = ruleBasedSelectionHH(obj.nbRules, obj.targetProblemText);            
+%             newHH.nbFeatures        = obj.nbFeatures; % Number of features for the HH
+%             newHH.nbSolvers         = obj.nbSolvers; % Number of available solvers for the HH
+%             newHH.featurevalues     = obj.featurevalues; % Vector containing the current feature values. To-Do: Remove this if unused
+%             newHH.featureIDs        = obj.featureIDs; % Vector with the ID of the features that the model uses            
+%             newHH.HHRules           = obj.HHRules; % TO-DO: Complete description
+%             newHH.instances         = obj.instances; % Stores information returned by getInstances
+%             newHH.trainingInstances = obj.trainingInstances;
+%             newHH.trainingMethod    = obj.trainingMethod;
+%             newHH.trainingParameters = obj.trainingParameters;
+%             newHH.testingInstances  = obj.testingInstances;
+%             newHH.performanceData   = obj.performanceData;
+%             newHH.status            = obj.status;            
+%             newHH.value             = obj.value;
+%             
+%             % ToDo: Change this by a for-loop that iterates across
+%             % properties... in the meantime: 
+%             newHH.oracle            = obj.oracle;    
+%             newHH.trainingPerformance = obj.trainingPerformance;
+%             newHH.trainingSolution  = obj.trainingSolution;
+%             newHH.trainingStats     = obj.trainingStats;            
+%             % -- End Old code --
+            % -- New code --
+            newHH = ruleBasedSelectionHH(obj);
         end
         
         % ----- Instance seeker
@@ -707,7 +718,8 @@ classdef ruleBasedSelectionHH < selectionHH
             bestSolverPerInstance = selectedSolvers(bestSolversID);
             oraclePerformance = mean(individualSolutions);            
             obj.oracle = struct('isReady',true,'lastPerformance',oraclePerformance,'lastInstanceSolutions',individualSolutions, ...
-                'lastBestSolvers',bestSolverPerInstance', 'unsolvedInstances', {instanceSet'});
+                'lastBestSolvers',bestSolverPerInstance', 'lastHeuristics', selectedSolvers, 'lastHeuristicSolutions', performanceAllSolvers, ...
+                'unsolvedInstances', {instanceSet'});
         end
         
         function printExtraData(obj)
