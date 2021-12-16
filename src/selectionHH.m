@@ -40,13 +40,16 @@ classdef selectionHH < handle
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function obj = selectionHH()
+        function obj = selectionHH(varargin)
             % Function for creating a raw selection hyper-heuristic            
 %             addpath(genpath('..\')) % This line should be moved from here and put into the main code
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
             obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0
-                % Put something here in case a constructor is required...                
+                if isa(varargin{1},'selectionHH')
+                    obj = selectionHH();
+                    varargin{1}.cloneProperties(obj);
+                end
             end
         end              
         
@@ -81,6 +84,16 @@ classdef selectionHH < handle
                     error('Problem %s has not been implemented yet!', problemType)
             end
         end 
+        
+        % ----- Deep copy
+        function cloneProperties(oldHH, newHH)
+            % cloneProperties   Method for moving the selectionHH
+            % properties. Automatically sweeps all properties           
+            propertySet = properties(oldHH);
+            for idx = 1:length(propertySet) 
+                newHH.(propertySet{idx}) = oldHH.(propertySet{idx});
+            end
+        end
         
         % ----- Instance seeker
         function getInstances(obj, instanceType)
