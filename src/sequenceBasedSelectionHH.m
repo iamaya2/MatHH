@@ -1,4 +1,15 @@
-% Class definition for Rule-based selection hyper-heuristics
+% Class definition for Sequence-based selection hyper-heuristics
+% The constructor method supports the following modes:
+%  sequenceBasedSelectionHH(HH): Creates a clone of HH (deep copy)
+%  sequenceBasedSelectionHH(props): Creates a new HH using the properties 
+%   defined by props. The following properties are supported: 
+%   - length: Scalar with the size of the model (number of
+%   steps). Default: 2
+%   - model: Vector with one heuristic ID per step. Default:
+%   random model
+%   - selectedSolvers: Vector with IDs of solvers available for
+%   the HH. Default: [1 2]
+%   - targetProblem: Domain that will be solved. Default: "job shop scheduling"
 classdef sequenceBasedSelectionHH < selectionHH
     % ----- ---------------------------------------------------- -----
     %                       Properties
@@ -26,21 +37,7 @@ classdef sequenceBasedSelectionHH < selectionHH
         % Constructor
         % ----- ---------------------------------------------------- -----
         function obj = sequenceBasedSelectionHH(varargin)
-            % sequenceBasedSelectionHH Method for creating a sequence-based
-            % selection hyper-heuristic. 
-            % Supported modes: 
-            % sequenceBasedSelectionHH(HH): Creates a clone of HH (deep
-            % copy)
-            % sequenceBasedSelectionHH(props): Creates a new HH using the
-            % properties defined by props. The following properties are
-            % supported: 
-            %   - length: Scalar with the size of the model (number of
-            %   steps). Default: 2
-            %   - model: Vector with one heuristic ID per step. Default:
-            %   random model
-            %   - selectedSolvers: Vector with IDs of solvers available for
-            %   the HH. Default: [1 2]
-            %   - targetProblem: Domain that will be solved. Default: "job shop scheduling"
+            % sequenceBasedSelectionHH   Constructor method for the class
             obj.hhType = 'Sequence-based';
             obj.value  = [];
             
