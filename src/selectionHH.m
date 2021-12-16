@@ -7,8 +7,7 @@ classdef selectionHH < handle
     % ----- ---------------------------------------------------- -----
     %                       Properties
     % ----- ---------------------------------------------------- -----
-    properties
-        availableFeatures            ; % String vector of features that can be used for analyzing the problem state
+    properties        
         availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
         lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
@@ -75,9 +74,11 @@ classdef selectionHH < handle
                 case 'job shop scheduling'
                     dummyProblem= JSSP();
                     obj.targetProblem = dummyProblem;
-                    obj.availableSolvers = dummyProblem.problemSolvers;
-                    obj.availableFeatures = dummyProblem.problemFeatures;
-                    obj.nbFeatures=length(obj.availableFeatures);
+                    obj.availableSolvers = dummyProblem.problemSolvers;                    
+                    if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
+                        obj.availableFeatures = dummyProblem.problemFeatures;
+                        obj.nbFeatures=length(obj.availableFeatures); 
+                    end
                     obj.nbSolvers=length(obj.availableSolvers);
                     obj.problemType="JSSP";
 				otherwise

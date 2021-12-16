@@ -4,17 +4,18 @@ classdef sequenceBasedSelectionHH < selectionHH
     %                       Properties
     % ----- ---------------------------------------------------- -----
     properties
-    % Most properties are inherited from the selectionHH superclass. Only
-    % the following properties are specific to this class:
-    nbSolvers       = NaN;    
-    currentStep     = 1;
-    currentInc      = 1;
-    Type            = 1; %Prefefined Pac-man 
+        % Most properties are inherited from the selectionHH superclass. Only
+        % the following properties are specific to this class:
+        nbSolvers       = NaN;
+        currentStep     = 1;
+        currentInc      = 1;
+        modelLength     = NaN;
+        Type            = 1; %Prefefined Pac-man
     end
     
     properties (Dependent)
         % TO-DO: Put any dependent properties here (calculated on-the-fly)
-        nbSequenceSteps   = NaN;
+%         nbSequenceSteps   = NaN; % toDo: Remove this (check first)
     end
     
     % ----- ---------------------------------------------------- -----
@@ -24,15 +25,52 @@ classdef sequenceBasedSelectionHH < selectionHH
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function obj = sequenceBasedSelectionHH()            
+        function obj = sequenceBasedSelectionHH(varargin)
             % Function for creating a sequence selection hyper-heuristic
             obj.hhType = 'Sequence-based';
-            obj.value  = [1,2,1,2]; 
+            obj.value  = [];
+            
+            targetProblem = "job shop scheduling"; % Default domain                       
+            defaultSolvers = true; % Flag for using default solvers
+            defaultModel = true; % Flag for using random initial model
+            defaultLength = true;
+            
             if nargin > 0
-                % Put something here in case a constructor is required...
-            endtestHH.trainingInstances
+                if isa(varargin{1},'sequenceBasedSelectionHH') % Support for cloning directly from the constructor
+                    obj = sequenceBasedSelectionHH();
+                    varargin{1}.cloneProperties(obj);
+                    return
+                elseif isstruct(varargin{1})
+                    props = varargin{1};        
+                    if isfield(props,'length'), targetLength = props.length; defaultLength = false; end
+                    if isfield(props,'model'), targetValue = props.model; defaultModel = false; end                    
+                    if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end                    
+                    if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end                    
+                else
+                    error('The current input is not currently supported. Try using a struct or another HH.')
+                end
             end
+            
+            obj.targetProblemText = targetProblem;            
+            obj.assignProblem(targetProblem)            
+            
+            % Check for default values
+            if defaultModel
+                if defaultLength, targetLength = 2; end
+                if defaultSolvers, selectedSolvers = [1 2]; end               
+                obj.initializeModel(targetLength, selectedSolvers); 
+            else
+                targetLength = length(targetValue);
+                defaultLength = false; 
+                obj.value = targetValue;
+                if defaultSolvers, selectedSolvers = unique(targetValue); end
+                obj.availableSolvers = selectedSolvers;                
+                obj.modelLength = targetLength;
+                obj.nbSolvers = length(selectedSolvers);                
+            end 
         end
+        
+        
         
         % ----- ---------------------------------------------------- -----
         % Other methods (sort them alphabetically)
@@ -69,12 +107,21 @@ classdef sequenceBasedSelectionHH < selectionHH
         end 
         
         % ----- Model initializer
-        function initializeModel(obj, nbSolvers, value, Type)
+        function initializeModel(obj, varargin)
             % INITIALIZEMODEL  Method for generating a random solution for
             % the current hh model
-            obj.value = value;
-            obj.nbSolvers = nbSolvers;
-            obj.Type = Type; 
+            if isempty(varargin)
+                obj.initializeModel(obj.modelLength, obj.availableSolvers)
+            elseif length(varargin) == 2
+                obj.modelLength = varargin{1};
+                obj.availableSolvers = varargin{2};
+                obj.nbSolvers = length(obj.availableSolvers);
+                randomIDs = randi(obj.nbSolvers,1,obj.modelLength);
+                randomModel = obj.availableSolvers(randomIDs);
+                obj.value = randomModel;
+            else
+                error('initializeModel cannot handle the requested number of parameters. Try with none or with two.')
+            end            
         end 
         
         % ----- Print overloader for disp()
@@ -234,9 +281,9 @@ classdef sequenceBasedSelectionHH < selectionHH
 %             % Define here dependent properties
 %         end
 
-        function resultingData = get.nbSequenceSteps(obj)
-            % Define here dependent properties
-            resultingData = length(obj.value);
-        end
+%         function resultingData = get.nbSequenceSteps(obj)
+%             % Define here dependent properties
+%             resultingData = length(obj.value);
+%         end
     end
 end

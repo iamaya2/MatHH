@@ -40,6 +40,7 @@ classdef ruleBasedSelectionHH < selectionHH
     properties
         % Most properties are inherited from the selectionHH superclass. Only
         % the following properties are specific to this class:
+        availableFeatures            ; % String vector of features that can be used for analyzing the problem state
         nbRules         = NaN; % Number of rules for the HH
         nbFeatures      = NaN; % Number of features for the HH
         nbSolvers       = NaN; % Number of available solvers for the HH
