@@ -419,7 +419,8 @@ classdef selectionHH < handle
         end
         
         function printCommonData(obj)
-            % Define here dependent properties
+            % printCommonData   Method for displaying common information
+            % within selection HH models. 
             fprintf('Displaying information about the %s HH:\n', obj.status)
             if strcmp(obj.targetProblem, 'Undefined')
                 fprintf('\tTarget problem:      Undefined\n')
@@ -447,7 +448,7 @@ classdef selectionHH < handle
         
         function printExtraData(obj)
             % Replace this with the HH specific information            
-            fprintf('To be overloaded by each specific HH model...\n')
+            warning('The printExtraData method must be overloaded by each specific HH model...\n')
         end
         
         function printModel(obj)

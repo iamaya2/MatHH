@@ -7,9 +7,14 @@
 %   steps). Default: 2
 %   - model: Vector with one heuristic ID per step. Default:
 %   random model
+%   - position: Scalar with the initial location within the sequence.
+%   Default: 1
 %   - selectedSolvers: Vector with IDs of solvers available for
 %   the HH. Default: [1 2]
+%   - shift: Scalar with the shift (increase/decrease) that will be used
+%   when taking steps within the sequence. Default: 1
 %   - targetProblem: Domain that will be solved. Default: "job shop scheduling"
+%   - type: Repetition type. Default: 1
 classdef sequenceBasedSelectionHH < selectionHH
     % ----- ---------------------------------------------------- -----
     %                       Properties
@@ -42,6 +47,9 @@ classdef sequenceBasedSelectionHH < selectionHH
             obj.value  = [];
             
             targetProblem = "job shop scheduling"; % Default domain                       
+            targetShift = 1; % Default shift
+            targetLocation = 1; % Default location
+            targetType = 1; % Default repeat type
             defaultSolvers = true; % Flag for using default solvers
             defaultModel = true; % Flag for using random initial model
             defaultLength = true;
@@ -55,15 +63,21 @@ classdef sequenceBasedSelectionHH < selectionHH
                     props = varargin{1};        
                     if isfield(props,'length'), targetLength = props.length; defaultLength = false; end
                     if isfield(props,'model'), targetValue = props.model; defaultModel = false; end                    
+                    if isfield(props,'position'), targetLocation = props.position; end                    
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end                    
+                    if isfield(props,'shift'), targetShift = props.shift; end
                     if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end                    
+                    if isfield(props,'type'), targetType = props.type; end
                 else
                     error('The current input is not currently supported. Try using a struct or another HH.')
                 end
             end
             
             obj.targetProblemText = targetProblem;            
-            obj.assignProblem(targetProblem)            
+            obj.assignProblem(targetProblem) 
+            obj.currentInc = targetShift;
+            obj.currentStep = targetLocation;
+            obj.Type = targetType;
             
             % Check for default values
             if defaultModel
@@ -102,13 +116,13 @@ classdef sequenceBasedSelectionHH < selectionHH
             % the current hh model
             sequencePos = obj.currentStep;
             obj.currentStep = obj.currentStep + obj.currentInc;
-            if obj.currentStep > obj.nbSequenceSteps
+            if obj.currentStep > obj.modelLength
                 % Pac-Man way
                 if obj.Type == 1
                     obj.currentStep = 1;
                 % Bounce
                 elseif obj.Type == 2
-                    obj.currentStep = obj.nbSequenceSteps;    
+                    obj.currentStep = obj.modelLength;    
                     obj.currentInc = -1;
                 end
             elseif obj.currentStep == 0
@@ -135,12 +149,7 @@ classdef sequenceBasedSelectionHH < selectionHH
             end            
         end 
         
-        % ----- Print overloader for disp()
-        function printExtraData(obj)            
-            fprintf('\tCurrent model:       \n\t')
-            fprintf('\t%d', obj.value)
-            fprintf('\n');
-        end
+        
         
         % ----- Model setter
         function setModel(obj, model, Type)
@@ -151,16 +160,23 @@ classdef sequenceBasedSelectionHH < selectionHH
         end 
                       
         % ----- Hyper-heuristic solver
-        function instance = solveInstance(obj, instance)
+        function [instance, performanceData] = solveInstance(obj, instance)
             % SOLVEINSTANCE  Method for solving a single instance with the current version of the HH (not yet implemented)            
+            performanceData = {};
             while ~strcmp(instance.status, 'Solved')
                 activeStep = obj.getNextStep();
                 heuristicID = obj.value(activeStep);
+                stepData = struct('selectedSolver', heuristicID,...
+                                    'solution', instance.solution.clone());
+                performanceData = [performanceData stepData];
                 obj.targetProblem.stepHeuristic(instance, heuristicID);
 %                 instance.stepHeuristic(heuristicID);
             end   
             obj.currentStep = 1; 
-            obj.currentInc = 1;             
+            obj.currentInc = 1;  
+            stepData = struct('selectedSolver', NaN,...
+                'solution', instance.solution);
+            performanceData = [performanceData stepData]; % Values associated to the solved instance
         end         
         
                        
@@ -283,6 +299,20 @@ classdef sequenceBasedSelectionHH < selectionHH
 %             disp('Not yet fully implemented...')
 %             obj.solution.plot()
 %         end
+
+        % ----- Print overloader for disp()
+        function printExtraData(obj)
+            % printExtraData   Method for printing information specific to
+            % sequence-based HH models. 
+            fprintf('Model-specific information:\n')
+            fprintf('\tNumber of steps:\t%d\n', obj.modelLength)
+            fprintf('\tCurrent position in the sequence:\t%d\n', obj.currentStep)
+            fprintf('\tCurrent shift per step:\t%d\n', obj.currentInc)
+            fprintf('\tRepetition type:\t%d\n', obj.Type)
+            fprintf('\tUsable solvers: \t%d\t[',obj.nbSolvers)
+            fprintf(' %d ', obj.availableSolvers)            
+            fprintf(']\n')
+        end
 %         
 
         % ----- ---------------------------------------------------- -----

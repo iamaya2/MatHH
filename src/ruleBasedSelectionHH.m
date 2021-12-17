@@ -582,64 +582,95 @@ classdef ruleBasedSelectionHH < selectionHH
         
         % ----- Hyper-heuristic trainer        
 %         function [position,fitness,details] = train(obj, criterion, parameters)
-        function [position,fitness,details] = train(obj, criterion, varargin)
+        function [position,fitness,details] = train(obj, varargin)
             % TRAIN  Method for training the HH (not yet implemented)
             %   criterion: Type of criterion that will be used for stopping training (e.g. iteration or stagnation)
             %   parameters: Parameters associated to the stopping criterion (e.g. nbIter or the deltas and such)
             %
             %   See also DISP (ignore that).
-            
-            % ------------- THIS MUST BE SOLVED ASAP -------------
-            switch criterion
-                case 1 %number of iterations
-                    if length(varargin) >= 1, maxIter = varargin{1}; else, maxIter =100; end
-                    if length(varargin) >= 2, populationSize = varargin{2}; else, populationSize =15; end
-                    if length(varargin) >= 3, selfConf = varargin{3}; else,  selfConf=2; end %must be an array of two elements
-                    if length(varargin) >= 4, globalConf = varargin{4}; else, globalConf=2.5; end
-                    if length(varargin) >= 5, unifyFactor = varargin{5}; else, unifyFactor=0.25; end
-                    if length(varargin) == 6, visualMode = varargin{6}; else,visualMode=false; end
-                    % Test run using UPSO
-                    nbSearchDimensionsFeatures  = obj.nbRules*obj.nbFeatures;
-                    nbSearchDimensionsActions   = obj.nbRules;
-                    fh = @(x)obj.evaluateCandidateSolution(x,obj.trainingInstances); % Evaluates a given solution
-                    flimFeatures = repmat([0 1], nbSearchDimensionsFeatures, 1 ); % First features, then actions
-                    flimActions  = repmat([1 obj.nbSolvers], nbSearchDimensionsActions, 1);
-                    flim = [flimFeatures; flimActions];
                     
-                    % UPSO properties definition
-                    properties = struct('visualMode', visualMode, 'verboseMode', true, ...
-                        'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', maxIter, ...
-                        'selfConf', selfConf, 'globalConf', globalConf, 'unifyFactor', unifyFactor);
-                    % Call to the optimizer
-                    [position,fitness,details] = UPSO2(fh, flim, properties);
-                    obj.evaluateCandidateSolution(position,obj.trainingInstances);
-                    obj.status = 'Trained';
-                    obj.trainingMethod = 'UPSO';
-                    obj.trainingSolution = position;
-                    obj.trainingParameters = properties;
-                    obj.trainingPerformance = fitness;
-                    obj.trainingStats = details;
-                otherwise
-                    error("a criterion must be set: 1.-number of iterations")
+            % Default values:
+            trainingMethod = 'UPSO';
+            % --- For UPSO:
+            maxIter = 100;
+            populationSize = 15;
+            selfConf = 2;
+            globalConf = 2.5;
+            unifyFactor = 0.25;
+            visualMode = false;
+            % --- For Map-Elites:
+            normalization = 0;
+            nbDimInt = 10;
+            nbInitialGenomes = 6;
+            nbIterations = 50;  % This may be overriden
+            mutationRate = 0.3;
+            repeatType = 1;
+            
+            if nargin > 1
+                if isstring(varargin{1}) || ischar(varargin{1})
+                    trainingMethod = varargin{1};
+                    if length(varargin) == 2
+                        if isstruct(varargin{2})
+                            props = varargin{2};
+                            if strcmpi(trainingMethod,'UPSO')
+                                if isfield(props,'maxIter'), maxIter = props.maxIter; end
+                                if isfield(props,'populationSize'), populationSize = props.populationSize; end
+                                if isfield(props,'selfConf'), selfConf = props.selfConf; end
+                                if isfield(props,'globalConf'), globalConf = props.globalConf; end
+                                if isfield(props,'unifyFactor'), unifyFactor = props.unifyFactor; end
+                                if isfield(props,'visualMode'), visualMode = props.visualMode; end
+                            elseif strcmpi(trainingMethod,'MAP-Elites')
+                                if isfield(props,'normalization'), normalization = props.normalization; end
+                                if isfield(props,'nbDimInt'), nbDimInt = props.nbDimInt; end
+                                if isfield(props,'nbInitialGenomes'), nbInitialGenomes = props.nbInitialGenomes; end
+                                if isfield(props,'nbIterations'), nbIterations = props.nbIterations; end
+                                if isfield(props,'mutationRate'), mutationRate = props.mutationRate; end
+                                if isfield(props,'Type'), repeatType = props.Type; end
+                            else
+                                error('Training method not supported. Aborting!')
+                            end
+                        else
+                            error('Parameters must be given as a structure. Aborting!')
+                        end
+                    end
+                elseif isnumeric(varargin{1})
+                    criterion = varargin{1};
+                    switch criterion
+                        case 1 %number of iterations
+                            if length(varargin) >= 2, maxIter = varargin{2}; else, maxIter =100; end
+                            if length(varargin) >= 3, populationSize = varargin{3}; else, populationSize =15; end
+                            if length(varargin) >= 4, selfConf = varargin{4}; else,  selfConf=2; end %must be an array of two elements
+                            if length(varargin) >= 5, globalConf = varargin{5}; else, globalConf=2.5; end
+                            if length(varargin) >= 6, unifyFactor = varargin{6}; else, unifyFactor=0.25; end
+                            if length(varargin) == 7, visualMode = varargin{7}; else,visualMode=false; end
+                            % Test run using UPSO
+                            nbSearchDimensionsFeatures  = obj.nbRules*obj.nbFeatures;
+                            nbSearchDimensionsActions   = obj.nbRules;
+                            fh = @(x)obj.evaluateCandidateSolution(x,obj.trainingInstances); % Evaluates a given solution
+                            flimFeatures = repmat([0 1], nbSearchDimensionsFeatures, 1 ); % First features, then actions
+                            flimActions  = repmat([1 obj.nbSolvers], nbSearchDimensionsActions, 1);
+                            flim = [flimFeatures; flimActions];
+                            
+                            % UPSO properties definition
+                            properties = struct('visualMode', visualMode, 'verboseMode', true, ...
+                                'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', maxIter, ...
+                                'selfConf', selfConf, 'globalConf', globalConf, 'unifyFactor', unifyFactor);
+                            % Call to the optimizer
+                            [position,fitness,details] = UPSO2(fh, flim, properties);
+                            obj.evaluateCandidateSolution(position,obj.trainingInstances);
+                            obj.status = 'Trained';
+                            obj.trainingMethod = 'UPSO';
+                            obj.trainingSolution = position;
+                            obj.trainingParameters = properties;
+                            obj.trainingPerformance = fitness;
+                            obj.trainingStats = details;
+                        otherwise
+                            error("a criterion must be set: 1.-number of iterations")
+                    end
+                end
+            else
+                warning('No training parameters have been specified in the function call. Using default values...')
             end
-            
-            % ------------- CONFLICTING VERSION BELOW: -------------
-            
-            %            % Test run using UPSO
-            %           nbSearchDimensionsFeatures  = obj.nbRules*obj.nbFeatures;
-            %          nbSearchDimensionsActions   = obj.nbRules;
-            %         fh = @(x)obj.evaluateCandidateSolution(x); % Evaluates a given solution
-            %        flimFeatures = repmat([0 1], nbSearchDimensionsFeatures, 1 ); % First features, then actions
-            %       flimActions  = repmat([1 obj.nbSolvers], nbSearchDimensionsActions, 1);
-            %      flim = [flimFeatures; flimActions];
-            
-            %    % UPSO properties definition
-            %     properties = struct('visualMode', true, 'verboseMode', true, ...
-            %        'populationSize', 15, 'maxIter', 50, 'maxStagIter', 100, ...
-            %        'selfConf', 2, 'globalConf', 2.5, 'unifyFactor', 0.25);
-            %    % Call to the optimizer
-            %    [position,fitness,details] = UPSO2(fh, flim, properties);
-            %    obj.evaluateCandidateSolution(position);
         end
         
 
@@ -724,7 +755,7 @@ classdef ruleBasedSelectionHH < selectionHH
         end
         
         function printExtraData(obj)
-            % Rule-based Selection HH informationo            
+            % Rule-based Selection HH information
             fprintf('Model-specific information:\n')
             fprintf('\tNumber of rules:\t%d\n', obj.nbRules)
             fprintf('\tUsable features:\t%d (toDo: Include here the ID of each feature, in order)\n', obj.nbFeatures)
