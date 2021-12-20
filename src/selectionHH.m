@@ -104,8 +104,8 @@ classdef selectionHH < handle
             
         end 
         
-        function allMetrics = getSolversUsed(obj,selectedInstance)
-            thisInstance = obj.performanceData{selectedInstance};
+        function allMetrics = getSolversUsed(obj,selectedInstanceID)
+            thisInstance = obj.performanceData{selectedInstanceID};
             selectedSteps = [thisInstance{:}];
             allMetrics = [selectedSteps.selectedSolver];
         end
@@ -207,17 +207,22 @@ classdef selectionHH < handle
         end
         
         function [fA, fV] = plotSolverUsageDistributionMulti(obj,selectedInstances, varargin)
-            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the distribution 
-            % of solvers used at each step of the solution for multiple instances. 
-            % Optional input: Accumulation flag. True: Pie chart with
-            % accumulated information; False (default): violinplot with distribution
-            % per instance. 
+            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the 
+            % distribution of solvers used at each step of the solution 
+            % for multiple instances. 
+            %
+            % Required input: ID vector with scalars indicating the
+            %      instances that will be processed for information.
+            %
+            % Optional input: Accumulation flag. 
+            %      True: Pie chart with accumulated information
+            %      False (default): violinplot with distribution per instance
             %
             % Returns axes and violin/pie handles.            
             toAccumulate = false;
             nbInstances = length(selectedInstances);
             nbSteps = length(obj.performanceData{1});
-            allMetrics = nan(nbSteps,nbInstances);
+            allMetrics = nan(nbSteps,nbInstances);  
             for idx = 1 : nbInstances
                 allMetrics(:,idx) = obj.getSolversUsed(selectedInstances(idx));
             end

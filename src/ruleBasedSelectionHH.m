@@ -642,34 +642,43 @@ classdef ruleBasedSelectionHH < selectionHH
                             if length(varargin) >= 4, selfConf = varargin{4}; else,  selfConf=2; end %must be an array of two elements
                             if length(varargin) >= 5, globalConf = varargin{5}; else, globalConf=2.5; end
                             if length(varargin) >= 6, unifyFactor = varargin{6}; else, unifyFactor=0.25; end
-                            if length(varargin) == 7, visualMode = varargin{7}; else,visualMode=false; end
-                            % Test run using UPSO
-                            nbSearchDimensionsFeatures  = obj.nbRules*obj.nbFeatures;
-                            nbSearchDimensionsActions   = obj.nbRules;
-                            fh = @(x)obj.evaluateCandidateSolution(x,obj.trainingInstances); % Evaluates a given solution
-                            flimFeatures = repmat([0 1], nbSearchDimensionsFeatures, 1 ); % First features, then actions
-                            flimActions  = repmat([1 obj.nbSolvers], nbSearchDimensionsActions, 1);
-                            flim = [flimFeatures; flimActions];
-                            
-                            % UPSO properties definition
-                            properties = struct('visualMode', visualMode, 'verboseMode', true, ...
-                                'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', maxIter, ...
-                                'selfConf', selfConf, 'globalConf', globalConf, 'unifyFactor', unifyFactor);
-                            % Call to the optimizer
-                            [position,fitness,details] = UPSO2(fh, flim, properties);
-                            obj.evaluateCandidateSolution(position,obj.trainingInstances);
-                            obj.status = 'Trained';
-                            obj.trainingMethod = 'UPSO';
-                            obj.trainingSolution = position;
-                            obj.trainingParameters = properties;
-                            obj.trainingPerformance = fitness;
-                            obj.trainingStats = details;
+                            if length(varargin) == 7, visualMode = varargin{7}; else,visualMode=false; end                            
                         otherwise
                             error("a criterion must be set: 1.-number of iterations")
                     end
                 end
             else
                 warning('No training parameters have been specified in the function call. Using default values...')
+            end
+            % Unify parameters and call the corresponding training method
+            switch lower(trainingMethod)
+                case 'upso'
+                    % Range definition for each variable
+                    nbSearchDimensionsFeatures  = obj.nbRules*obj.nbFeatures;
+                    nbSearchDimensionsActions   = obj.nbRules;
+                    fh = @(x)obj.evaluateCandidateSolution(x,obj.trainingInstances); % Evaluates a given solution
+                    flimFeatures = repmat([0 1], nbSearchDimensionsFeatures, 1 ); % First features, then actions
+                    flimActions  = repmat([1 obj.nbSolvers], nbSearchDimensionsActions, 1);
+                    flim = [flimFeatures; flimActions];
+                    
+                    % UPSO properties
+                    properties = struct('visualMode', visualMode, 'verboseMode', true, ...
+                        'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', maxIter, ...
+                        'selfConf', selfConf, 'globalConf', globalConf, 'unifyFactor', unifyFactor);
+                    
+                    % Call to the optimizer
+                    [position,fitness,details] = UPSO2(fh, flim, properties);
+                    obj.evaluateCandidateSolution(position,obj.trainingInstances);
+                    obj.status = 'Trained';
+                    obj.trainingMethod = 'UPSO';
+                    obj.trainingSolution = position;
+                    obj.trainingParameters = properties;
+                    obj.trainingPerformance = fitness;
+                    obj.trainingStats = details;
+                case 'map-elites'
+                    error('Map-Elites have not been implemented yet for rule-based selection HHs. Aborting...')
+                otherwise
+                    error('Training method does not exist. Aborting...')
             end
         end
         
