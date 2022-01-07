@@ -26,7 +26,7 @@ classdef sequenceBasedSelectionHH < selectionHH
         currentStep     = 1;
         currentInc      = 1;
         modelLength     = NaN;
-        Type            = 1; %Prefefined Pac-man
+        type            = 1; %Prefefined Pac-man
     end
     
     properties (Dependent)
@@ -77,7 +77,7 @@ classdef sequenceBasedSelectionHH < selectionHH
             obj.assignProblem(targetProblem) 
             obj.currentInc = targetShift;
             obj.currentStep = targetLocation;
-            obj.Type = targetType;
+            obj.type = targetType;
             
             % Check for default values
             if defaultModel
@@ -100,7 +100,16 @@ classdef sequenceBasedSelectionHH < selectionHH
         % ----- ---------------------------------------------------- -----
         % Other methods (sort them alphabetically)
         % ----- ---------------------------------------------------- -----
-
+        function evaluateCandidateSolution(obj, solution, instances)
+            % evaluateCandidateSolution  Method for evaluating a candidate
+            % solution. Does not consider normalization procedures.
+            obj.setModel(solution,obj.type)
+            solvedInstances = obj.solveInstanceSet(instances);
+            fitness = 0;
+            for idx=1:length(instances)
+                fitness = fitness + solvedInstances{idx}.solution.fitness;                
+            end
+        end
         
         % ----- Instance seeker
         function getInstances(obj, instanceType)
@@ -118,7 +127,7 @@ classdef sequenceBasedSelectionHH < selectionHH
             obj.currentStep = obj.currentStep + obj.currentInc;
             if obj.currentStep > obj.modelLength
                 % Pac-Man way
-                if obj.Type == 1
+                if obj.type == 1
                     obj.currentStep = 1;
                 % Bounce
                 elseif obj.Type == 2
@@ -152,11 +161,15 @@ classdef sequenceBasedSelectionHH < selectionHH
         
         
         % ----- Model setter
-        function setModel(obj, model, Type)
-            % SETMODEL  Method for setting the hh model to a fixed matrix
+        function setModel(obj, model, type)
+            % SETMODEL  Method for setting the HH model to a fixed array
             obj.value = model;
-            obj.Type = Type; 
-            obj.nbSolvers = max(model(:,end)); % At least the max action
+            obj.type = type; 
+            obj.availableSolvers = unique(model);
+            obj.nbSolvers = length(obj.availableSolvers);
+            obj.modelLength = length(model);
+            obj.currentStep = 1;
+%             obj.nbSolvers = max(model(:,end)); % At least the max action
         end 
                       
         % ----- Hyper-heuristic solver
@@ -238,9 +251,9 @@ classdef sequenceBasedSelectionHH < selectionHH
                 for idn = 1 : nbInstances
                     if normalization == 1 
                         sumItems = sum(obj.trainingInstances{1,idn}.instanceItems,'all');
-                        totalFitness = totalFitness + (solvedInstances{1,idn}.fitness / sumItems);
+                        totalFitness = totalFitness + (solvedInstances{1,idn}.solution.fitness / sumItems);
                     else
-                        totalFitness = totalFitness + solvedInstances{1,idn}.fitness;
+                        totalFitness = totalFitness + solvedInstances{1,idn}.solution.fitness;
                     end
                 end
                 totalFitness = totalFitness/nbInstances; 
@@ -249,45 +262,89 @@ classdef sequenceBasedSelectionHH < selectionHH
         end
         
         % ----- Hyper-heuristic trainer        
-        function [bestGenoma,bestGenomaFitness,bestIterations] = train(obj, criterion, parameters)
-            % TRAIN  Method for training the HH
-            %   criterion: Type of criterion that will be used for stopping training (e.g. iteration or stagnation)
-            %   parameters: Parameters associated to the optimizer
-            %               (nbInstances, nbRegionsDim, nbRegionsInt, nbInitialGenomes,
-            %               nbIterations, searchDomain, mutationRate, normalization). 
+        function [bestGenoma,bestGenomaFitness,details] = train(obj, varargin)
+            % TRAIN  Method for training the sequence-based HH
+            %   By default, this method uses MAP-Elites (ME) for training.
+            %   This can be overriden by using a first optional input with
+            %   the name of the desired training method (e.g. UPSO). Other
+            %   optional inputs are: 
+            %    - (toDo) criterion: Type of criterion that will be used for stopping training (e.g. iteration or stagnation)
+            %    - parameters: Structure with parameters associated with
+            %    ME. Any parameter can be omitted and default values will be used for it. 
+            %
+            %      Implemented fields (default value):             
+            %           *mutationRate (0.3): Mutation rate for the sequence             
+            %           *mutationType (1): Set of mutation operators to
+            %           use. 1: Traditional. 2: Set of 5 operators.
+            %           *nbDimInt (10): Number of dimensions in the search
+            %           domain (steps of the sequence)
+            %           *nbInitialGenomes (6): Number of initial search agents
+            %           *nbIterations (50): Number of iterations to train for            
+            %           *nbRegionsDim (5): Number of divisions (slots)
+            %           along each dimension of the search domain.
+            %           *normalization (0): Flag indicating whether to normalize fitness data 
+            %           *searchDomain (1:5): Array of feasible values for
+            %           each dimension of the search domain.
+            %
+            %   If no parameters are specified, the HH trains using default
+            %   parameters, based on the method (user-defined or default).
             
-            % HH and MAP-Elites
             
-            % MAP-Elites parameters definition
-            % ---- Constant parameters
-            parameters.nbInstances = length(obj.trainingInstances); 
-            parameters.nbRegionsDim = 5; 
-            parameters.searchDomain = [1 2 3 4 5];
-            parameters.mutationType = 1; 
+            % criterion, parameters    --  toDelete after assignment
+            % Data validation
+            trainingMethod = 'MAP-Elites'; % Default method for this HH
+            if nargin > 1
+                if isstring(varargin{1}) || ischar(varargin{1}) % Method given
+                    trainingMethod = varargin{1};
+                    if length(varargin) >= 2
+                        if isstruct(varargin{2})
+                            parameters = varargin{2};
+                        else
+                            warning('Second input parameter must be a structure with training parameters, which was not provided. Using default values...')
+                            parameters = struct();
+                        end
+                    else
+                        warning('A structure with training parameters was not given. Using default values...')
+                        parameters = struct();
+                    end
+                elseif isstruct(varargin{1}) % Default method with custom parameters
+                    parameters = varargin{1};
+                else
+                    error('First input parameter must be either a string with a training method or a structure with training parameters. Aborting!')
+                end
+            else
+                warning('No training parameters have been specified in the function call. Using default values...')
+                parameters = struct();
+            end
+            
+            % HH and MAP-Elites (ME)
+            % ME parameters definition
+            % ---- Fixed parameters
+            parameters.nbInstances = length(obj.trainingInstances);             
             instances = obj.trainingInstances;
             
-            % ---- Default parameters             
-            if ~isfield(parameters,'normalization') 
-                parameters.normalization = 0;
-            end
-            if ~isfield(parameters,'nbDimInt') 
-                parameters.nbDimInt = 10;
-            end
-            if ~isfield(parameters,'nbInitialGenomes') 
-                parameters.nbInitialGenomes = 6;
-            end
-            if ~isfield(parameters,'nbIterations') 
-                parameters.nbIterations = 50;
-            end
-            if ~isfield(parameters,'mutationRate') 
-                parameters.mutationRate = 0.3;
-            end
-            if ~isfield(parameters,'Type') 
-                parameters.Type = obj.Type;
-            end
+            % ---- Check and set default parameters as necessary
+            if ~isfield(parameters,'mutationRate'), parameters.mutationRate = 0.3; end            
+            if ~isfield(parameters,'mutationType'), parameters.mutationType = 1; end
+            if ~isfield(parameters,'nbDimInt'), parameters.nbDimInt = 10; end
+            if ~isfield(parameters,'nbInitialGenomes'), parameters.nbInitialGenomes = 6; end
+            if ~isfield(parameters,'nbIterations'), parameters.nbIterations = 50; end
+            if ~isfield(parameters,'nbRegionsDim'), parameters.nbRegionsDim = 5; end
+            if ~isfield(parameters,'normalization'), parameters.normalization = 0; end
+            if ~isfield(parameters,'searchDomain'), parameters.searchDomain = [1 2 3 4 5]; end
+            if ~isfield(parameters,'type'), parameters.type = obj.type; end % toDo: Check this ASAP. Should not be here since it is an obj parameter and not a training parameter
             
             % Call the optimizer 
-            [bestGenoma,bestGenomaFitness,bestIterations] = MAP_Elites_v2(obj, instances, parameters); 
+            [bestGenoma, bestGenomaFitness, ~, details] = MAP_Elites_v2(obj, instances, parameters); 
+            
+            % Information update within the HH
+            obj.evaluateCandidateSolution(bestGenoma,obj.trainingInstances);
+            obj.status = 'Trained';
+            obj.trainingMethod = 'MAP-Elites';
+            obj.trainingSolution = bestGenoma;
+            obj.trainingParameters = parameters; % toDo: Update
+            obj.trainingPerformance = bestGenomaFitness;
+            obj.trainingStats = details;
         end        
         
 
@@ -308,7 +365,7 @@ classdef sequenceBasedSelectionHH < selectionHH
             fprintf('\tNumber of steps:\t%d\n', obj.modelLength)
             fprintf('\tCurrent position in the sequence:\t%d\n', obj.currentStep)
             fprintf('\tCurrent shift per step:\t%d\n', obj.currentInc)
-            fprintf('\tRepetition type:\t%d\n', obj.Type)
+            fprintf('\tRepetition type:\t%d\n', obj.type)
             fprintf('\tUsable solvers: \t%d\t[',obj.nbSolvers)
             fprintf(' %d ', obj.availableSolvers)            
             fprintf(']\n')

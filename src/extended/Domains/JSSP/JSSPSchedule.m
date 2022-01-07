@@ -28,9 +28,9 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         schColorMap % Colormap used for differentiating jobs within the schedule       
     end        
     
-%     properties (Dependent)
-% 
-%     end
+    properties (Dependent)
+        fitness % Mask for the makespan (for compatibility)
+    end
     
     methods
         % ----- ---------------------------------------------------- -----
@@ -233,7 +233,9 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties
         % ----- ---------------------------------------------------- -----
-            
+        function fitness = get.fitness(obj)
+            fitness = obj.makespan;
+        end
         
     end
 end

@@ -328,7 +328,7 @@ classdef ruleBasedSelectionHH < selectionHH
         % Tests a given hh model (candidate) to see if it is good. Requires
         % that the new model preserves the number of rules and features
         function fitness = evaluateCandidateSolution(obj, solution, varargin)
-		if length(varargin)==1 
+            if length(varargin)==1
                 instances = varargin{1};
             else
                 instances = obj.trainingInstances;
@@ -337,27 +337,27 @@ classdef ruleBasedSelectionHH < selectionHH
                 case 'JSSP'
                     
                     currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-                    currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs 
+                    currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
                     obj.setModel(currentModel)
-                  
+                    
                     SolvedInstances=obj.solveInstanceSet(instances);
                     fitness=0;
                     %fitness = sum([obj.instances.solution.makespan]);
-                     for i=1:length(instances)
-                         fitness=fitness + SolvedInstances{i}.solution.makespan;
-                         %instances{i}.reset
-                     end
-                      
+                    for i=1:length(instances)
+                        fitness=fitness + SolvedInstances{i}.solution.makespan;
+                        %instances{i}.reset
+                    end
                     
-                otherwise     
-            currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-            currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs 
-            obj.setModel(currentModel)
-			disp(obj.value)
-            solvedInstances = obj.solveInstanceSet(obj.trainingInstances);
-            allInstances  = [solvedInstances{:}];
-            fitness = sum([allInstances.fitness]);
-			end
+                    
+                otherwise
+                    currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
+                    currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
+                    obj.setModel(currentModel)
+                    disp(obj.value)
+                    solvedInstances = obj.solveInstanceSet(obj.trainingInstances);
+                    allInstances  = [solvedInstances{:}];
+                    fitness = sum([allInstances.fitness]);
+            end
         end
         
         % ----- Model initializer
