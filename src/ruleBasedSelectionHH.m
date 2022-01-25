@@ -397,11 +397,29 @@ classdef ruleBasedSelectionHH < selectionHH
         function fH = plotFeatureMap(obj, instanceSet, opMode, varargin)
             % PLOTFEATUREMAP   Method for plotting the distribution of
             % feature values for a given set of instances, when solved with
-            % the current HH model.
+            % the current HH model. The method enforces a contour of bins
+            % to ensure that all values are included within the plot. So,
+            % bins in the perimeter may represent out-of-bounds data.
             %
-            % Inputs: 
+            % Required inputs: 
             % --- instanceSet: The set of instances that will be analyzed
-            % --- opMode: Operating Mode ('initial','full','final')
+            % --- opMode: Operating Mode ('initial','full','final'). A
+            %             number with the ID of a solution step can also be given. This
+            %             allows plotting the distribution of features at intermediate
+            %             points of the solution.
+            %
+            % Optional inputs:
+            % --- params: Structure with optional parameters for customizing 
+            %             the plot. The following fields (default values)
+            %             are implemented:
+            % --- --- nbBins ([10 10]): Number of 'inner' bins (disregarding the
+            %                           contour) along each dimension.
+            % --- --- valMin ([0 0]): Lower bound for 'inner' bins along each
+            %                         dimension.
+            % --- --- valMax ([1 1]): Upper bound for 'inner' bins along each
+            %                         dimension.
+            % --- --- features ([1 2]): Positions within the feature vector
+            %                           that will be plotted.
             %
             % Returns: 
             % --- fH: Figure handle for further processing.
@@ -409,32 +427,73 @@ classdef ruleBasedSelectionHH < selectionHH
             % Initialization:
             allFeatureValues = [];
             nbInstances = length(instanceSet);            
-            nbBins = 10;
-            valMin = 0; valMax = 1;
-            binEdges = [-inf valMin : (valMax-valMin)/nbBins : valMax inf];
+            nbBins = [10 10];
+            valMin = [0 0]; valMax = [1 1];            
+            features = [1 2];
+            
+            % Parameter validation:
+            if ~isempty(varargin)
+                if isstruct(varargin{1})
+                    params = varargin{1};
+                    if isfield(params,'nbBins'), nbBins = params.nbBins; end
+                    if isfield(params,'valMin'), valMin = params.valMin; end
+                    if isfield(params,'valMax'), valMax = params.valMax; end
+                    if isfield(params,'features'), features = params.features; end
+                else
+                    error('Optional input must be a structure with plotting parameters. Aborting!')
+                end
+            end
+            
+            % Parameter calculation:
+            binEdges1 = [-inf valMin(1) : (valMax(1)-valMin(1))/nbBins(1) : valMax(1) inf];
+            binEdges2 = [-inf valMin(2) : (valMax(2)-valMin(2))/nbBins(2) : valMax(2) inf];
             
             % Data gathering:
             obj.solveInstanceSet(instanceSet); % Solve the instances
-            for idx = 1 : nbInstances 
-                nbSteps = length(obj.performanceData{idx});
-                currentData = nan(nbSteps,obj.nbFeatures);
-                for idy = 1 : nbSteps
-                    currentData(idy,:) = obj.performanceData{idx}{idy}.featureValues;
+            for idx = 1 : nbInstances                 
+                switch lower(opMode)
+                    case 'initial'
+                        currentData = obj.performanceData{idx}{1}.featureValues;
+                    case 'final'
+                        currentData = obj.performanceData{idx}{end}.featureValues;
+                    case 'full'
+                        nbSteps = length(obj.performanceData{idx});
+                        currentData = nan(nbSteps,obj.nbFeatures);
+                        for idy = 1 : nbSteps
+                            currentData(idy,:) = obj.performanceData{idx}{idy}.featureValues;
+                        end
+                    otherwise
+                        if isnumeric(opMode)
+                            currentData = obj.performanceData{idx}{opMode}.featureValues;
+                        else
+                            error('Operating mode must be a step ID (integer) or one of: initial, final, full. Aborting!')
+                        end
                 end
                 allFeatureValues = [allFeatureValues; currentData];                
             end
             
             % Data processing:
-            firstFeature = allFeatureValues(:,1);
-            secondFeature = allFeatureValues(:,2);
+            firstFeature = allFeatureValues(:,features(1));
+            secondFeature = allFeatureValues(:,features(2));
+%             figure, fH = histogram2(firstFeature, secondFeature, 'displaystyle', 'tile');
+%             fH.ShowEmptyBins = 'off';
+%             fH.XBinEdges = binEdges1;
+%             fH.YBinEdges = binEdges2;
+%             fH.Normalization = 'probability';
+%             colorbar
+%             colormap(jet)
+%             grid off
+
             figure, fH = histogram2(firstFeature, secondFeature, 'displaystyle', 'tile');
             fH.ShowEmptyBins = 'off';
-            fH.XBinEdges = binEdges;
-            fH.YBinEdges = binEdges;
+            fH.XBinEdges = binEdges1;
+            fH.YBinEdges = binEdges2;
             fH.Normalization = 'probability';
-            colorbar
-            colormap(jet)
-            grid off
+            histData = fH.Values;
+            
+            fH.delete
+            fH = surf(histData,'edgecolor','interp','facecolor','interp');
+            set(gca,'View',[0 90])
         end
         
         function plotRules(obj, varargin)
