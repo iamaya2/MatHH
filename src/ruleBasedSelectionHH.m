@@ -394,6 +394,48 @@ classdef ruleBasedSelectionHH < selectionHH
 %         end
 
         
+        function fH = plotFeatureMap(obj, instanceSet, opMode, varargin)
+            % PLOTFEATUREMAP   Method for plotting the distribution of
+            % feature values for a given set of instances, when solved with
+            % the current HH model.
+            %
+            % Inputs: 
+            % --- instanceSet: The set of instances that will be analyzed
+            % --- opMode: Operating Mode ('initial','full','final')
+            %
+            % Returns: 
+            % --- fH: Figure handle for further processing.
+            
+            % Initialization:
+            allFeatureValues = [];
+            nbInstances = length(instanceSet);            
+            nbBins = 10;
+            valMin = 0; valMax = 1;
+            binEdges = [-inf valMin : (valMax-valMin)/nbBins : valMax inf];
+            
+            % Data gathering:
+            obj.solveInstanceSet(instanceSet); % Solve the instances
+            for idx = 1 : nbInstances 
+                nbSteps = length(obj.performanceData{idx});
+                currentData = nan(nbSteps,obj.nbFeatures);
+                for idy = 1 : nbSteps
+                    currentData(idy,:) = obj.performanceData{idx}{idy}.featureValues;
+                end
+                allFeatureValues = [allFeatureValues; currentData];                
+            end
+            
+            % Data processing:
+            firstFeature = allFeatureValues(:,1);
+            secondFeature = allFeatureValues(:,2);
+            figure, fH = histogram2(firstFeature, secondFeature, 'displaystyle', 'tile');
+            fH.ShowEmptyBins = 'off';
+            fH.XBinEdges = binEdges;
+            fH.YBinEdges = binEdges;
+            fH.Normalization = 'probability';
+            colorbar
+            colormap(jet)
+            grid off
+        end
         
         function plotRules(obj, varargin)
             figure
