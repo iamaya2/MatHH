@@ -394,7 +394,7 @@ classdef ruleBasedSelectionHH < selectionHH
 %         end
 
         
-        function fH = plotFeatureMap(obj, instanceSet, opMode, varargin)
+        function [fH2, fH] = plotFeatureMap(obj, instanceSet, opMode, varargin)
             % PLOTFEATUREMAP   Method for plotting the distribution of
             % feature values for a given set of instances, when solved with
             % the current HH model. The method enforces a contour of bins
@@ -445,8 +445,10 @@ classdef ruleBasedSelectionHH < selectionHH
             end
             
             % Parameter calculation:
-            binEdges1 = [-inf valMin(1) : (valMax(1)-valMin(1))/nbBins(1) : valMax(1) inf];
-            binEdges2 = [-inf valMin(2) : (valMax(2)-valMin(2))/nbBins(2) : valMax(2) inf];
+            innerBins1 = valMin(1) : (valMax(1)-valMin(1))/nbBins(1) : valMax(1);
+            innerBins2 = valMin(2) : (valMax(2)-valMin(2))/nbBins(2) : valMax(2);
+            binEdges1 = [-inf innerBins1 inf];
+            binEdges2 = [-inf innerBins2 inf];
             
             % Data gathering:
             obj.solveInstanceSet(instanceSet); % Solve the instances
@@ -475,25 +477,35 @@ classdef ruleBasedSelectionHH < selectionHH
             % Data processing:
             firstFeature = allFeatureValues(:,features(1));
             secondFeature = allFeatureValues(:,features(2));
-%             figure, fH = histogram2(firstFeature, secondFeature, 'displaystyle', 'tile');
-%             fH.ShowEmptyBins = 'off';
-%             fH.XBinEdges = binEdges1;
-%             fH.YBinEdges = binEdges2;
-%             fH.Normalization = 'probability';
-%             colorbar
-%             colormap(jet)
-%             grid off
 
             figure, fH = histogram2(firstFeature, secondFeature, 'displaystyle', 'tile');
             fH.ShowEmptyBins = 'off';
             fH.XBinEdges = binEdges1;
             fH.YBinEdges = binEdges2;
             fH.Normalization = 'probability';
+            
+            % Surf post-processing
             histData = fH.Values;
             
-            fH.delete
-            fH = surf(histData,'edgecolor','interp','facecolor','interp');
+            midPoints1 = mean( [innerBins1(1:end-1);innerBins1(2:end)] );
+            midPoints2 = mean( [innerBins2(1:end-1);innerBins2(2:end)] );
+            
+            xPts = [valMin(1)-0.1 midPoints1 valMax(2)+0.1];
+            yPts = [valMin(1)-0.1 midPoints2 valMax(2)+0.1];
+            
+            
+%             fH.delete
+            figure
+            
+            fH2 = surf(xPts,yPts,histData','edgecolor','interp','facecolor','interp');
             set(gca,'View',[0 90])
+            colorbar
+            colormap(jet)
+            grid off
+            axis equal
+            box on
+            xlabel(['F_' num2str(features(1))])
+            ylabel(['F_' num2str(features(2))])
         end
         
         function plotRules(obj, varargin)
