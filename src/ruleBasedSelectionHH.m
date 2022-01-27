@@ -421,8 +421,16 @@ classdef ruleBasedSelectionHH < selectionHH
             % --- --- features ([1 2]): Positions within the feature vector
             %                           that will be plotted.
             %
+            % --- doTrack: Boolean (flag) for indicating if individual
+            %              feature changes (per instance) must be tracked. If true,
+            %              requires the next parameter to indicate instance IDs.
+            %
+            % --- featID: ID (scalar or vector) with the numbers (IDs) of
+            %             the instances that will be tracked.
+            %
             % Returns: 
-            % --- fH: Figure handle for further processing.
+            % --- fH2: Figure handle to the surf figure for further processing.
+            % --- fH:  Figure handle to the boxplot for further processing.
             
             % Initialization:
             allFeatureValues = [];
@@ -430,6 +438,9 @@ classdef ruleBasedSelectionHH < selectionHH
             nbBins = [10 10];
             valMin = [0 0]; valMax = [1 1];            
             features = [1 2];
+            doTrack = false;
+            featID = nan;
+            dataToPlot = [];
             
             % Parameter validation:
             if ~isempty(varargin)
@@ -439,9 +450,24 @@ classdef ruleBasedSelectionHH < selectionHH
                     if isfield(params,'valMin'), valMin = params.valMin; end
                     if isfield(params,'valMax'), valMax = params.valMax; end
                     if isfield(params,'features'), features = params.features; end
+                    
+                    if islogical(varargin{2})
+                        doTrack = varargin{2};
+                        if doTrack
+                            if isnumeric(varargin{3})
+                                featID = varargin{3};
+                            else
+                                error('Optional argument must be an instance number for which to plot its feature track. Aborting!')
+                            end
+                        end
+                    end
+                elseif islogical(varargin{1})
+                    obj.plotFeatureMap(instanceSet,opMode,struct(),varargin{:})
+                    return
                 else
-                    error('Optional input must be a structure with plotting parameters. Aborting!')
+                    error('First optional input is invalid. It must be either a structure with plotting parameters, or a logical (boolean) value. Aborting!')
                 end
+                
             end
             
             % Parameter calculation:
@@ -472,6 +498,9 @@ classdef ruleBasedSelectionHH < selectionHH
                         end
                 end
                 allFeatureValues = [allFeatureValues; currentData];                
+                if doTrack && any(idx == featID)
+                    dataToPlot(:,:,end+1) = currentData(:,features);                    
+                end
             end
             
             % Data processing:
@@ -490,8 +519,8 @@ classdef ruleBasedSelectionHH < selectionHH
             midPoints1 = mean( [innerBins1(1:end-1);innerBins1(2:end)] );
             midPoints2 = mean( [innerBins2(1:end-1);innerBins2(2:end)] );
             
-            xPts = [valMin(1)-0.1 midPoints1 valMax(2)+0.1];
-            yPts = [valMin(1)-0.1 midPoints2 valMax(2)+0.1];
+            xPts = [valMin(1)-0.1 midPoints1 valMax(1)+0.1];
+            yPts = [valMin(2)-0.1 midPoints2 valMax(2)+0.1];
             
             
 %             fH.delete
@@ -502,10 +531,26 @@ classdef ruleBasedSelectionHH < selectionHH
             colorbar
             colormap(jet)
             grid off
-            axis equal
+%             axis equal
+%             axis([min(xPts) max(xPts) min(yPts) max(yPts) 0 1])
             box on
             xlabel(['F_' num2str(features(1))])
             ylabel(['F_' num2str(features(2))])
+            
+            if doTrack
+                for idx = 2 : size(dataToPlot,3)
+                    obj.plotFeatureTrack(dataToPlot(:,:,idx));
+                end
+            end
+            
+        end
+        
+        function plotFeatureTrack(obj, data)
+            nbPts = length(data(:,1));
+            hold on, 
+            plot3(data(:,1),data(:,2),ones(nbPts,1),'k--')
+            plot3(data(1,1),data(1,2),1,'rs','MarkerFaceColor','red','MarkerEdgeColor','black')
+            plot3(data(end,1),data(end,2),1,'gd','MarkerFaceColor','green','MarkerEdgeColor','black')
         end
         
         function plotRules(obj, varargin)
