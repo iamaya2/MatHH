@@ -526,10 +526,11 @@ classdef ruleBasedSelectionHH < selectionHH
 %             fH.delete
             figure
             
-            fH2 = surf(xPts,yPts,histData','edgecolor','interp','facecolor','interp');
+            fH2 = surf(xPts,yPts,histData','edgecolor','none','facecolor','interp','FaceAlpha',0.65);
             set(gca,'View',[0 90])
             colorbar
-            colormap(jet)
+%             colormap(jet)
+            colormap(summer)
             grid off
 %             axis equal
 %             axis([min(xPts) max(xPts) min(yPts) max(yPts) 0 1])
