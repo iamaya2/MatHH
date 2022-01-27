@@ -290,8 +290,6 @@ classdef sequenceBasedSelectionHH < selectionHH
             %   parameters, based on the method (user-defined or default).
             
             
-            % criterion, parameters    --  toDelete after assignment
-            
             % Data validation
             trainingMethod = 'MAP-Elites'; % Default method for this HH
             if nargin > 1
