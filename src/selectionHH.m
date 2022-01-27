@@ -14,7 +14,8 @@ classdef selectionHH < handle
         oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
         performanceData                % Information about the performance on the test set.
 		problemType     = 'Undefined'; % Problem type name
-        status          = 'New'; % HH status. Can be: New, Trained
+        status          = 'New';       % HH status. Can be: New, Trained
+        solverIDs       = NaN;         % Vector with ID of each solver that the model will use
         targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
         targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
         testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem		

@@ -94,9 +94,9 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.nbRules = Rules;
             obj.assignProblem(targetProblem)
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
-%             if defaultSolvers, end % toDo
+            if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 
-%             obj.assignSolvers(selectedSolvers); % toDo
+            obj.assignSolvers(selectedSolvers); 
             obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
             %             obj.description = "description unset";
         end              
@@ -110,6 +110,12 @@ classdef ruleBasedSelectionHH < selectionHH
             % Method for assigning the feature IDs that the HH shall use
              obj.featureIDs = featureArray;
              obj.nbFeatures = length(featureArray);
+        end
+        
+        function assignSolvers(obj, solverIDs)
+            warning('WIP. Untested...')
+            obj.solverIDs = solverIDs;
+            obj.nbSolvers = length(solverIDs);
         end
         
         function newHH = clone(obj)
@@ -337,7 +343,9 @@ classdef ruleBasedSelectionHH < selectionHH
                 case 'JSSP'
                     
                     currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-                    currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
+                    currentSelection = round(currentModel(:,end)); % Round action IDs
+                    currentModel(:,end) = obj.solverIDs(currentSelection); % Translates to action IDs
+%                     currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
                     obj.setModel(currentModel)
                     
                     SolvedInstances=obj.solveInstanceSet(instances);
@@ -364,7 +372,8 @@ classdef ruleBasedSelectionHH < selectionHH
         function initializeModel(obj, nbRules, nbFeatures, nbSolvers)
             % INITIALIZEMODEL  Method for generating a random solution for
             % the current hh model
-            obj.value = [rand(nbRules, nbFeatures) randi(nbSolvers,[nbRules, 1])];
+            randSolverIDs = randi(nbSolvers,[1,nbRules]);
+            obj.value = [rand(nbRules, nbFeatures) obj.solverIDs(randSolverIDs)'];
             obj.nbRules = nbRules; 
             obj.nbFeatures = nbFeatures;
             obj.nbSolvers = nbSolvers;
@@ -926,8 +935,12 @@ classdef ruleBasedSelectionHH < selectionHH
             % Rule-based Selection HH information
             fprintf('Model-specific information:\n')
             fprintf('\tNumber of rules:\t%d\n', obj.nbRules)
-            fprintf('\tUsable features:\t%d (toDo: Include here the ID of each feature, in order)\n', obj.nbFeatures)
-            fprintf('\tUsable solvers:\t%d (toDo: Include here the ID of each solver, in order)\n', obj.nbSolvers)            
+            fprintf('\tUsable features:\t%d ( ', obj.nbFeatures)
+            fprintf(' %d ', obj.featureIDs)
+            fprintf(' )\n')
+            fprintf('\tUsable solvers:\t%d ( ', obj.nbSolvers)            
+            fprintf(' %d ', obj.solverIDs)            
+            fprintf(' )\n') 
         end
 
         
