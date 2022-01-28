@@ -1,0 +1,104 @@
+%% BPSet   Class for creating set objects for the Balanced Partition problem.
+%
+% A set can be created from the following sources: 
+% 
+%  1. Vector of BPItem objecs. In this case the user must provide two values. The first
+%  one is the vector of BPItem objects. The second one is a numeric ID for
+%  differentiating one set from another.
+%  2. Another BPSet. In this case the user must only provide an already
+%  created object and the method returns a deep copy of such a set.
+classdef BPSet < handle
+    properties
+        elements = []; % Vector of BPItem objects within the set
+        ID = NaN ; % Scalar for differentiating among sets
+        load = 0; % Scalar with the total load of this set
+        nbElements = 0; % Number of elements within the set
+    end
+    
+    methods
+        % ---- ------------------------ ----
+        % ---- CONSTRUCTOR ----
+        % ---- ------------------------ ----
+        function obj = BPSet(varargin)            
+            if nargin > 0
+                if isa(varargin{1},'BPItem') % from vector of BPItem
+                    obj.elements = varargin{1};
+                    obj.ID = varargin{2};
+                    obj.updateLength();
+                    obj.updateLoad();                    
+                elseif isa(varargin{1},'BPSet') % from another BPSet
+                    obj = BPSet();
+                    varargin{1}.cloneProperties(obj);
+                elseif isnumeric(varargin{1}) % just the ID
+                    obj.ID = varargin{1};
+                else
+                    error('Invalid data for constructor. Aborting!')
+                end
+            end
+        end
+        
+        % ---- ------------------------ ----
+        % ---- OTHER METHODS ----
+        % ---- ------------------------ ----        
+        function cloneProperties(oldSet, newSet)
+            % cloneProperties   Method for deep cloning the BPSet
+            % properties. Automatically sweeps all properties           
+            propertySet = properties(oldSet);
+            for idx = 1:length(propertySet) 
+                newSet.(propertySet{idx}) = oldSet.(propertySet{idx});
+            end
+        end
+        
+        function donateItem(obj,itemToMove,newSet)
+            % donateItem   Method for sending a BPItem to another BPSet.
+            %
+            % This method requires the BPItem that will be moved, and a 
+            % BPSet to receive the object.
+            newSet.receiveItem(itemToMove);
+            obj.removeItem(itemToMove);
+        end
+        
+        function receiveItem(obj,itemToMove)
+            % receiveItem   Method for receiving an item from another BPSet.
+            % 
+            % This method requires the BPItem that will be put into the
+            % set. Updates the length and total load accordingly.
+            obj.elements = [obj.elements itemToMove];
+            obj.updateLength(1);
+            obj.updateLoad(itemToMove.load);
+        end
+        
+        function removeItem(obj,itemToMove)
+            % removeItem   Method for removing an item from the BPSet.
+            % 
+            % This method requires the BPItem that will be removed from the
+            % set, e.g. after donating it to another one. Updates the length 
+            % and total load accordingly.
+            itemID = find(obj.elements == itemToMove, 1); % Moves at most one item
+            if isempty(itemID)
+                error('The requested BPItem cannot be found within BPSet %d. Check that contents match. Aborting!', obj.ID)
+            else
+                obj.elements = [obj.elements(1:itemID-1) obj.elements(itemID+1:end)];
+                obj.updateLength(-1);
+                obj.updateLoad(-itemToMove.load);
+            end            
+        end
+   
+        function updateLength(obj, varargin)
+            if nargin == 1
+                obj.nbElements = length(obj.elements);
+            else
+                obj.nbElements = obj.nbElements + varargin{1};
+            end
+        end
+        
+        function updateLoad(obj, varargin)
+            if nargin == 1
+                obj.load = sum([obj.elements.load]);
+            else
+                obj.load = obj.load + varargin{1};
+            end
+        end
+        
+    end
+end
