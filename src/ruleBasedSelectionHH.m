@@ -252,6 +252,7 @@ classdef ruleBasedSelectionHH < selectionHH
             % --------------- ANALYZE/IMPROVE THIS CODE ------------
             switch obj.problemType
                 case 'JSSP'
+                    featureValues = nan(1,obj.nbFeatures);
                     for f=1:obj.nbFeatures
                         featureValues(f)=normalizeFeature(CalculateFeature(instance, obj.featureIDs(f)),obj.featureIDs(f));
                     end
