@@ -7,7 +7,7 @@
 %  differentiating one object from another.
 %  2. Another BPItem. In this case the user must only provide an already
 %  created object and the method returns a deep copy of such an item.
-classdef BPItem < handle
+classdef BPItem < handle & deepCopyThis
     properties
         ID = NaN; % Scalar for identification
         inSet = NaN; % Scalar with the set ID in which this item is located
@@ -42,13 +42,5 @@ classdef BPItem < handle
             obj.inSet = setID;
         end
         
-        function cloneProperties(oldItem, newItem)
-            % cloneProperties   Method for deep cloning the BPItem
-            % properties. Automatically sweeps all properties           
-            propertySet = properties(oldItem);
-            for idx = 1:length(propertySet) 
-                newItem.(propertySet{idx}) = oldItem.(propertySet{idx});
-            end
-        end
     end
 end

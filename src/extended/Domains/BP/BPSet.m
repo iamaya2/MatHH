@@ -7,7 +7,7 @@
 %  differentiating one set from another.
 %  2. Another BPSet. In this case the user must only provide an already
 %  created object and the method returns a deep copy of such a set.
-classdef BPSet < handle
+classdef BPSet < handle & deepCopyThis
     properties
         elements = []; % Vector of BPItem objects within the set
         ID = NaN ; % Scalar for differentiating among sets
@@ -58,6 +58,19 @@ classdef BPSet < handle
             obj.removeItem(itemToMove);
         end
         
+        function currentFeatures = getFeatureVector(obj, varargin)
+            % getFeatureVector   Method for calculating features associated
+            % with the BPSet. Receives a single optional input with the ID
+            % of the feature to be calculated: 
+            %
+            % * 0: ??
+            %
+            % If no input is given, getFeatureVector calculates all the available
+            % features.
+            currentFeatures = NaN;
+            callErrorCode(0); % WIP Err code
+        end
+        
         function receiveItem(obj,itemToMove)
             % receiveItem   Method for receiving an item from another BPSet.
             % 
@@ -66,6 +79,7 @@ classdef BPSet < handle
             obj.elements = [obj.elements itemToMove];
             obj.updateLength(1);
             obj.updateLoad(itemToMove.load);
+            itemToMove.assignToSet(obj.ID);
         end
         
         function removeItem(obj,itemToMove)
@@ -85,6 +99,15 @@ classdef BPSet < handle
         end
    
         function updateLength(obj, varargin)
+            % updateLength   Method for updating the length of the current
+            % set. Has two operating modes. If no arguments are given, the
+            % 'length' command is used to calculate the whole vector. It
+            % can also receive the number of elements to increase, and it
+            % would simply add that ammount to the current length. Note
+            % that the first one always provide the correct value but it
+            % could reduce performance when multiple updates are required.
+            % The other approach should be faster, but is prone to error if
+            % the user is not careful. 
             if nargin == 1
                 obj.nbElements = length(obj.elements);
             else
@@ -93,6 +116,15 @@ classdef BPSet < handle
         end
         
         function updateLoad(obj, varargin)
+            % updateLoad   Method for updating the laod of the current
+            % set. Has two operating modes. If no arguments are given, the
+            % load is calculated by summing the load of the whole vector. It
+            % can also receive the load to increase, and it
+            % would simply add that ammount to the current load. Note
+            % that the first one always provide the correct value but it
+            % could reduce performance when multiple updates are required.
+            % The other approach should be faster, but is prone to error if
+            % the user is not careful. 
             if nargin == 1
                 obj.load = sum([obj.elements.load]);
             else
