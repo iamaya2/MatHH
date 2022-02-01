@@ -8,15 +8,16 @@
 %                              objects as the first argument.
 %  3. Another BPInstance. In this case the user must only provide an already
 %                         created object and the method returns a deep copy of such an instance.
-classdef BPInstance < handle & deepCopyThis
+classdef BPInstance < problemInstance
     properties        
-        currentFeatures = NaN; % Vector of current feature values
+        features = NaN; % Vector of current feature values
         ID = NaN ; % Scalar for differentiating among instances
         items = BPItem(); % A vector with all BPItem objects
         load = 0; % Scalar with the current total load of this instance
         maxLoad = 0; % Scalar with the max total load of the instance
         nbItems = 0; % Number of elements within the instance
         solution = BPSolution(); % A solution object for the BP problem
+        status = 'Undefined'; % Initial status of the instance
     end
     
     methods
@@ -38,7 +39,7 @@ classdef BPInstance < handle & deepCopyThis
                     obj.ID = varargin{2};                    
                 elseif isa(varargin{1},'BPInstance') % from another BPInstance
                     obj = BPInstance();
-                    varargin{1}.cloneProperties(obj);
+                    varargin{1}.deepCopy(obj);
                     return
                 else
                     error('Invalid data for constructor. Aborting!')
@@ -52,31 +53,9 @@ classdef BPInstance < handle & deepCopyThis
         end
         
         % ---- ------------------------ ----
-        % ---- FEATURE-RELATED METHODS ----
+        % ---- MAIN METHODS ----
         % ---- ------------------------ ---- 
-        function calculateFeature(obj,featureIDs)
-            nbFeaturesToCalculate = length(featureIDs);
-            allFeatures = nan(1,nbFeaturesToCalculate);
-            for idx = 1 : nbFeaturesToCalculate
-                switch featureIDs(idx)
-                    case 1
-                        thisFeatureValue = obj.getBalanceRatio();
-                    otherwise
-                        error('Feature ID not defined. Aborting!')
-                end
-                allFeatures(idx) = thisFeatureValue;
-            end
-            obj.currentFeatures = allFeatures;
-        end
-        
-        function featValue = getBalanceRatio(obj)
-            featValue = obj.solution.sets(1).load / obj.maxLoad;
-        end
-        
-        % ---- ------------------------ ----
-        % ---- OTHER METHODS ----
-        % ---- ------------------------ ---- 
-        function getFeatureVector(obj, varargin)
+        function featureValues = getFeatureVector(obj, varargin)
             % getFeatureVector   Method for calculating features associated
             % with the whole instance. Receives a single optional input with the ID
             % of the feature to be calculated: 
@@ -86,9 +65,28 @@ classdef BPInstance < handle & deepCopyThis
             % If no input is given, getFeatureVector calculates all the available
             % features.
             if isempty(varargin)
-                obj.calculateFeature(1:length(BP.problemFeatures));
+                featureValues = obj.calculateFeature(1:length(BP.problemFeatures));
             else
-                obj.calculateFeature(varargin{1});
+                featureValues = obj.calculateFeature(varargin{1});
+            end
+        end
+        
+        function values = getSetLoads(obj,setID)
+            values = [obj.solution.sets(setID).elements.load];
+        end
+        
+        function moveItem(obj,itemID,fromSet,toSet)
+            % moveItem   Method for moving items between solution sets
+            %
+            % -\ Inputs:
+            % -\ ---\ itemID: Position within the set of the element that will be moved
+            % -\ ---\ fromSet: Position within the set array of the origin set
+            % -\ ---\ toSet: Position within the set array of the destination set
+            itemToMove = obj.solution.sets(fromSet).elements(itemID);
+            obj.solution.sets(fromSet).donateItem(itemToMove, obj.solution.sets(toSet));
+            % Check if instance has been solved and update accordingly
+            if obj.solution.sets(1).load / obj.load <= 0.5
+                obj.status = 'Solved';
             end
         end
         
@@ -125,5 +123,32 @@ classdef BPInstance < handle & deepCopyThis
                 obj.load = obj.load + varargin{1};
             end
         end
+        
+        % ---- ------------------------ ----
+        % ---- FEATURE-RELATED METHODS ----
+        % ---- ------------------------ ---- 
+        function allFeatures = calculateFeature(obj,featureIDs)
+            nbFeaturesToCalculate = length(featureIDs);
+            allFeatures = nan(1,nbFeaturesToCalculate);
+            for idx = 1 : nbFeaturesToCalculate
+                switch featureIDs(idx)
+                    case 1
+                        thisFeatureValue = obj.getBalanceRatio();
+                    otherwise
+                        error('Feature ID not defined. Aborting!')
+                end
+                allFeatures(idx) = thisFeatureValue;
+            end
+            obj.features = allFeatures;
+        end
+        
+        function featValue = getBalanceRatio(obj)
+            featValue = obj.solution.sets(1).load / obj.maxLoad;
+        end
+        
+        % ---- ------------------------ ----
+        % ---- OTHER METHODS ----
+        % ---- ------------------------ ---- 
+        
     end
 end

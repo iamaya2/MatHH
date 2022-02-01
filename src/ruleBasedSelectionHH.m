@@ -66,9 +66,13 @@ classdef ruleBasedSelectionHH < selectionHH
         function obj = ruleBasedSelectionHH(varargin)
             % Function for creating a rule-based selection hyper-heuristic.
             % Default values: 2 rules for the JSSP with all available
-            % features.            
+            % features.       
+            % -\ Inputs: (pending update)
+            % -\ ---\ targetProblem: function handle to static class of the
+            %                        problem domain (e.g. JSSP, BP)
             obj.hhType = 'Rule-based'; % Always true
-            targetProblem = "job shop scheduling"; % Default domain
+%             targetProblem = "job shop scheduling"; % Default domain
+            targetProblem = @JSSP;
             Rules = 2;  % Default number of rules
             defaultFeatures = true; % Flag for using default features
             defaultSolvers = true; % Flag for using default solvers
@@ -82,17 +86,17 @@ classdef ruleBasedSelectionHH < selectionHH
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
                     if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
-                    if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; warning('Custom solvers not yet implemented...'); end
+                    if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
                 else                        % Given for compatibility with older code
                     warning('Using deprecated constructor. Consider changing to a structure-based approach...')
                     Rules = varargin{1};
                     if nargin >= 2, targetProblem = varargin{2}; end
                     if nargin >= 3, selectedFeatures = varargin{3}; defaultFeatures = false; end
                 end
-            end
-            obj.targetProblemText = targetProblem;
+            end            
             obj.nbRules = Rules;
             obj.assignProblem(targetProblem)
+            obj.targetProblemText = obj.targetProblem.disp();
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 
@@ -107,13 +111,16 @@ classdef ruleBasedSelectionHH < selectionHH
         % ----- ---------------------------------------------------- -----
 
         function assignFeatures(obj,featureArray)
-            % Method for assigning the feature IDs that the HH shall use
+            % assignFeatures  Method for assigning the feature IDs that the
+            % HH shall use. Requires a single input, which is a vector of
+            % feature IDs
              obj.featureIDs = featureArray;
              obj.nbFeatures = length(featureArray);
         end
         
         function assignSolvers(obj, solverIDs)
-            warning('WIP. Untested...')
+            % assignSolvers  Method for defining a custom solver subset.
+            % Requires a single input, which is a vector of solver IDs.
             obj.solverIDs = solverIDs;
             obj.nbSolvers = length(solverIDs);
         end
@@ -247,28 +254,33 @@ classdef ruleBasedSelectionHH < selectionHH
         
         % ----- Rule selector for the model
         function closestRule = getClosestRule(obj, instance)
-            % INITIALIZEMODEL  Method for generating a random solution for
-            % the current hh model
+            % GETCLOSESTRULE  Method for obtaining the rule (from the
+            % selector) that is closest to the current state of the problem
+            % (as indicated by the problem features in use). Receives a
+            % single input, which is the instance to analyze.
+            
             % --------------- ANALYZE/IMPROVE THIS CODE ------------
             switch obj.problemType
-                case 'JSSP'
+                case 'a' %'JSSP' (for testing purposes)
                     featureValues = nan(1,obj.nbFeatures);
                     for f=1:obj.nbFeatures
                         featureValues(f)=normalizeFeature(CalculateFeature(instance, obj.featureIDs(f)),obj.featureIDs(f));
                     end
                     instance.features=featureValues;
+                    currentFeatures = instance.features;
+                otherwise
+                    currentFeatures = instance.getFeatureVector(obj.featureIDs); 
             end
             %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            for i = 1:size(obj.value,1)
-                
-                dist(i)  = sqrt(sum((obj.value(i,1:end-1) - instance.features) .^ 2));
+            for i = 1:size(obj.value,1)                
+                dist(i)  = sqrt(sum((obj.value(i,1:end-1) - currentFeatures) .^ 2));
             end
             [~, closestRule] = min(dist);
             %disp(dist)
             
             % --------------- CONFLICTING VERSION: ------------
             %allDistances = distRadialKernel(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            %             allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
+            %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
             %[~, closestRule] = min(allDistances);
         end
         
@@ -332,41 +344,38 @@ classdef ruleBasedSelectionHH < selectionHH
             end
         end
         
-        % Tests a given hh model (candidate) to see if it is good. Requires
-        % that the new model preserves the number of rules and features
-        function fitness = evaluateCandidateSolution(obj, solution, varargin)
+        
+        function [fitness, solvedInstances] = evaluateCandidateSolution(obj, solution, varargin)
+            % evaluateCandidateSolution   Method for testing a given
+            % solution, to assess its quality. Requires that the new model 
+            % preserves the number of rules and features.
+            %
+            % -\ Required inputs:
+            % -\ ---\ solution: A vectorized solution model (as given by
+            %                   UPSO)
+            % -\ Optional inputs:
+            % -\ ---\ instances: A set of instances for testing the model.
+            %                    If no instances are given, the framework
+            %                    uses those stored in the trainingInstances
+            %                    property.
+            % -\ Outputs:
+            % -\ ---\ fitness: The fitness achieved by the given model.
+            % -\ ---\ solvedInstances: A copy of the instances as solved by
+            %                          the given model.
             if length(varargin)==1
                 instances = varargin{1};
             else
                 instances = obj.trainingInstances;
-            end
-            switch obj.problemType
-                case 'JSSP'
-                    
-                    currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-                    currentSelection = round(currentModel(:,end)); % Round action IDs
-                    currentModel(:,end) = obj.solverIDs(currentSelection); % Translates to action IDs
-%                     currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
-                    obj.setModel(currentModel)
-                    
-                    SolvedInstances=obj.solveInstanceSet(instances);
-                    fitness=0;
-                    %fitness = sum([obj.instances.solution.makespan]);
-                    for i=1:length(instances)
-                        fitness=fitness + SolvedInstances{i}.solution.makespan;
-                        %instances{i}.reset
-                    end
-                    
-                    
-                otherwise
-                    currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-                    currentModel(:,end) = round(currentModel(:,end)); % Translates to action IDs
-                    obj.setModel(currentModel)
-                    disp(obj.value)
-                    solvedInstances = obj.solveInstanceSet(obj.trainingInstances);
-                    allInstances  = [solvedInstances{:}];
-                    fitness = sum([allInstances.fitness]);
-            end
+            end            
+            currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
+            currentSelection = round(currentModel(:,end)); % Round action IDs
+            currentModel(:,end) = obj.solverIDs(currentSelection); % Translates to action IDs
+            obj.setModel(currentModel)
+            solvedInstances = obj.solveInstanceSet(instances);
+            fitness = 0;
+            for thisInstance = instances
+                fitness = fitness + thisInstance.getSolutionPerformanceMetric();
+            end                        
         end
         
         % ----- Model initializer

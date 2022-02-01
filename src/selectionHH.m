@@ -66,26 +66,37 @@ classdef selectionHH < handle
             %  problemType: Problem that will be linked (e.g. JSSP)
             %  varargin:    Put parameters associated to the problem (e.g. #
             %               machines and jobs)
-            switch lower(problemType)
-                case 'balanced partition'
-                    dummyProblem = BalancedPartition(); % Temp: Just to select a random instance
-%                     obj.targetProblem = dummyProblem.problemType;
-                    obj.targetProblem = dummyProblem;
-                    obj.availableSolvers = dummyProblem.problemSolvers;
-                case 'job shop scheduling'
-                    dummyProblem= JSSP();
-                    obj.targetProblem = dummyProblem;
-                    obj.availableSolvers = dummyProblem.problemSolvers;                    
-                    if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
-                        obj.availableFeatures = dummyProblem.problemFeatures;
-                        obj.nbFeatures=length(obj.availableFeatures); 
-                    end
-                    obj.nbSolvers=length(obj.availableSolvers);
-                    obj.problemType="JSSP";
-				otherwise
-                    error('Problem %s has not been implemented yet!', problemType)
+            if isa(problemType,'function_handle')
+                dummyProblem = problemType();
+                obj.targetProblem = dummyProblem;
+                obj.availableSolvers = dummyProblem.problemSolvers;
+                if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
+                    obj.availableFeatures = dummyProblem.problemFeatures;
+                    obj.nbFeatures=length(obj.availableFeatures);
+                end
+                obj.nbSolvers=length(obj.availableSolvers);
+                obj.problemType=dummyProblem.problemType;
+            else % for compatibility purposes (old approach)
+                warning('Deprecated approach. Use function handle for the targetProblem property instead.')
+                switch lower(problemType)
+                    case 'balanced partition'
+                        dummyProblem = BP(); 
+                        obj.problemType="BP";                        
+                    case 'job shop scheduling'
+                        dummyProblem = JSSP();                        
+                        obj.problemType="JSSP";
+                    otherwise
+                        error('Problem %s has not been implemented yet!', problemType)
+                end
+                obj.targetProblem = dummyProblem;
+                obj.availableSolvers = dummyProblem.problemSolvers;
+                if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
+                    obj.availableFeatures = dummyProblem.problemFeatures;
+                    obj.nbFeatures=length(obj.availableFeatures);
+                end
+                obj.nbSolvers=length(obj.availableSolvers);
             end
-        end 
+        end
         
         % ----- Deep copy
         function cloneProperties(oldHH, newHH)

@@ -14,9 +14,10 @@ if errCode < 100
             error('Warning code %d has not been defined yet. Aborting!', errCode)
     end
 else
+    warning('Error code %d detected. The following fatal issue has occurred: ', errCode)
     switch errCode
         case 100
-            error('toDo')
+            error('Undefined heuristic ID. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

@@ -24,6 +24,9 @@ classdef BPSet < handle & deepCopyThis
                 if isa(varargin{1},'BPItem') % from vector of BPItem
                     obj.elements = varargin{1};
                     obj.ID = varargin{2};
+                    for thisItem = obj.elements
+                        thisItem.assignToSet(obj.ID);
+                    end                    
                     obj.updateLength();
                     obj.updateLoad();                    
                 elseif isa(varargin{1},'BPSet') % from another BPSet
