@@ -180,6 +180,10 @@ classdef JSSPInstance < handle
                 featureValues = obj.calculateFeature(varargin{1});
             end
         end
+   
+        function makespan = getSolutionPerformanceMetric(obj)
+            makespan = obj.solution.getSolutionPerformanceMetric();
+        end
         
         function plot(obj, varargin)
             % plot   Plots the current solution (schedule) of the instance

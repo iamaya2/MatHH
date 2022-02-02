@@ -17,6 +17,7 @@ classdef selectionHH < handle
         status          = 'New';       % HH status. Can be: New, Trained
         solverIDs       = NaN;         % Vector with ID of each solver that the model will use
         targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
+        targetProblemHandle            % Function handle for multiple domain support
         targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
         testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem		
         testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances)
@@ -66,9 +67,10 @@ classdef selectionHH < handle
             %  problemType: Problem that will be linked (e.g. JSSP)
             %  varargin:    Put parameters associated to the problem (e.g. #
             %               machines and jobs)
-            if isa(problemType,'function_handle')
+            if isa(problemType,'function_handle') % new approach
                 dummyProblem = problemType();
                 obj.targetProblem = dummyProblem;
+                obj.targetProblemHandle = problemType;
                 obj.availableSolvers = dummyProblem.problemSolvers;
                 if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
                     obj.availableFeatures = dummyProblem.problemFeatures;
@@ -82,9 +84,11 @@ classdef selectionHH < handle
                     case 'balanced partition'
                         dummyProblem = BP(); 
                         obj.problemType="BP";                        
+                        obj.targetProblemHandle = @BP;
                     case 'job shop scheduling'
                         dummyProblem = JSSP();                        
                         obj.problemType="JSSP";
+                        obj.targetProblemHandle = @JSSP;
                     otherwise
                         error('Problem %s has not been implemented yet!', problemType)
                 end

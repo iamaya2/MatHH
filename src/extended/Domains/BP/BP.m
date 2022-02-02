@@ -9,6 +9,14 @@ classdef BP < problemDomain
         % ---- ------------------------ ----
         % ---- INHERITED METHODS ----
         % ---- ------------------------ ----
+        function newInstance = cloneInstance(oldInstance)
+            newInstance = BPInstance(oldInstance);
+        end
+        
+        function dummyInstance = createDummyInstance()
+            dummyInstance = BPInstance();
+        end
+        
         function s = disp()
             % disp   Method that returns a string with the full name of the
             % BP domain.

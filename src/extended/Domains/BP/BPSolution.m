@@ -38,5 +38,9 @@ classdef BPSolution < problemSolution
             fitness = abs(load1-load2);
         end
         
+        function metricName = getSolutionPerformanceMetricName(obj)
+            metricName = 'Partition quality (Q)';
+        end
+        
     end
 end

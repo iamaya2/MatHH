@@ -72,10 +72,11 @@ classdef ruleBasedSelectionHH < selectionHH
             %                        problem domain (e.g. JSSP, BP)
             obj.hhType = 'Rule-based'; % Always true
 %             targetProblem = "job shop scheduling"; % Default domain
-            targetProblem = @JSSP;
+            targetProblemHandle = @JSSP;
             Rules = 2;  % Default number of rules
             defaultFeatures = true; % Flag for using default features
             defaultSolvers = true; % Flag for using default solvers
+            isDeprecated = false; % Flag for supporting old scheme
             if nargin >= 1                  
                 if isa(varargin{1},'ruleBasedSelectionHH')
                     obj = ruleBasedSelectionHH();
@@ -85,17 +86,23 @@ classdef ruleBasedSelectionHH < selectionHH
                     props = varargin{1};
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
                     if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
+                    if isfield(props,'targetProblemHandle'), targetProblemHandle = props.targetProblemHandle; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
                 else                        % Given for compatibility with older code
                     warning('Using deprecated constructor. Consider changing to a structure-based approach...')
+                    isDeprecated = true;
                     Rules = varargin{1};
                     if nargin >= 2, targetProblem = varargin{2}; end
                     if nargin >= 3, selectedFeatures = varargin{3}; defaultFeatures = false; end
                 end
             end            
             obj.nbRules = Rules;
-            obj.assignProblem(targetProblem)
+            if isDeprecated
+                obj.assignProblem(targetProblem);  % old approach
+            else                
+                obj.assignProblem(targetProblemHandle); % new approach
+            end
             obj.targetProblemText = obj.targetProblem.disp();
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
@@ -373,7 +380,10 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.setModel(currentModel)
             solvedInstances = obj.solveInstanceSet(instances);
             fitness = 0;
-            for thisInstance = instances
+            nbInstances = length(solvedInstances);
+            for idx = 1 : nbInstances
+%             for thisInstance = instances                
+                thisInstance = solvedInstances{idx};
                 fitness = fitness + thisInstance.getSolutionPerformanceMetric();
             end                        
         end
@@ -603,6 +613,11 @@ classdef ruleBasedSelectionHH < selectionHH
         % ----- Model setter
         function setModel(obj, model)
             % SETMODEL  Method for setting the hh model to a fixed matrix
+            % This method receives a single parameter, which is the matrix
+            % corresponding to the new model. Beware that the number of
+            % rules and features is inferred from the given model. So, the
+            % HH can be set to a model with a different number of rules and
+            % features.
             obj.value = model;
             [obj.nbRules, obj.nbFeatures] = size(model); 
             obj.nbFeatures = obj.nbFeatures -1; % Fix for the action column
@@ -635,7 +650,7 @@ classdef ruleBasedSelectionHH < selectionHH
             %disp(heuristicVector)
             obj.heuristicVector=heuristicVector2;
             SolvedInstance = instance;
-            stepData = struct('featureValues', instance.features,...
+            stepData = struct('featureValues', instance.getFeatureVector(obj.featureIDs),...
                 'selectedSolver', NaN,...
                 'solution', instance.solution);
             performanceData = [performanceData stepData]; % Values associated to the solved instance
@@ -916,8 +931,22 @@ classdef ruleBasedSelectionHH < selectionHH
             % Afterward, it selects the best solution
             % for each instance and builds the Oracle with that
             % information. The method returns the average performance
-            % and the performance for each solution. It also sets the oracle property                        
-            dummyProps = struct('nbRules',1,'targetProblem',obj.targetProblemText);
+            % and the performance for each solution. It also sets the oracle property.
+            %
+            % -\ Inputs:
+            % -\ ---\ instanceSet: The set of instances to solve
+            %
+            % -\ Optional inputs:
+            % -\ ---\ selectedSolvers: The ID of the solvers to use
+            %
+            % -\ Outputs:
+            % -\ ---\ oraclePerformance: Average Oracle performance over
+            %                            the set of instances
+            % -\ ---\ individualSolutions: Vector with the performance
+            %                            achieved for each instance
+            % -\ ---\ bestSolverPerInstance: Vector with the ID of the best
+            %                                solver for each instance
+            dummyProps = struct('nbRules',1,'targetProblemHandle',obj.targetProblemHandle);
             dummyHH = ruleBasedSelectionHH(dummyProps);
             % Check if custom heuristic IDs were given:
             if length(varargin) == 1                % they were
