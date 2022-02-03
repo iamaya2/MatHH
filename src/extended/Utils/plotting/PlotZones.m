@@ -54,16 +54,30 @@ elseif nargin < 5
     toEuclid = varargin{2};
     selectedFeatures = varargin{3};
     rX = selectedFeatures(1);
-    rY = selectedFeatures(2);
+    if length(selectedFeatures) == 1
+        warning('A single feature was provided. Plotting against the same feature in both axis to enhance readability')
+        rY = rX;
+    else    
+        rY = selectedFeatures(2);
+    end
 else
     points = varargin{1};
     toEuclid = varargin{2};
     selectedFeatures = varargin{3};
     rX = selectedFeatures(1);
-    rY = selectedFeatures(2);
+    if length(selectedFeatures) == 1
+        warning('A single feature was provided. Plotting against the same feature in both axis to enhance readability')
+        rY = rX;
+    else    
+        rY = selectedFeatures(2);
+    end
     plotRules = varargin{4};
 end
 
+if size(Rules,2) == 2
+    warning('The model has a single feature. Plotting against the same feature in both axis to enhance readability')
+    rY = rX;
+end
 
 Action = Rules(:,end);
 ActionMarker = "s";

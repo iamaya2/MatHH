@@ -23,6 +23,55 @@ classdef BP < problemDomain
             s = sprintf('Balanced Partition Problem');
         end
         
+        function instanceSet = loadInstanceSet(setID)
+            % loadInstanceSet  Method for loading a set of provided
+            % instances. Requires a single input (setID) and returns a cell
+            % array with the set of loaded instances.
+            %
+            % The following sets are available:
+            %
+            % \--------------------------------------------\
+            % |    SetID    |  Bits | Elements | Instances |
+            % \--------------------------------------------\
+            % | rand5E2B    |    2  |     5    |     10    |
+            % | rand5E8B    |    8  |     5    |     10    |
+            % | rand25E4B   |    4  |    25    |    200    |
+            % | rand25E25B  |   25  |    25    |    200    |
+            % | rand25E50B  |   50  |    25    |    200    |
+            % | rand40E4B   |    4  |    40    |    200    |
+            % | rand40E25B  |   25  |    40    |    200    |
+            % | rand40E50B  |   50  |    40    |    200    |
+            % | rand100E10B |   10  |   100    |     10    |
+            % \--------------------------------------------\                       
+            thisFolder = fileparts(which('BP'));
+            oldDir = cd(thisFolder);
+            switch lower(setID)
+                case 'rand5e2b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\5Elements\2Bits\instanceDataset.mat';
+                case 'rand5e8b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\5Elements\8Bits\instanceDataset.mat';
+                case 'rand25e4b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\25Elements\4Bits\instanceDataset.mat';
+                case 'rand25e25b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\25Elements\25Bits\instanceDataset.mat';
+                case 'rand25e50b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\25Elements\50Bits\instanceDataset.mat';
+                case 'rand40e4b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\40Elements\4Bits\instanceDataset.mat';
+                case 'rand40e25b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\40Elements\25Bits\instanceDataset.mat';
+                case 'rand40e50b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\40Elements\50Bits\instanceDataset.mat';
+                case 'rand100e10b'
+                    datasetPath = '..\..\..\..\..\BaseInstances\BalancedPartition\files\mat\Random\100Elements\10Bits\instanceDataset.mat';
+                otherwise
+                    callErrorCode(101)
+            end
+            load(datasetPath,'instanceDataset');
+            instanceSet = instanceDataset;
+            cd(oldDir);
+        end
+        
         function stepHeuristic(instance, heurID, varargin)
             % stepHeuristic   Method for executing a single solution step
             % in a Balanced Partition problem instance. Updates the

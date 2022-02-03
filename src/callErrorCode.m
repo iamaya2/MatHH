@@ -5,6 +5,8 @@ function callErrorCode(errCode)
 % ---\ Warnings (0-99):
 %     ---\ 0: Method/script is currently being developed.
 % ---\ Errors (100+):
+%     ---\ 100: Undefined heuristic ID.
+%     ---\ 101: Undefined instance dataset.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -18,6 +20,8 @@ else
     switch errCode
         case 100
             error('Undefined heuristic ID. Aborting!')
+        case 101
+            error('Undefined instance dataset. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end
