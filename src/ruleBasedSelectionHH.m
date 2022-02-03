@@ -588,9 +588,33 @@ classdef ruleBasedSelectionHH < selectionHH
             PlotRules(obj.value, varargin{:});
         end
 
-        function plotZones(obj, varargin)
+        function allAreas = plotZones(obj, varargin)
+            % PlotZones   Method for plotting a rule-based HH
+            %  This method uses the current HH model to plot the regions 
+            %  where each action is selected. By default, it plots against 
+            %  the first two features of the model and uses a fixed number 
+            %  of points, although behaviour can be altered with optional
+            %  arguments.
+            %
+            %  -\ Optional inputs (default values):
+            %  -\ ---\ points (0:0.01:1) - Vector with the points that will be evaluated (per dimension)
+            %  -\ ---\ isEuclidean (true) - Flag indicating if Euclidean distance will be used
+            %  -\ ---\ selectedFeatures (1:2) - Vector with two elements containing the IDs of the features
+            %                                   (columns) to use when plotting
+            %  -\ ---\ doRules (false) - Flag indicating if the rules should be plotted as well
+            %
+            %  -\ Returns:
+            %  -\ ---\ allAreas - Vector with areas occuppied by each action
+            %
+            %  Example:
+            %    HH1 = ruleBasedSelectionHH(); % Default HH with random model
+            %    HH1.plotZones(); % Plot with default behaviour
+            %    % Custom plot with area storage
+            %    newPoints = 0:0.005:1; % Increased resolution
+            %    customFeatures = [1 2]; % Same features as default            
+            %    allAreas = HH1.plotZones(newPoints, true, customFeatures, true)            
             figure
-            PlotZones(obj.value, varargin{:});
+            allAreas = PlotZones(obj.value, varargin{:});
         end
         
         function plotZones3D(obj, varargin)
