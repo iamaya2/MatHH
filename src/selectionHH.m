@@ -7,16 +7,17 @@ classdef selectionHH < handle
     % ----- ---------------------------------------------------- -----
     %                       Properties
     % ----- ---------------------------------------------------- -----
-    properties
-        availableFeatures            ; % String vector of features that can be used for analyzing the problem state
+    properties        
         availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
         lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
         oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
         performanceData                % Information about the performance on the test set.
 		problemType     = 'Undefined'; % Problem type name
-        status          = 'New'; % HH status. Can be: New, Trained
+        status          = 'New';       % HH status. Can be: New, Trained
+        solverIDs       = NaN;         % Vector with ID of each solver that the model will use
         targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
+        targetProblemHandle            % Function handle for multiple domain support
         targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
         testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem		
         testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances)
@@ -66,24 +67,40 @@ classdef selectionHH < handle
             %  problemType: Problem that will be linked (e.g. JSSP)
             %  varargin:    Put parameters associated to the problem (e.g. #
             %               machines and jobs)
-            switch lower(problemType)
-                case 'balanced partition'
-                    dummyProblem = BalancedPartition(); % Temp: Just to select a random instance
-%                     obj.targetProblem = dummyProblem.problemType;
-                    obj.targetProblem = dummyProblem;
-                    obj.availableSolvers = dummyProblem.problemSolvers;
-                case 'job shop scheduling'
-                    dummyProblem= JSSP();
-                    obj.targetProblem = dummyProblem;
-                    obj.availableSolvers = dummyProblem.problemSolvers;
+            if isa(problemType,'function_handle') % new approach
+                dummyProblem = problemType();
+                obj.targetProblem = dummyProblem;
+                obj.targetProblemHandle = problemType;
+                obj.availableSolvers = dummyProblem.problemSolvers;
+                if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
                     obj.availableFeatures = dummyProblem.problemFeatures;
                     obj.nbFeatures=length(obj.availableFeatures);
-                    obj.nbSolvers=length(obj.availableSolvers);
-                    obj.problemType="JSSP";
-				otherwise
-                    error('Problem %s has not been implemented yet!', problemType)
+                end
+                obj.nbSolvers=length(obj.availableSolvers);
+                obj.problemType=dummyProblem.problemType;
+            else % for compatibility purposes (old approach)
+                warning('Deprecated approach. Use function handle for the targetProblem property instead.')
+                switch lower(problemType)
+                    case 'balanced partition'
+                        dummyProblem = BP(); 
+                        obj.problemType="BP";                        
+                        obj.targetProblemHandle = @BP;
+                    case 'job shop scheduling'
+                        dummyProblem = JSSP();                        
+                        obj.problemType="JSSP";
+                        obj.targetProblemHandle = @JSSP;
+                    otherwise
+                        error('Problem %s has not been implemented yet!', problemType)
+                end
+                obj.targetProblem = dummyProblem;
+                obj.availableSolvers = dummyProblem.problemSolvers;
+                if isa(obj,'ruleBasedSelectionHH') %  Handler for feature-based model
+                    obj.availableFeatures = dummyProblem.problemFeatures;
+                    obj.nbFeatures=length(obj.availableFeatures);
+                end
+                obj.nbSolvers=length(obj.availableSolvers);
             end
-        end 
+        end
         
         % ----- Deep copy
         function cloneProperties(oldHH, newHH)
@@ -103,8 +120,8 @@ classdef selectionHH < handle
             
         end 
         
-        function allMetrics = getSolversUsed(obj,selectedInstance)
-            thisInstance = obj.performanceData{selectedInstance};
+        function allMetrics = getSolversUsed(obj,selectedInstanceID)
+            thisInstance = obj.performanceData{selectedInstanceID};
             selectedSteps = [thisInstance{:}];
             allMetrics = [selectedSteps.selectedSolver];
         end
@@ -206,17 +223,22 @@ classdef selectionHH < handle
         end
         
         function [fA, fV] = plotSolverUsageDistributionMulti(obj,selectedInstances, varargin)
-            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the distribution 
-            % of solvers used at each step of the solution for multiple instances. 
-            % Optional input: Accumulation flag. True: Pie chart with
-            % accumulated information; False (default): violinplot with distribution
-            % per instance. 
+            % PLOTSOLVERUSAGEDISTRIBUTIONMULTI   Method for plotting the 
+            % distribution of solvers used at each step of the solution 
+            % for multiple instances. 
+            %
+            % Required input: ID vector with scalars indicating the
+            %      instances that will be processed for information.
+            %
+            % Optional input: Accumulation flag. 
+            %      True: Pie chart with accumulated information
+            %      False (default): violinplot with distribution per instance
             %
             % Returns axes and violin/pie handles.            
             toAccumulate = false;
             nbInstances = length(selectedInstances);
             nbSteps = length(obj.performanceData{1});
-            allMetrics = nan(nbSteps,nbInstances);
+            allMetrics = nan(nbSteps,nbInstances);  
             for idx = 1 : nbInstances
                 allMetrics(:,idx) = obj.getSolversUsed(selectedInstances(idx));
             end
@@ -418,7 +440,8 @@ classdef selectionHH < handle
         end
         
         function printCommonData(obj)
-            % Define here dependent properties
+            % printCommonData   Method for displaying common information
+            % within selection HH models. 
             fprintf('Displaying information about the %s HH:\n', obj.status)
             if strcmp(obj.targetProblem, 'Undefined')
                 fprintf('\tTarget problem:      Undefined\n')
@@ -446,7 +469,7 @@ classdef selectionHH < handle
         
         function printExtraData(obj)
             % Replace this with the HH specific information            
-            fprintf('To be overloaded by each specific HH model...\n')
+            warning('The printExtraData method must be overloaded by each specific HH model...\n')
         end
         
         function printModel(obj)

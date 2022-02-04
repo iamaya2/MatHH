@@ -88,6 +88,18 @@ classdef JSSPInstance < handle
         % ----- ---------------------------------------------------- -----
         % Calculate Features
         % ----- ---------------------------------------------------- -----
+        
+        function allFeatures = calculateFeature(obj, featureIDs)
+            nbFeaturesToCalculate = length(featureIDs);
+            allFeatures = nan(1,nbFeaturesToCalculate);
+            for idx = 1 : nbFeaturesToCalculate
+                thisFeatureValue = normalizeFeature( CalculateFeature(obj, featureIDs(idx)), featureIDs(idx) );
+                allFeatures(idx) = thisFeatureValue;
+            end
+            obj.features = allFeatures;
+        end
+        
+        
         function features = gettingFeatures(obj,varargin)
             % gettingFeatures   Method for calculating feature values
             %  This method has variable input arguments, organized as
@@ -161,6 +173,18 @@ classdef JSSPInstance < handle
         % ----- ---------------------------------------------------- -----
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
+        function featureValues = getFeatureVector(obj, varargin)
+             if isempty(varargin)
+                featureValues = obj.calculateFeature(1:length(JSSP.problemFeatures));
+            else
+                featureValues = obj.calculateFeature(varargin{1});
+            end
+        end
+   
+        function makespan = getSolutionPerformanceMetric(obj)
+            makespan = obj.solution.getSolutionPerformanceMetric();
+        end
+        
         function plot(obj, varargin)
             % plot   Plots the current solution (schedule) of the instance
             disp('Not yet fully implemented...')
