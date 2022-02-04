@@ -31,7 +31,7 @@ classdef BPSet < handle & deepCopyThis
                     obj.updateLoad();                    
                 elseif isa(varargin{1},'BPSet') % from another BPSet
                     obj = BPSet();
-                    varargin{1}.cloneProperties(obj);
+                    varargin{1}.deepCopy(obj);
                 elseif isnumeric(varargin{1}) % just the ID
                     obj.ID = varargin{1};
                 else

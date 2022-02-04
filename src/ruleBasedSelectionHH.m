@@ -454,7 +454,7 @@ classdef ruleBasedSelectionHH < selectionHH
             %              feature changes (per instance) must be tracked. If true,
             %              requires the next parameter to indicate instance IDs.
             %
-            % --- featID: ID (scalar or vector) with the numbers (IDs) of
+            % --- instID: ID (scalar or vector) with the numbers (IDs) of
             %             the instances that will be tracked.
             %
             % Returns: 

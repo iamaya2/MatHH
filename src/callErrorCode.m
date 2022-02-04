@@ -7,6 +7,7 @@ function callErrorCode(errCode)
 % ---\ Errors (100+):
 %     ---\ 100: Undefined heuristic ID.
 %     ---\ 101: Undefined instance dataset.
+%     ---\ 102: Invalid input for constructor.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -22,6 +23,8 @@ else
             error('Undefined heuristic ID. Aborting!')
         case 101
             error('Undefined instance dataset. Aborting!')
+        case 102
+            error('Invalid input for constructor. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

@@ -47,7 +47,7 @@ classdef BPInstance < problemInstance
                 obj.updateLength();
                 obj.updateLoad();
                 obj.maxLoad = obj.load;
-                obj.solution.sets = [BPSet(obj.items,1) BPSet(2)];
+                obj.solution = BPSolution([BPSet(obj.items,1) BPSet(2)]);
                 obj.getFeatureVector();
             end
         end

@@ -6,7 +6,7 @@
 %                         created object and the method returns a deep copy of such solution.
 classdef BPSolution < problemSolution
     properties
-        sets = []; % Sets with the corresponding elements for the solution
+        sets = BPSet(); % Sets with the corresponding elements for the solution
     end
     
     methods
@@ -15,9 +15,20 @@ classdef BPSolution < problemSolution
         % ---- ------------------------ ----
         function obj = BPSolution(varargin)
             if nargin > 0
-                oldObj = varargin{1};
-                obj = BPSolution();
-                oldObj.deepCopy(obj);
+                if isa(varargin{1},'BPSolution') % From another solution
+                    oldObj = varargin{1};
+                    obj = BPSolution();
+                    oldObj.deepCopy(obj);
+                elseif isa(varargin{1},'BPSet') % Array of BPSet
+                    allSets = varargin{1};
+                    nbSets = length(allSets);
+                    obj.sets(nbSets) = BPSet(); % Dummy set for allocation
+                    for idx = 1 : nbSets
+                        obj.sets(idx) = allSets(idx);
+                    end
+                else
+                    callErrorCode(102) % Invalid input for constructor
+                end                
             end
         end
         

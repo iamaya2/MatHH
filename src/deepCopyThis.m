@@ -23,9 +23,11 @@ classdef deepCopyThis < matlab.mixin.Copyable
         end
        
        function deepCopy(oldObj, newObj)
-            % deepCopy   WIP - Method for deep cloning object
+            % deepCopy   Method for deep cloning object
             % properties. Automatically sweeps all properties
             %            
+            % Example:
+            %   oldObj.deepCopy(newObj);
             propertySet = properties(oldObj);
             for idx = 1:length(propertySet)                 
                 thisOldProp = oldObj.(propertySet{idx});
