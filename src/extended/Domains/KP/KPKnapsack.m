@@ -13,7 +13,9 @@ classdef KPKnapsack < handle & deepCopyThis
         ID = NaN; % Identifier of this knapsack
         capacity = NaN; % Capacity (limit) of the knapsack
         currentWeight = 0; % Weight taken by the items currently packed 
-        items = []; % Array to contain the items packed into this knapsack
+        currentProfit = 0; % Profit given by the items currently packed 
+        items = KPItem.empty(1,0); % Array to contain the items packed into this knapsack
+        isUsable = true; % Used for validating if the knapsack is valid
         nbItems = 0; % Number of items within the knapsack
     end
     
@@ -26,6 +28,7 @@ classdef KPKnapsack < handle & deepCopyThis
                 if isnumeric(varargin{1}) % From numeric data
                     obj.capacity = varargin{1};                    
                     obj.ID = varargin{2};                    
+                    obj.checkValidity();
                 elseif isa(varargin{1},'KPKnapsack') % From another KPKnapsack
                     oldObj = varargin{1};
                     obj = KPKnapsack();
@@ -39,6 +42,23 @@ classdef KPKnapsack < handle & deepCopyThis
         % ---- ------------------------ ----
         % ---- OTHER METHODS ----
         % ---- ------------------------ ----
+        function checkValidity(obj)
+            % checkValidity   Method for determining if the knapsack is
+            % valid (has free capacity). It sets the isUsable property and
+            % requires no inputs. If the knapsack is invalid, it also
+            % displays a warning.
+            %
+            % Note: Matlab adds a reserved property callid isValid for
+            % assessing if a handle object is valid. So, that property
+            % cannot be used in this method.
+            if obj.currentWeight > obj.capacity
+                warning('The capacity of knapsack %d has been exceeded!',obj.ID)
+                obj.isUsable = false;
+            else
+                obj.isUsable = true;
+            end
+        end
+        
         function packItem(obj, thisItem)
             % packItem  Method for packing items within a KPKnapsack object.
             % Requires a single input, which is a KPItem object.
@@ -46,8 +66,10 @@ classdef KPKnapsack < handle & deepCopyThis
             % elements), the current weight and the status of the KPItem. 
             obj.items = [obj.items thisItem];
             obj.updateCurrentWeight(thisItem.weight);
+            obj.updateCurrentProfit(thisItem.profit);
             obj.updateLength(1);
             thisItem.donePacking();
+            obj.checkValidity();
         end
         
         function unpackItem(obj, thisItem)
@@ -61,8 +83,10 @@ classdef KPKnapsack < handle & deepCopyThis
             else
                 obj.items = [obj.items(1:itemID-1) obj.items(itemID+1:end)];
                 obj.updateCurrentWeight(-thisItem.weight);
+                obj.updateCurrentProfit(-thisItem.profit);
                 obj.updateLength(-1);
                 thisItem.doneUnpacking();
+                obj.checkValidity();
             end            
         end
         
@@ -82,6 +106,24 @@ classdef KPKnapsack < handle & deepCopyThis
                 obj.currentWeight = obj.currentWeight + varargin{1};
             end
         end
+        
+        function updateCurrentProfit(obj, varargin)
+            % updateCurrentProfit   Method for updating current profit of
+            % the knapsack. Has two operating modes. If no arguments are given,
+            % the profit of all items is summed up. It can also receive 
+            % the ammount to increase/decrease.
+            % 
+            % Note that the first one always provide the correct value but it
+            % could reduce performance when multiple updates are required.
+            % The other approach should be faster, but is prone to error if
+            % the user is not careful. 
+            if nargin == 1
+                obj.currentProfit = sum([obj.items.profit]);
+            else
+                obj.currentProfit = obj.currentProfit + varargin{1};
+            end
+        end
+        
         
         function updateLength(obj, varargin)
             % updateLength   Method for updating current number of items in
