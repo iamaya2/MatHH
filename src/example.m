@@ -10,7 +10,7 @@ addpath(genpath('extended\Utils')); % Adds assorted utilities
 %% HH creation
 % --- Basic parameters
 nbRules = 4;
-nbFeatures = 3; 
+nbFeatures = 3; thisFeatures = 1:nbFeatures;
 nbSolvers = 4;
 targetProblem = "job shop scheduling";
 userModel = [0.2 0.4 0.6 1;...
@@ -19,7 +19,7 @@ userModel = [0.2 0.4 0.6 1;...
              0.5 0.5 0.5 2];
 
 % --- Main process
-testHH = ruleBasedSelectionHH(nbRules, targetProblem); % Initializes to random model
+testHH = ruleBasedSelectionHH(nbRules, targetProblem, thisFeatures); % Initializes to random model
 testHH.value = userModel; % Sets a user-defined model
 testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Sets a random model
 
