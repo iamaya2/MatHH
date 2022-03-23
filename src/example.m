@@ -4,8 +4,8 @@ clear
 close all
 
 %% Loads required packages
-addpath(genpath('extended\Domains\JSSP')); % Adds JSSP functionality
-addpath(genpath('extended\Utils')); % Adds assorted utilities
+addpath(genpath('extended/Domains/JSSP')); % Adds JSSP functionality
+addpath(genpath('extended/Utils')); % Adds assorted utilities
 
 %% HH creation
 % --- Basic parameters
@@ -25,12 +25,12 @@ testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Sets a random model
 
 % --- Instance assignment
 % ------ Load first set of training instances
-instanceDataset = '..\..\BaseInstances\JobShopScheduling\files\mat\Instances\E02\instanceDataset.mat';
+instanceDataset = '../../BaseInstances/JobShopScheduling/files/mat/Instances/E02/instanceDataset.mat';
 load(instanceDataset);
 trainInstances1 = num2cell(allInstances); % Stores instances as cell array
 
 % ------ Load second set of training instances
-instanceDataset = '..\..\BaseInstances\JobShopScheduling\files\mat\Instances\E01\instanceDataset.mat';
+instanceDataset = '../../BaseInstances/JobShopScheduling/files/mat/Instances/E01/instanceDataset.mat';
 load(instanceDataset);
 trainInstances2 = num2cell(allInstances); % Stores as cell array
 
