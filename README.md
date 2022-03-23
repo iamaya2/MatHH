@@ -29,7 +29,7 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
    
 ***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
 
-***Note for Mac users**: Please notice that we use the Windows path separator ("\") throughout this document, which differs from the one used by Mac ("/"). So, Mac users must modify the separator in order to use `MatHH`.*
+***Note for Mac users**: Please notice that we use the Windows path separator ("\\") throughout this document, which differs from the one used by Mac ("/"). So, Mac users must modify the separator in order to use `MatHH`.*
 
 ## Currently supported hyper-heuristic models
 The following kinds of hyper-heuristics (HHs) are currently supported:
