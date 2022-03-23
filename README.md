@@ -7,7 +7,7 @@ In order to properly use `MatHH` and the examples shown in this document, the fo
 
 - `Utils`: a set of diverse utility functions to better organize the code; available at: [Github](https://github.com/iamaya2/Utils)
 - *Problem domains:* different packages can be developed/used for providing domain-specific capabilities. So far, the following packages have been tested:
-   - `JSSP-Matlab-OOP`: an object-oriented class for handling Job-Shop scheduling problems; available at: [Github](https://github.com/iamaya2/JSSP-Matlab-OOP)
+   - `JSSP-Matlab-OOP`: an object-oriented class for handling Job-Shop scheduling problems; available at: [Github](https://github.com/iamaya2/JSSP-Matlab-OOP). Note that we include a stable version of this domain with the `MatHH`, for the sake of simplicity. So, there is no need to clone the repository, unless the user wishes to test experimental features.
 - *Instances:* Problem instances (cases) that will be solved with the hyper-heuristic. Consider using one of the following: 
 	- `BaseInstances`: a set of instances for different problem domains; available at: [Github](https://github.com/iamaya2/BaseInstances)
    
@@ -18,15 +18,18 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
 
 ```
 \BaseInstances
-\JSSP-Matlab-OOP
 \MatHH
    \src
-\Utils
-   \distance
-   ...
+   	\extended
+		\Domains
+		\Utils
+   			\distance
+   			...
 ```   
    
 ***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
+
+***Note for Mac users**: Please notice that we use the Windows path separator ("\") throughout this document, which differs from the one used by Mac ("/"). So, Mac users must modify the separator in order to use `MatHH`.*
 
 ## Currently supported hyper-heuristic models
 The following kinds of hyper-heuristics (HHs) are currently supported:
