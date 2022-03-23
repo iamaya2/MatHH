@@ -1,6 +1,6 @@
 # MatHH: A Matlab-based Hyper-Heuristic framework
 ---
-This repository contains a description of `MatHH`, a framework developed in Matlab for coding and testing hyper-heuristics.
+This repository contains a description of `MatHH`, a framework developed in Matlab for coding and testing hyper-heuristics. This framework has been published in Elsevier's SoftwareX journal and is freely available [here](https://www.sciencedirect.com/science/article/pii/S2352711022000413).
 
 ## Required packages
 In order to properly use `MatHH` and the examples shown in this document, the following packages are required:
