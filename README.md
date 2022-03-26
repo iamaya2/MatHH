@@ -88,12 +88,16 @@ userModel = [0.2 0.4 0.6 1;...
 testHH.value = userModel; % Sets the user-defined model			 
 ```			 
 
-Similarly, we can create a random model with fixed parameters: 
+Similarly, we can create random models with subsets of features or solvers: 
 
 ```			 
-nbFeatures = 3; % Number of features for the model 
-nbSolvers = 4; % Number of solvers that will be available 
-testHH.initializeModel(nbRules, nbFeatures, nbSolvers); % Generates a random model
+useFeatures = [2 4 3]; % Number of features for the model 
+useSolvers = 2:4; % Number of solvers that will be available 
+useRules = 10; % New number of rules for the HH
+testHH.assignFeatures(useFeatures);
+testHH.assignSolvers(useSolvers);
+testHH.initializeModel(useRules); % Generates a random model for the current subset of features and solvers
+testHH % Displays the new HH model
 ```			 
 
 ## Instance assignment
