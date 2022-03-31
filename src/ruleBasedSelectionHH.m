@@ -46,6 +46,7 @@ classdef ruleBasedSelectionHH < selectionHH
         nbSolvers       = NaN; % Number of available solvers for the HH
         featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
         featureIDs % Vector with the ID of the features that the model uses
+        hasInitialized = false; % Flag for indicating if the model reflects the feature and solver assignment
         heuristicVector % Stores information about heuristic usage (not yet implemented)
         HHRules % TO-DO: Complete description
         instances % Stores information returned by getInstances
@@ -78,7 +79,7 @@ classdef ruleBasedSelectionHH < selectionHH
             defaultSolvers = true; % Flag for using default solvers
             isDeprecated = false; % Flag for supporting old scheme
             if nargin >= 1                  
-                if isa(varargin{1},'ruleBasedSelectionHH')
+                if isa(varargin{1},'ruleBasedSelectionHH') % From another HH
                     obj = ruleBasedSelectionHH();
                     varargin{1}.cloneProperties(obj);
                     return
@@ -108,8 +109,7 @@ classdef ruleBasedSelectionHH < selectionHH
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 
             obj.assignSolvers(selectedSolvers); 
-            obj.initializeModel(Rules,obj.nbFeatures, obj.nbSolvers);
-            %             obj.description = "description unset";
+            obj.initializeModel(Rules);            
         end              
         		
         
@@ -123,6 +123,7 @@ classdef ruleBasedSelectionHH < selectionHH
             % feature IDs
              obj.featureIDs = featureArray;
              obj.nbFeatures = length(featureArray);
+             obj.hasInitialized = false;
         end
         
         function assignSolvers(obj, solverIDs)
@@ -130,6 +131,7 @@ classdef ruleBasedSelectionHH < selectionHH
             % Requires a single input, which is a vector of solver IDs.
             obj.solverIDs = solverIDs;
             obj.nbSolvers = length(solverIDs);
+            obj.hasInitialized = false;
         end
         
         function newHH = clone(obj)
@@ -389,14 +391,14 @@ classdef ruleBasedSelectionHH < selectionHH
         end
         
         % ----- Model initializer
-        function initializeModel(obj, nbRules, nbFeatures, nbSolvers)
+%         function initializeModel(obj, nbRules, nbFeatures, nbSolvers)
+        function initializeModel(obj, nbRules)
             % INITIALIZEMODEL  Method for generating a random solution for
             % the current hh model
-            randSolverIDs = randi(nbSolvers,[1,nbRules]);
-            obj.value = [rand(nbRules, nbFeatures) obj.solverIDs(randSolverIDs)'];
-            obj.nbRules = nbRules; 
-            obj.nbFeatures = nbFeatures;
-            obj.nbSolvers = nbSolvers;
+            randSolverIDs = randi(obj.nbSolvers,[1,nbRules]);
+            obj.value = [rand(nbRules, obj.nbFeatures) obj.solverIDs(randSolverIDs)'];
+            obj.nbRules = nbRules;             
+            obj.hasInitialized = true;
         end 
 		
 %         function initializeModel_one_to_one(obj, nbRules, nbFeatures, nbSolvers)
@@ -1004,6 +1006,7 @@ classdef ruleBasedSelectionHH < selectionHH
             fprintf('\tUsable solvers:\t%d ( ', obj.nbSolvers)            
             fprintf(' %d ', obj.solverIDs)            
             fprintf(' )\n') 
+            if ~obj.hasInitialized, callErrorCode(1); end
         end
 
         
