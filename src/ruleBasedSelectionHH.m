@@ -3,10 +3,40 @@ classdef ruleBasedSelectionHH < selectionHH
     %  This class allows the creation of Rule-based selection
     %  hyper-heuristics (RBSHH) objects that can be used for solving
     %  combinatorial optimization problems. Most properties are inherited 
-    %  from the selectionHH superclass. 
+    %  from the selectionHH superclass. Check the doc file for a list of properties and methods.
+    %  
+    %  Recommended usage: 
+    %    Define a structure with the properties of the RBSHH and pass it as
+    %    an argument. The following fields are currently supported (default
+    %    values given in parentheses):
+    % 
+    %       nbRules             (2)     - Number of rules   
+    %       targetProblemHandle (@JSSP) - Function handle for the COP that will
+    %                                       be tackled
+    %       selectedFeatures    (All)   - Vector with the IDs of the features
+    %                                       that will be used by the model
+    %       selectedSolvers     (All)   - Vector with the IDs of the solvers
+    %                                       that will be used by the model
     %
+    %  Other usage modes:
+    %    From another RBSHH - Pass the existing RBSHH as an argument and a
+    %                           deep copy shall be returned.
+    %    Empty shell - Use no arguments and an 'empty' RBSHH shall be
+    %                   returned.
+    %    Using several arguments - (deprecated) Pass several arguments in
+    %                               order to return an old-style RBSHH. Not
+    %                               recommended and prone to errors.
+    %
+    % See also: selectionHH, JSSP
+    
     %  ruleBasedSelectionHH Properties:     
     %
+    %   availableFeatures - String vector of features that can be used for
+    %      analyzing the problem state (problem dependent; see each COP for
+    %      more details)
+    %   availableSolvers - String vector of solvers available for the
+    %      current targetProblem (problem dependent; see each COP for
+    %      more details). Inherited from selectionHH class.
     %   nbRules - Number of rules for the HH
     %   nbFeatures - Number of features for the HH
     %   nbSolvers - Number of available solvers for the HH
@@ -37,9 +67,11 @@ classdef ruleBasedSelectionHH < selectionHH
     %   test(obj) -
     %   train(obj, criterion, varargin) -
     %    
+    
     properties
         % Most properties are inherited from the selectionHH superclass. Only
         % the following properties are specific to this class:
+        
         availableFeatures            ; % String vector of features that can be used for analyzing the problem state
         nbRules         = NaN; % Number of rules for the HH
         nbFeatures      = NaN; % Number of features for the HH
@@ -86,7 +118,8 @@ classdef ruleBasedSelectionHH < selectionHH
                 elseif isstruct(varargin{1})    % Pass arguments as a structure
                     props = varargin{1};
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
-                    if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
+%                     if isfield(props,'targetProblem'), targetProblem =
+%                     props.targetProblem; end % toDelete
                     if isfield(props,'targetProblemHandle'), targetProblemHandle = props.targetProblemHandle; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
