@@ -353,6 +353,36 @@ classdef ruleBasedSelectionHH < selectionHH
             end
         end
         
+        function heuristicID = getRuleAction(obj, ruleID)
+            % getRuleAction   Method for returning the action ID of a given
+            % rule. It corresponds to the last column of the selector. 
+            %
+            % Inputs:
+            %    ruleID - Scalar between 1 and the number of rules that
+            %    indicates the rule of interest (a.k.a. active or selected
+            %    rule).
+            %
+            % Outputs:
+            %    heuristicID - Scalar with the ID of the solver that must
+            %    be used
+            heuristicID = obj.value(ruleID, end); 
+        end
+        
+        function stepData = getStepData(obj, instance, heuristicID)
+            % getStepData   Method for generating step data for partial
+            % solutions. 
+            %
+            % Inputs:
+            %    instance - Problem instance that is being solved
+            %    heuristicID - ID of the heuristic that was chosen at this
+            %    step, which comes from the getRuleAction method
+            % 
+            % Outputs:
+            %    stepData - Structure with the information from this step
+            stepData = struct('featureValues', instance.features,...
+                                    'selectedSolver', heuristicID,...
+                                    'solution', instance.solution.clone()); 
+        end
         
         function [fitness, solvedInstances] = evaluateCandidateSolution(obj, solution, varargin)
             % evaluateCandidateSolution   Method for testing a given
@@ -663,10 +693,12 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
-                stepData = struct('featureValues', instance.features,...
-                                    'selectedSolver', heuristicID,...
-                                    'solution', instance.solution.clone()); % Must change this by a getStepData method
+                heuristicID = obj.getRuleAction(activeRule); 
+                %heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
+                stepData = obj.getStepData(instance, heuristicID);
+%                 stepData = struct('featureValues', instance.features,...
+%                                     'selectedSolver', heuristicID,...
+%                                     'solution', instance.solution.clone()); % Must change this by a getStepData method
                 performanceData = [performanceData stepData];
                 heuristicVector2(counter) = heuristicID;
                 counter = counter +1;
