@@ -11,12 +11,9 @@ classdef ruleBasedSelectionHH < selectionHH
     %    values given in parentheses):
     % 
     %       nbRules             (2)     - Number of rules   
-    %       targetProblemHandle (@JSSP) - Function handle for the COP that will
-    %                                       be tackled
-    %       selectedFeatures    (All)   - Vector with the IDs of the features
-    %                                       that will be used by the model
-    %       selectedSolvers     (All)   - Vector with the IDs of the solvers
-    %                                       that will be used by the model
+    %       targetProblemHandle (@JSSP) - Function handle for the COP that will be tackled
+    %       selectedFeatures    (All)   - Vector with the IDs of the features that will be used by the model    
+    %       selectedSolvers     (All)   - Vector with the IDs of the solvers that will be used by the model    
     %
     %  Other usage modes:
     %    From another RBSHH - Pass the existing RBSHH as an argument and a
@@ -27,16 +24,13 @@ classdef ruleBasedSelectionHH < selectionHH
     %                               order to return an old-style RBSHH. Not
     %                               recommended and prone to errors.
     %
+    %  Example: 
+    %   HH3Props = struct('nbRules',4,'targetProblemHandle', @JSSP, 'selectedFeatures',3:4,'selectedSolvers',[2 4]);
+    %   HH3 = ruleBasedSelectionHH(HH3Props)
     % See also: selectionHH, JSSP
     
     %  ruleBasedSelectionHH Properties:     
-    %
-    %   availableFeatures - String vector of features that can be used for
-    %      analyzing the problem state (problem dependent; see each COP for
-    %      more details)
-    %   availableSolvers - String vector of solvers available for the
-    %      current targetProblem (problem dependent; see each COP for
-    %      more details). Inherited from selectionHH class.
+    %    
     %   nbRules - Number of rules for the HH
     %   nbFeatures - Number of features for the HH
     %   nbSolvers - Number of available solvers for the HH
@@ -72,10 +66,11 @@ classdef ruleBasedSelectionHH < selectionHH
         % Most properties are inherited from the selectionHH superclass. Only
         % the following properties are specific to this class:
         
-        availableFeatures            ; % String vector of features that can be used for analyzing the problem state
-        nbRules         = NaN; % Number of rules for the HH
-        nbFeatures      = NaN; % Number of features for the HH
-        nbSolvers       = NaN; % Number of available solvers for the HH
+        % String vector of features that can be used for analyzing the problem state (problem dependent; see each COP for more details)    
+        availableFeatures; 
+        nbRules         = NaN; % Number of rules for the HH model
+        nbFeatures      = NaN; % Number of features for the HH model
+%         nbSolvers       = NaN; % Number of available solvers for the HH
         featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
         featureIDs % Vector with the ID of the features that the model uses
         hasInitialized = false; % Flag for indicating if the model reflects the feature and solver assignment
@@ -118,8 +113,6 @@ classdef ruleBasedSelectionHH < selectionHH
                 elseif isstruct(varargin{1})    % Pass arguments as a structure
                     props = varargin{1};
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
-%                     if isfield(props,'targetProblem'), targetProblem =
-%                     props.targetProblem; end % toDelete
                     if isfield(props,'targetProblemHandle'), targetProblemHandle = props.targetProblemHandle; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
@@ -137,7 +130,8 @@ classdef ruleBasedSelectionHH < selectionHH
             else                
                 obj.assignProblem(targetProblemHandle); % new approach
             end
-            obj.targetProblemText = obj.targetProblem.disp();
+%             obj.targetProblemText = obj.targetProblem.disp(); % moved to
+%             assignproblem method
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 

@@ -3,7 +3,7 @@ function callErrorCode(errCode)
 % feedback. The following codes have been defined:
 %
 % ---\ Warnings (0-99):
-%     ---\ 0: Method/script is currently being developed.
+%     ---\ 0: Method/script is currently being developed (a.k.a WIP).
 %     ---\ 1: HH is outdated. Requires call to initializeModel method.
 % ---\ Errors (100+):
 %     ---\ 100: Undefined heuristic ID.

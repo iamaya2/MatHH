@@ -8,26 +8,28 @@ classdef selectionHH < handle
     %                       Properties
     % ----- ---------------------------------------------------- -----
     properties        
-        availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
-        hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
-        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
-        oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
-        performanceData                % Information about the performance on the test set.
-		problemType     = 'Undefined'; % Problem type name
-        status          = 'New';       % HH status. Can be: New, Trained
-        solverIDs       = NaN;         % Vector with ID of each solver that the model will use
-        targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
-        targetProblemHandle            % Function handle for multiple domain support
-        targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
-        testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem		
-        testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances)
-        trainingInstances            ; % Instances used for training. Vector of instances of the targetProblem        
-        trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update)
-        trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running) 
-        trainingPerformance          ; % Same as testingPerformance, but for the training set
-        trainingSolution             ; % Data for the best solution provided by the last training stage
-        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method
-        value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector                
+        % String vector of solvers (heuristics) that can be used for tackling each problem state (problem dependent; see each COP for more details). Inherited from selectionHH class.    
+        availableSolvers; 
+        hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update). Inherited from selectionHH class. 
+        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method. Inherited from selectionHH class.
+        nbSolvers       = NaN;         % Number of available solvers for the HH. Inherited from selectionHH class.
+        oracle                       ; % Structure with oracle information. See GETORACLE method for more details. Inherited from selectionHH class.
+        performanceData                % Information about the performance on the test set. Inherited from selectionHH class.
+		problemType     = 'Undefined'; % Problem type name. Inherited from selectionHH class.
+        status          = 'New';       % HH status. Can be: New, Trained. Inherited from selectionHH class.
+        solverIDs       = NaN;         % Vector with ID of each solver that the model will use. Inherited from selectionHH class.
+        targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update). Inherited from selectionHH class.
+        targetProblemHandle            % Function handle for multiple domain support. Inherited from selectionHH class.
+        targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update). Inherited from selectionHH class.
+        testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem. Inherited from selectionHH class.		
+        testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances). Inherited from selectionHH class.
+        trainingInstances            ; % Instances used for training. Vector of instances of the targetProblem. Inherited from selectionHH class.
+        trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update). Inherited from selectionHH class.
+        trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running). Inherited from selectionHH class. 
+        trainingPerformance          ; % Same as testingPerformance, but for the training set. Inherited from selectionHH class.
+        trainingSolution             ; % Data for the best solution provided by the last training stage. Inherited from selectionHH class.
+        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method. Inherited from selectionHH class.
+        value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector. Inherited from selectionHH class.
     end
     
     properties (Dependent)
@@ -100,6 +102,7 @@ classdef selectionHH < handle
                 end
                 obj.nbSolvers=length(obj.availableSolvers);
             end
+            obj.targetProblemText = obj.targetProblem.disp();
         end
         
         % ----- Deep copy
