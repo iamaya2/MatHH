@@ -42,8 +42,18 @@ classdef ruleBasedSelectionHHMulti < ruleBasedSelectionHH
         % Own methods
         % ----- ---------------------------------------------------- -----
         function initializeParameters(obj, props)
+            %  initializeParameters  -  Method for initializing the object.
+            %
+            %    If the number of layers equals 1, then the inner HHs are
+            %    set as void, since it represents a traditional HH.
+            %    
+            %    Inputs:
+            %      props - Struct with all the internal fields of the object.
+            %               Should be used through the constructor, since
+            %               the latter checks for missing values and adds default
+            %               values, if required.
             obj.nbLayers = props.nbLayers;
-            obj.innerHHs = props.innerHHs;
+            if obj.nbLayers == 1, obj.innerHHs = []; else, obj.innerHHs = props.innerHHs; end
 %             obj.nbRules = props.nbRules;            
 %             obj.assignProblem(props.targetProblemHandle);
 %             obj.assignFeatures(props.selectedFeatures);
