@@ -128,6 +128,7 @@ classdef selectionHH < handle
             selectedSteps = [thisInstance{:}];
             allMetrics = [selectedSteps.selectedSolver];
         end
+        
         % ----- Model initializer
         function initializeModel(obj)
             % INITIALIZEMODEL  Method for generating a random solution for
@@ -216,8 +217,13 @@ classdef selectionHH < handle
         
         function fA = plotSolverUsageDistribution(obj,selectedInstance)
             % PLOTSOLVERUSAGEDISTRIBUTION   Method for plotting the distribution 
-            % of solvers used at each step of the solution for a given instance. Returns axes
-            % handle.            
+            %  of solvers used at each step of the solution for a given instance ID. 
+            %  This ID is used for indexing the performanceData property.
+            %  So, make sure of using the solveInstanceSet method first, to
+            %  ensure that the performanceData property has been properly
+            %  updated with the desired instance information.
+            %
+            % Returns axes handle.            
             allMetrics = obj.getSolversUsed(selectedInstance);
             histogram(allMetrics)            
             xlabel('Solver selected')
