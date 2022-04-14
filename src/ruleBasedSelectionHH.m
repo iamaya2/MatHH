@@ -720,7 +720,7 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.getRuleAction(activeRule); 
+                heuristicID = obj.getRuleAction(activeRule, instance); 
                 %heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
                 stepData = obj.getStepData(instance, heuristicID);
 %                 stepData = struct('featureValues', instance.features,...
