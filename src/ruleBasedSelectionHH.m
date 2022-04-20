@@ -1,5 +1,5 @@
 classdef ruleBasedSelectionHH < selectionHH
-    % ruleBasedSelectionHH   Class definition for Rule-based selection hyper-heuristics    
+    % ruleBasedSelectionHH  -  Class definition for Rule-based selection hyper-heuristics    
     %  This class allows the creation of Rule-based selection
     %  hyper-heuristics (RBSHH) objects that can be used for solving
     %  combinatorial optimization problems. Most properties are inherited 

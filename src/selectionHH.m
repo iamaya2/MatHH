@@ -1,14 +1,24 @@
-% Class definition for selection hyper-heuristics
-%   performanceData - Cell array containing performance data. Contains one
-%   element per instance. Each one of these elements is another cell array
-%   that contains performance data at each step of the solution. 
-%   See TEST for more information.
 classdef selectionHH < handle
+    % selectionHH  -  Class definition for selection hyper-heuristics (superclass)
+    %
+    %   This class contains methods and properties that should be common to all
+    %   kinds of selection hyper-heuristics. Some examples include the ability
+    %   to assign a problem domain and to make a deep copy of underlying
+    %   properties. See reference page for details about currently supported
+    %   properties and methods.
+    %
+    %   See also: ruleBasedSelectionHH, ruleBasedSelectionHHMulti,
+    %   sequenceBasedSelectionHH
+    
     % ----- ---------------------------------------------------- -----
     %                       Properties
     % ----- ---------------------------------------------------- -----
     properties        
         % String vector of solvers (heuristics) that can be used for tackling each problem state (problem dependent; see each COP for more details). Inherited from selectionHH class.    
+        % The values passed to this property are requested from the main
+        % class of the problem domain and represent the full list of
+        % supported solvers. Check the solverIDs property to see the IDs of
+        % the solvers currently allowed for this HH.        
         availableSolvers; 
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update). Inherited from selectionHH class. 
         lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method. Inherited from selectionHH class.
@@ -43,9 +53,7 @@ classdef selectionHH < handle
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function obj = selectionHH(varargin)
-            % Function for creating a raw selection hyper-heuristic            
-%             addpath(genpath('..\')) % This line should be moved from here and put into the main code
+        function obj = selectionHH(varargin)            
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
             obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0
@@ -65,10 +73,17 @@ classdef selectionHH < handle
         % ----- Model initializer
         function assignProblem(obj, problemType, varargin)
             % ASSIGNPROBLEM  Method for linking the HH with a given problem
-            % domain tailored to specific parameters (work in progress)
-            %  problemType: Problem that will be linked (e.g. JSSP)
-            %  varargin:    Put parameters associated to the problem (e.g. #
-            %               machines and jobs)
+            % domain.
+            %
+            %  Inputs:
+            %   problemType: Problem that will be linked (e.g. JSSP). It
+            %                   should be a function handle of the main
+            %                   class from the problem domain (e.g. @JSSP).
+            %                   Limited support is also given for
+            %                   text-based values, e.g. 'job shop scheduling'
+            %                   (for compatibility purposes).
+            %
+            %  Outputs: None (updates the HH object itself)                        
             if isa(problemType,'function_handle') % new approach
                 dummyProblem = problemType();
                 obj.targetProblem = dummyProblem;
@@ -108,7 +123,8 @@ classdef selectionHH < handle
         % ----- Deep copy
         function cloneProperties(oldHH, newHH)
             % cloneProperties   Method for moving the selectionHH
-            % properties. Automatically sweeps all properties           
+            % properties. Automatically sweeps all properties. Requires a
+            % single input (the new/empty HH object).
             propertySet = properties(oldHH);
             for idx = 1:length(propertySet) 
                 newHH.(propertySet{idx}) = oldHH.(propertySet{idx});
@@ -117,13 +133,29 @@ classdef selectionHH < handle
         
         % ----- Instance seeker
         function getInstances(obj, instanceType)
-            % GETINSTANCES  Method for extracting one kind of instances from the model (not yet implemented)
+            % GETINSTANCES  (WIP) Method for extracting one kind of instances from the model (not yet implemented)
             %  instanceType: String containing the kind of instances that
             %  will be extracted. Can be: Training, Testing
-            
+            callErrorCode(0);
         end 
         
         function allMetrics = getSolversUsed(obj,selectedInstanceID)
+            %  getSolversUsed  -  Method for generating data about solver
+            %                       usage at each solution step.
+            %
+            %  This method requires that the user has already called the
+            %  solveInstanceSet method so that the performanceData property
+            %  has been properly updated.
+            % 
+            %  Inputs:
+            %   selectedInstanceID - Numeric ID of the instance that will
+            %                           be analyzed.
+            % 
+            %  Outputs:
+            %   allMetrics - Array with the IDs of the solvers that were
+            %                   selected at each step of the solution.
+            %
+            %  See also: solveInstanceSet
             thisInstance = obj.performanceData{selectedInstanceID};
             selectedSteps = [thisInstance{:}];
             allMetrics = [selectedSteps.selectedSolver];

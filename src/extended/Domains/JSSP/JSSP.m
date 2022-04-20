@@ -4,7 +4,10 @@ classdef JSSP < handle
     %  This class contains general properties and static methods for handling different
     %  aspects of the JSSP.
     % 
-    %  Use doc JSSP for viewing properties and methods.
+    %  Use doc JSSP for viewing properties and methods. Also, use help
+    %  problemFeatures to check information about currently implemented
+    %  features and help problemSolvers to check information about
+    %  currently supported solvers.
     
     %   
     %  JSSP Properties:
