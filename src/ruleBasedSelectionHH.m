@@ -380,7 +380,7 @@ classdef ruleBasedSelectionHH < selectionHH
             end
         end
         
-        function heuristicID = getRuleAction(obj, ruleID)
+        function heuristicID = getRuleAction(obj, ruleID, instance)
             % getRuleAction   Method for returning the action ID of a given
             % rule. It corresponds to the last column of the selector. 
             %
