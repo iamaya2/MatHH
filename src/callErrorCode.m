@@ -4,6 +4,7 @@ function callErrorCode(errCode)
 %
 % ---\ Warnings (0-99):
 %     ---\ 0: Method/script is currently being developed.
+%     ---\ 1: HH is outdated. Requires call to initializeModel method.
 % ---\ Errors (100+):
 %     ---\ 100: Undefined heuristic ID.
 %     ---\ 101: Undefined instance dataset.
@@ -13,6 +14,8 @@ if errCode < 100
     switch errCode
         case 0
             warning('WIP. This method has not been implemented yet. Behaviour might be erratic. Proceed with caution...')
+        case 1
+            warning('The HH has not been initialized to reflect the latest changes in feature or solver subset. Please use the initializeModel method to regenerate the model for a given number of rules.')
         otherwise
             error('Warning code %d has not been defined yet. Aborting!', errCode)
     end
