@@ -164,14 +164,39 @@ classdef selectionHH < handle
         % ----- Model initializer
         function initializeModel(obj)
             % INITIALIZEMODEL  Method for generating a random solution for
-            % the current hh model (not yet implemented)
-            
+            %                   the current HH model.
+            %
+            %  This method is not intended for direct use and should be
+            %  overloaded by a child class.
+            %
+            %  See also: ruleBasedSelectionHH.initializeModel
+            callErrorCode(2);
         end 
         
         % ----- Instance loader
         function loadInstances(obj, varargin)
-            % LOADINSTANCES  Method for loading instances into the hh (work
-            % in progress)            
+            % LOADINSTANCES  Method for loading instances into the HH
+            %
+            %  This method requires a varying number of inputs and it 
+            %  offers basic load functionality for the following kinds of
+            %  instances:  
+            %
+            %   -\ Balanced Partition
+            %   ----\ Select random instance: Requires a single input with the ID
+            %           of the instance that will be loaded, using the
+            %           BPInstance class.
+            %   ----\ Create random instance: There are two ways to create
+            %           them. The first one requires four inputs and the
+            %           other one requires five inputs.
+            %   ----\ Load previously saved instances: Requires five
+            %           inputs.
+            %
+            %   -\ Job Shop Scheduling 
+            %   ----\ Not yet implemented
+            %
+            %  See also: BPInstance,
+            %  BalancedPartition.generateRandomInstances,
+            %  BalancedPartition.loadSavedInstances
             switch lower(obj.targetProblem.problemType)
                 case 'balanced partition'
                     switch length(varargin)
