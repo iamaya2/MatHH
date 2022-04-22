@@ -1,12 +1,36 @@
 classdef ruleBasedSelectionHH < selectionHH
-    % ruleBasedSelectionHH   Class definition for Rule-based selection hyper-heuristics    
+    % ruleBasedSelectionHH  -  Class definition for Rule-based selection hyper-heuristics    
     %  This class allows the creation of Rule-based selection
     %  hyper-heuristics (RBSHH) objects that can be used for solving
     %  combinatorial optimization problems. Most properties are inherited 
-    %  from the selectionHH superclass. 
+    %  from the selectionHH superclass. Check the doc file for a list of properties and methods.
+    %  
+    %  Recommended usage: 
+    %    Define a structure with the properties of the RBSHH and pass it as
+    %    an argument. The following fields are currently supported (default
+    %    values given in parentheses):
+    % 
+    %       nbRules             (2)     - Number of rules   
+    %       targetProblemHandle (@JSSP) - Function handle for the COP that will be tackled
+    %       selectedFeatures    (All)   - Vector with the IDs of the features that will be used by the model    
+    %       selectedSolvers     (All)   - Vector with the IDs of the solvers that will be used by the model    
     %
+    %  Other usage modes:
+    %    From another RBSHH - Pass the existing RBSHH as an argument and a
+    %                           deep copy shall be returned.
+    %    Empty shell - Use no arguments and an 'empty' RBSHH shall be
+    %                   returned.
+    %    Using several arguments - (deprecated) Pass several arguments in
+    %                               order to return an old-style RBSHH. Not
+    %                               recommended and prone to errors.
+    %
+    %  Example: 
+    %   HH3Props = struct('nbRules',4,'targetProblemHandle', @JSSP, 'selectedFeatures',3:4,'selectedSolvers',[2 4]);
+    %   HH3 = ruleBasedSelectionHH(HH3Props)
+    % See also: selectionHH, JSSP
+    
     %  ruleBasedSelectionHH Properties:     
-    %
+    %    
     %   nbRules - Number of rules for the HH
     %   nbFeatures - Number of features for the HH
     %   nbSolvers - Number of available solvers for the HH
@@ -37,13 +61,16 @@ classdef ruleBasedSelectionHH < selectionHH
     %   test(obj) -
     %   train(obj, criterion, varargin) -
     %    
+    
     properties
         % Most properties are inherited from the selectionHH superclass. Only
         % the following properties are specific to this class:
-        availableFeatures            ; % String vector of features that can be used for analyzing the problem state
-        nbRules         = NaN; % Number of rules for the HH
-        nbFeatures      = NaN; % Number of features for the HH
-        nbSolvers       = NaN; % Number of available solvers for the HH
+        
+        % String vector of features that can be used for analyzing the problem state (problem dependent; see each COP for more details)    
+        availableFeatures; 
+        nbRules         = NaN; % Number of rules for the HH model
+        nbFeatures      = NaN; % Number of features for the HH model
+%         nbSolvers       = NaN; % Number of available solvers for the HH
         featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
         featureIDs % Vector with the ID of the features that the model uses
         hasInitialized = false; % Flag for indicating if the model reflects the feature and solver assignment
@@ -86,7 +113,6 @@ classdef ruleBasedSelectionHH < selectionHH
                 elseif isstruct(varargin{1})    % Pass arguments as a structure
                     props = varargin{1};
                     if isfield(props,'nbRules'), Rules = props.nbRules; end
-                    if isfield(props,'targetProblem'), targetProblem = props.targetProblem; end
                     if isfield(props,'targetProblemHandle'), targetProblemHandle = props.targetProblemHandle; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
@@ -104,7 +130,8 @@ classdef ruleBasedSelectionHH < selectionHH
             else                
                 obj.assignProblem(targetProblemHandle); % new approach
             end
-            obj.targetProblemText = obj.targetProblem.disp();
+%             obj.targetProblemText = obj.targetProblem.disp(); % moved to
+%             assignproblem method
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 
@@ -353,6 +380,36 @@ classdef ruleBasedSelectionHH < selectionHH
             end
         end
         
+        function heuristicID = getRuleAction(obj, ruleID, instance)
+            % getRuleAction   Method for returning the action ID of a given
+            % rule. It corresponds to the last column of the selector. 
+            %
+            % Inputs:
+            %    ruleID - Scalar between 1 and the number of rules that
+            %    indicates the rule of interest (a.k.a. active or selected
+            %    rule).
+            %
+            % Outputs:
+            %    heuristicID - Scalar with the ID of the solver that must
+            %    be used
+            heuristicID = obj.value(ruleID, end); 
+        end
+        
+        function stepData = getStepData(obj, instance, heuristicID)
+            % getStepData   Method for generating step data for partial
+            % solutions. 
+            %
+            % Inputs:
+            %    instance - Problem instance that is being solved
+            %    heuristicID - ID of the heuristic that was chosen at this
+            %    step, which comes from the getRuleAction method
+            % 
+            % Outputs:
+            %    stepData - Structure with the information from this step
+            stepData = struct('featureValues', instance.features,...
+                                    'selectedSolver', heuristicID,...
+                                    'solution', instance.solution.clone()); 
+        end
         
         function [fitness, solvedInstances] = evaluateCandidateSolution(obj, solution, varargin)
             % evaluateCandidateSolution   Method for testing a given
@@ -663,10 +720,12 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.value(activeRule,end);
-                stepData = struct('featureValues', instance.features,...
-                                    'selectedSolver', heuristicID,...
-                                    'solution', instance.solution.clone());
+                heuristicID = obj.getRuleAction(activeRule, instance); 
+                %heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
+                stepData = obj.getStepData(instance, heuristicID);
+%                 stepData = struct('featureValues', instance.features,...
+%                                     'selectedSolver', heuristicID,...
+%                                     'solution', instance.solution.clone()); % Must change this by a getStepData method
                 performanceData = [performanceData stepData];
                 heuristicVector2(counter) = heuristicID;
                 counter = counter +1;

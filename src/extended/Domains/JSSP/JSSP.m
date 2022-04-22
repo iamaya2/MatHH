@@ -3,6 +3,12 @@ classdef JSSP < handle
     % JSSP   Class definition for the Job Shop Scheduling Problem (JSSP) 
     %  This class contains general properties and static methods for handling different
     %  aspects of the JSSP.
+    % 
+    %  Use doc JSSP for viewing properties and methods. Also, use help
+    %  problemFeatures to check information about currently implemented
+    %  features and help problemSolvers to check information about
+    %  currently supported solvers.
+    
     %   
     %  JSSP Properties:
     %   instances - Dummy instance for indicating the class of objects
@@ -32,13 +38,31 @@ classdef JSSP < handle
     %   heurSPT - 
     %   stepHeuristic - 
     %   disp - 
-    %
-    %  Use doc JSSP for a more detailed view.
+    %    
     properties               
-        instances           = JSSPInstance(); % Dummy instance for indicating the class of objects associated with instances.
-        problemFeatures     = {'1:Mirsh222', '2:Mirsh15','3:Mirsh29','4:Mirsh282', '5:Mirsh95'}; % Cell array containing a description of the available features and the IDs used for using them.
-        problemSolvers      = {'1:LPT', '2:SPT','3:MPA','4:LPA'}; % Cell array containing a description of the available solvers and the IDs used for them.
-        problemType         = 'JSSP'; % String with the name of the problem, i.e. JSSP
+        % Dummy instance for indicating the class of objects associated with instances.
+        instances           = JSSPInstance(); 
+        
+        % Cell array containing a description of the available features and the IDs used for using them.
+        %   Uses dictionary-style format for linking IDs and features:
+        %       1:Mirsh222
+        %       2:Mirsh15
+        %       3:Mirsh29
+        %       4:Mirsh282
+        %       5:Mirsh95
+        problemFeatures     = {'1:Mirsh222', '2:Mirsh15','3:Mirsh29','4:Mirsh282', '5:Mirsh95'}; 
+        
+        % Cell array containing a description of the available solvers and the IDs used for them.
+        %   Uses dictionary-style format for linking IDs and solvers:
+        %       1:LPT
+        %       2:SPT
+        %       3:MPA
+        %       4:LPA
+        problemSolvers      = {'1:LPT', '2:SPT','3:MPA','4:LPA'}; 
+        
+        % String with the name of the problem, i.e. JSSP, for
+        % identification purposes.
+        problemType         = 'JSSP'; 
     end
     
     properties (Dependent)

@@ -191,10 +191,12 @@ classdef JSSPInstance < handle
             obj.solution.plot()
         end
         
-        function disp(obj, varargin)
-            % disp    Prints instance information
+        function infoTxt = disp(obj, varargin)
+            % disp    Prints and returns instance information
             % This method prints basic instance information, including the
-            % instance status and the raw instance data.
+            % instance status and the raw instance data. It also returns
+            % this information (as a char array for fprintf), in case it 
+            % is required for post-processing.
             
 %             pTimes = nan(obj.nbJobs,obj.nbMachines);
 %             mOrder = pTimes;
@@ -203,13 +205,21 @@ classdef JSSPInstance < handle
 %                 mOrder(idx,:) = [obj.instanceData(idx).activities.machineID];
 %             end
         if strcmp(obj.status,"Undefined")
-            fprintf('Undefined Instance\n')
+            infoTxt = 'Undefined Instance\n';            
         else
-            fprintf('Processing times (P):\n')
-            disp(obj.rawInstanceData(:,:,1))
-            fprintf('Machine orderings (M):\n')
-            disp(obj.rawInstanceData(:,:,2))
+            infoTxt = sprintf('-----------------------------------------------------------------------\n');
+            infoTxt = [infoTxt sprintf('Description of the current instance state:\n')];
+            infoTxt = [infoTxt sprintf('-----------------------------------------------------------------------\n')];
+            infoTxt = [infoTxt sprintf('\tStatus: %s\n', obj.status)];
+            infoTxt = [infoTxt sprintf('\tSize: %d jobs and %d operations\n', obj.nbJobs, length(obj.instanceData))];
+            infoTxt = [infoTxt sprintf('\tNumber of available machines: %d\n', obj.nbMachines)];
+            infoTxt = [infoTxt '\tProcessing times (P):\n'];
+            infoTxt = [infoTxt evalc('disp(obj.rawInstanceData(:,:,1))')];
+            infoTxt = [infoTxt '\tMachine orderings (M):\n'];
+            infoTxt = [infoTxt evalc('disp(obj.rawInstanceData(:,:,2))')];            
+            infoTxt = [infoTxt evalc('disp(obj.solution)')];            
         end
+        fprintf(infoTxt)
         end
         % ----- ---------------------------------------------------- -----
         % Methods for dependent properties

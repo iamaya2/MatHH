@@ -1,33 +1,45 @@
-% Class definition for selection hyper-heuristics
-%   performanceData - Cell array containing performance data. Contains one
-%   element per instance. Each one of these elements is another cell array
-%   that contains performance data at each step of the solution. 
-%   See TEST for more information.
 classdef selectionHH < handle
+    % selectionHH  -  Class definition for selection hyper-heuristics (superclass)
+    %
+    %   This class contains methods and properties that should be common to all
+    %   kinds of selection hyper-heuristics. Some examples include the ability
+    %   to assign a problem domain and to make a deep copy of underlying
+    %   properties. See reference page for details about currently supported
+    %   properties and methods.
+    %
+    %   See also: ruleBasedSelectionHH, ruleBasedSelectionHHMulti,
+    %   sequenceBasedSelectionHH
+    
     % ----- ---------------------------------------------------- -----
     %                       Properties
     % ----- ---------------------------------------------------- -----
     properties        
-        availableSolvers             ; % String vector of solvers (heuristics) that can be used for tackling each problem state
-        hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update)
-        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method.
-        oracle                       ; % Structure with oracle information. See GETORACLE method for more details.
-        performanceData                % Information about the performance on the test set.
-		problemType     = 'Undefined'; % Problem type name
-        status          = 'New';       % HH status. Can be: New, Trained
-        solverIDs       = NaN;         % Vector with ID of each solver that the model will use
-        targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
-        targetProblemHandle            % Function handle for multiple domain support
-        targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update)        
-        testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem		
-        testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances)
-        trainingInstances            ; % Instances used for training. Vector of instances of the targetProblem        
-        trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update)
-        trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running) 
-        trainingPerformance          ; % Same as testingPerformance, but for the training set
-        trainingSolution             ; % Data for the best solution provided by the last training stage
-        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method
-        value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector                
+        % String vector of solvers (heuristics) that can be used for tackling each problem state (problem dependent; see each COP for more details). Inherited from selectionHH class.    
+        % The values passed to this property are requested from the main
+        % class of the problem domain and represent the full list of
+        % supported solvers. Check the solverIDs property to see the IDs of
+        % the solvers currently allowed for this HH.        
+        availableSolvers; 
+        hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update). Inherited from selectionHH class. 
+        lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method. Inherited from selectionHH class.
+        nbSolvers       = NaN;         % Number of available solvers for the HH. Inherited from selectionHH class.
+        oracle                       ; % Structure with oracle information. See GETORACLE method for more details. Inherited from selectionHH class.
+        performanceData                % Information about the performance on the test set. Inherited from selectionHH class.
+		problemType     = 'Undefined'; % Problem type name. Inherited from selectionHH class.
+        status          = 'New';       % HH status. Can be: New, Trained. Inherited from selectionHH class.
+        solverIDs       = NaN;         % Vector with ID of each solver that the model will use. Inherited from selectionHH class.
+        targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update). Inherited from selectionHH class.
+        targetProblemHandle            % Function handle for multiple domain support. Inherited from selectionHH class.
+        targetProblemText = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update). Inherited from selectionHH class.
+        testingInstances             ; % Instances used for testing. Vector of instances of the targetProblem. Inherited from selectionHH class.		
+        testingPerformance           ; % Structure with a vector containing the final solutions achieved for each instance of the training set. Also contains the accumulated performance data (over all instances) and the statistical data (across instances). Inherited from selectionHH class.
+        trainingInstances            ; % Instances used for training. Vector of instances of the targetProblem. Inherited from selectionHH class.
+        trainingMethod  = 'Undefined'; % Training approach that will be used. Can be: Undefined (when new), UPSO, or others (pending update). Inherited from selectionHH class.
+        trainingParameters = NaN;       % Structure with the parameters associated to the training method (for running). Inherited from selectionHH class. 
+        trainingPerformance          ; % Same as testingPerformance, but for the training set. Inherited from selectionHH class.
+        trainingSolution             ; % Data for the best solution provided by the last training stage. Inherited from selectionHH class.
+        trainingStats   = NaN        ; % Statistical parameters of the last training batch, as reported by the training method. Inherited from selectionHH class.
+        value           = 'Undefined'; % Values for the HH. Can be: Undefined (when new) or take a value depending on the type. For rule-based it is the selector matrix; for sequence-based is the sequence vector. Inherited from selectionHH class.
     end
     
     properties (Dependent)
@@ -41,9 +53,7 @@ classdef selectionHH < handle
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function obj = selectionHH(varargin)
-            % Function for creating a raw selection hyper-heuristic            
-%             addpath(genpath('..\')) % This line should be moved from here and put into the main code
+        function obj = selectionHH(varargin)            
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
             obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0
@@ -63,10 +73,17 @@ classdef selectionHH < handle
         % ----- Model initializer
         function assignProblem(obj, problemType, varargin)
             % ASSIGNPROBLEM  Method for linking the HH with a given problem
-            % domain tailored to specific parameters (work in progress)
-            %  problemType: Problem that will be linked (e.g. JSSP)
-            %  varargin:    Put parameters associated to the problem (e.g. #
-            %               machines and jobs)
+            % domain.
+            %
+            %  Inputs:
+            %   problemType: Problem that will be linked (e.g. JSSP). It
+            %                   should be a function handle of the main
+            %                   class from the problem domain (e.g. @JSSP).
+            %                   Limited support is also given for
+            %                   text-based values, e.g. 'job shop scheduling'
+            %                   (for compatibility purposes).
+            %
+            %  Outputs: None (updates the HH object itself)                        
             if isa(problemType,'function_handle') % new approach
                 dummyProblem = problemType();
                 obj.targetProblem = dummyProblem;
@@ -100,12 +117,14 @@ classdef selectionHH < handle
                 end
                 obj.nbSolvers=length(obj.availableSolvers);
             end
+            obj.targetProblemText = obj.targetProblem.disp();
         end
         
         % ----- Deep copy
         function cloneProperties(oldHH, newHH)
             % cloneProperties   Method for moving the selectionHH
-            % properties. Automatically sweeps all properties           
+            % properties. Automatically sweeps all properties. Requires a
+            % single input (the new/empty HH object).
             propertySet = properties(oldHH);
             for idx = 1:length(propertySet) 
                 newHH.(propertySet{idx}) = oldHH.(propertySet{idx});
@@ -114,28 +133,70 @@ classdef selectionHH < handle
         
         % ----- Instance seeker
         function getInstances(obj, instanceType)
-            % GETINSTANCES  Method for extracting one kind of instances from the model (not yet implemented)
+            % GETINSTANCES  (WIP) Method for extracting one kind of instances from the model (not yet implemented)
             %  instanceType: String containing the kind of instances that
             %  will be extracted. Can be: Training, Testing
-            
+            callErrorCode(0);
         end 
         
         function allMetrics = getSolversUsed(obj,selectedInstanceID)
+            %  getSolversUsed  -  Method for generating data about solver
+            %                       usage at each solution step.
+            %
+            %  This method requires that the user has already called the
+            %  solveInstanceSet method so that the performanceData property
+            %  has been properly updated.
+            % 
+            %  Inputs:
+            %   selectedInstanceID - Numeric ID of the instance that will
+            %                           be analyzed.
+            % 
+            %  Outputs:
+            %   allMetrics - Array with the IDs of the solvers that were
+            %                   selected at each step of the solution.
+            %
+            %  See also: solveInstanceSet
             thisInstance = obj.performanceData{selectedInstanceID};
             selectedSteps = [thisInstance{:}];
             allMetrics = [selectedSteps.selectedSolver];
         end
+        
         % ----- Model initializer
         function initializeModel(obj)
             % INITIALIZEMODEL  Method for generating a random solution for
-            % the current hh model (not yet implemented)
-            
+            %                   the current HH model.
+            %
+            %  This method is not intended for direct use and should be
+            %  overloaded by a child class.
+            %
+            %  See also: ruleBasedSelectionHH.initializeModel
+            callErrorCode(2);
         end 
         
         % ----- Instance loader
         function loadInstances(obj, varargin)
-            % LOADINSTANCES  Method for loading instances into the hh (work
-            % in progress)            
+            % LOADINSTANCES  Method for loading instances into the HH
+            %
+            %  This method requires a varying number of inputs and it 
+            %  offers basic load functionality for the following kinds of
+            %  instances:  
+            %
+            %   -\ Balanced Partition
+            %   ----\ Select random instance: Requires a single input with the ID
+            %           of the instance that will be loaded, using the
+            %           BPInstance class.
+            %   ----\ Create random instance: There are two ways to create
+            %           them. The first one requires four inputs and the
+            %           other one requires five inputs.
+            %   ----\ Load previously saved instances: Requires five
+            %           inputs.
+            %
+            %   -\ Job Shop Scheduling 
+            %   ----\ Not yet implemented
+            %
+            %  See also: BPInstance,
+            %  BalancedPartition.generateRandomInstances,
+            %  BalancedPartition.loadSavedInstances
             switch lower(obj.targetProblem.problemType)
                 case 'balanced partition'
                     switch length(varargin)
@@ -213,8 +274,13 @@ classdef selectionHH < handle
         
         function fA = plotSolverUsageDistribution(obj,selectedInstance)
             % PLOTSOLVERUSAGEDISTRIBUTION   Method for plotting the distribution 
-            % of solvers used at each step of the solution for a given instance. Returns axes
-            % handle.            
+            %  of solvers used at each step of the solution for a given instance ID. 
+            %  This ID is used for indexing the performanceData property.
+            %  So, make sure of using the solveInstanceSet method first, to
+            %  ensure that the performanceData property has been properly
+            %  updated with the desired instance information.
+            %
+            % Returns axes handle.            
             allMetrics = obj.getSolversUsed(selectedInstance);
             histogram(allMetrics)            
             xlabel('Solver selected')
