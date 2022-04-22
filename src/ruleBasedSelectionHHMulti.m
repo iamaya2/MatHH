@@ -89,7 +89,7 @@ classdef ruleBasedSelectionHHMulti < ruleBasedSelectionHH
         end
         
 %         function stepData = getStepData(obj, instance, heuristicID, innerIDs)
-        function stepData = getStepData(obj, instance, heuristicID) % temporary   
+        function stepData = getStepData(obj, instance, heuristicID, varargin) % temporary   
             % getStepData   Method for generating step data for partial solutions. 
             %
             %  Overloaded version for the multi-layered HH. This method
