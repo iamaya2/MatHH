@@ -1069,6 +1069,20 @@ classdef ruleBasedSelectionHH < selectionHH
             fprintf(' )\n') 
             if ~obj.hasInitialized, callErrorCode(1); end
         end
+        
+        function printModel(obj)
+            % printModel  -  Method for printing a RBSHH
+            % This method formats and prints the selection matrix, using
+            % proper headers.            
+            fprintf("\nCurrent model:\n")
+            T = table;
+            T.RuleID = [1:obj.nbRules]';
+            for idx = 1 : obj.nbFeatures
+                eval(['T.F' num2str(obj.featureIDs(idx)) '= obj.value(:,idx);']);
+            end
+            T.HeuristicID = obj.value(:,end);
+            disp(T)
+        end
 
         
         % ----- ---------------------------------------------------- -----
