@@ -143,7 +143,7 @@ classdef BPInstance < problemInstance
         end
         
         function featValue = getBalanceRatio(obj)
-            featValue = obj.solution.sets(1).load / obj.maxLoad;
+            featValue = obj.solution.sets(2).load / obj.maxLoad;
         end
         
         % ---- ------------------------ ----

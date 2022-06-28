@@ -1,7 +1,7 @@
 classdef BP < problemDomain
     properties (Constant)
-        problemFeatures = {'0:Set1Ratio'};
-        problemSolvers = {'0:MAX', '1:MIN'};
+        problemFeatures = {'1:Set2Ratio'};
+        problemSolvers = {'1:MAX', '2:MIN'};
         problemType = 'BP';
     end
     
