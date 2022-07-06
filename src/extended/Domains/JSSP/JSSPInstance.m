@@ -53,7 +53,7 @@ classdef JSSPInstance < handle
         % ----- ---------------------------------------------------- -----
         % Constructor
         % ----- ---------------------------------------------------- -----
-        function instance = JSSPInstance(instanceData)
+        function instance = JSSPInstance(instanceData, varargin)
             % JSSPInstance Constructor for creating the instance object
             %  - Inputs:
             %     instanceData - nbJobs*nbMachines*2 array. First layer:
@@ -61,6 +61,7 @@ classdef JSSPInstance < handle
             %  - Outputs:
             %      instance - The JSSPInstance object
             if nargin > 0
+                if isnumeric(instanceData) % If given raw data:
                 [instance.nbJobs, ~] = size(instanceData(:,:,1));
                 instance.nbMachines = max(max(instanceData(:,:,2)));
                 instance.instanceData(instance.nbJobs) = ...
@@ -73,11 +74,54 @@ classdef JSSPInstance < handle
                     instance.pendingData(idx) = ...
                         JSSPJob(instanceData(idx,:,2),instanceData(idx,:,1),idx);
                 end
+                
+                elseif isa(instanceData,'JSSPJob') % if given JSSPJob objects (should support jobs with different lengths)
+                    nbJobs = length(instanceData);
+                    if ~isempty(varargin)
+                        nbMachines = varargin{1}; % Given as extra parameter 
+                    else
+                        allActivities = [instanceData.activities];
+                        allMachineIDs = [allActivities.machineID];
+                        nbMachines = max(allMachineIDs); % Inferred from data
+                    end
+                    instance.nbJobs = nbJobs;
+                    instance.nbMachines = nbMachines;
+                    instance.instanceData(nbJobs) = JSSPJob(); % Initialize array size
+                    instance.pendingData(nbJobs) = JSSPJob(); % Initialize array size
+                    
+                    nbOperationsPerJob = nan(1,nbJobs); % temp fix
+                    
+                    for idx = nbJobs : -1 : 1% create a deep copy of each job
+                        instanceData(idx).deepCopy(instance.instanceData(idx));
+                        instanceData(idx).deepCopy(instance.pendingData(idx));
+                        
+                        nbOperationsPerJob(idx) = length(instanceData(idx).activities); % temp fix
+                    end
+                    
+                    % Temp fix for allowing jobs with different lengths
+                    % (wip)
+                    nbOperations = max(nbOperationsPerJob); % max number of operations in any job of this instance
+                    rawData = zeros(nbJobs,nbOperations,2);
+                    for idx  = 1 : nbJobs
+                        thisJobProcTimes = [instance.instanceData(idx).activities.processingTime];
+                        thisJobMachOrders = [instance.instanceData(idx).activities.machineID];
+                        thisJobNbOps = length(thisJobProcTimes);
+                        rawData(idx,1:thisJobNbOps,1) = thisJobProcTimes;
+                        rawData(idx,1:thisJobNbOps,2) = thisJobMachOrders;
+                    end
+                    instanceData = rawData; % Warning: overwrites input job data. Should be improved.
+                    
+                else
+                    callErrorCode(102); % Invalid input
+                end
+                
+                % Common process
                 instance.status = 'Pending';
                 instance.solution = JSSPSchedule(instance.nbMachines, instance.nbJobs);                
-                instance.rawInstanceData = instanceData;
-                instance.updatingData = instanceData;
-                for i=1:size(instanceData(:,:,1))
+                instance.rawInstanceData = instanceData; % May give trouble when using JSSPJob objects
+                instance.updatingData = instanceData;  % May give trouble when using JSSPJob objects
+%                 for i=1:size(instanceData(:,:,1)) % this should be moved up to the branch for the raw data, or modified to be generic
+                for i=1:instance.nbJobs % testing this out to make it general
                     instance.jobRegister(i)=0;
                 end
                 instance.gettingFeatures(true); % Defines initial feature values

@@ -28,18 +28,39 @@ classdef deepCopyThis < matlab.mixin.Copyable
             %            
             % Example:
             %   oldObj.deepCopy(newObj);
-            propertySet = properties(oldObj);
-            for idx = 1:length(propertySet)                 
-                thisOldProp = oldObj.(propertySet{idx});
-                newObj.(propertySet{idx}) = [thisOldProp];
-                if isa(thisOldProp,'deepCopyThis')
-                    nbCopies = length(thisOldProp);
-                    for idy = 1 : nbCopies
-                        newObj.(propertySet{idx})(idy) = eval(class(thisOldProp));
-                        oldObj.(propertySet{idx})(idy).deepCopy(newObj.(propertySet{idx})(idy));
-                    end                                        
+            
+            % Old version (conflicts with dependent properties)
+%             propertySet = properties(oldObj);
+%             for idx = 1:length(propertySet)                 
+%                 thisOldProp = oldObj.(propertySet{idx});
+%                 newObj.(propertySet{idx}) = [thisOldProp];
+%                 if isa(thisOldProp,'deepCopyThis')
+%                     nbCopies = length(thisOldProp);
+%                     for idy = 1 : nbCopies
+%                         newObj.(propertySet{idx})(idy) = eval(class(thisOldProp));
+%                         oldObj.(propertySet{idx})(idy).deepCopy(newObj.(propertySet{idx})(idy));
+%                     end                                        
+%                 end
+%             end
+            
+            % New version (pending test)
+            mc = eval(['?' class(oldObj)]); % Gets metaclass for object
+            allProps = mc.PropertyList;
+            nbProps = length(allProps);
+            for idx = 1 : nbProps
+                if ~allProps(idx).NonCopyable
+                    thisOldProp = oldObj.(allProps(idx).Name);
+                    newObj.(allProps(idx).Name) = [thisOldProp];
+                    if isa(thisOldProp,'deepCopyThis')
+                        nbCopies = length(thisOldProp);
+                        for idy = 1 : nbCopies
+                            newObj.(allProps(idx).Name)(idy) = eval(class(thisOldProp));
+                            oldObj.(allProps(idx).Name)(idy).deepCopy(newObj.(allProps(idx).Name)(idy));
+                        end
+                    end
                 end
             end
+
        end
         
    end

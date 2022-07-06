@@ -39,10 +39,11 @@ classdef JSSPActivity < handle
     
     methods
         function activityObj = JSSPActivity(machID, procTime, varargin)
-            % JSSPActivity   Constructor. Receives ID and processing time.
+            % JSSPActivity   Constructor. Receives machine ID and processing time.
             %  This method should work properly if given vectors of IDs
             %  and processing times. In this case, it should return a
-            %  vector of JSSPActivity objects.
+            %  vector of JSSPActivity objects. A third parameter (optional)
+            %  can be given to define an inner activity ID. 
             if nargin > 0                
                 nbAct = length(machID);
                 if nargin == 3, allIDs = varargin{1}; else, allIDs = nan(1,nbAct); end

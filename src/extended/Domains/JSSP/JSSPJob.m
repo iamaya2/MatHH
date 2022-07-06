@@ -1,4 +1,4 @@
-classdef JSSPJob < handle
+classdef JSSPJob < handle & deepCopyThis
     % JSSPJob   Class for creating job objects for the JSSP
     %  Objects of this class are mainly given by a set of JSSPActivity
     %  objects. 
@@ -29,7 +29,7 @@ classdef JSSPJob < handle
         lastScheduledTime = 0; % Time instant in which the lastScheduledActivity was assigned
     end
     
-    properties (Dependent)
+    properties (Dependent, NonCopyable)
         nbActivities % Amount of activities yet to be scheduled
     end
     
