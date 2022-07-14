@@ -144,5 +144,26 @@ classdef KPKnapsack < handle & deepCopyThis
             end
         end
         
+        % ----- ---------------------------------------------------- -----
+        % Methods for overloading functionality
+        % ----- ---------------------------------------------------- -----
+        function disp(obj)
+            % Header with main info
+            useStr = 'Not usable';
+            if obj.isUsable, useStr = 'Usable'; end
+            s1 = sprintf('Knapsack %d:\n\tState: %s\n\tCurrent weight: %2.f/%2.f\n\tCurrent profit: %.2f\n\tContents:\n', ...
+                obj.ID, useStr, obj.currentWeight, obj.capacity, obj.currentProfit);
+            % Process items
+            if obj.nbItems == 0
+                s2 = sprintf('\t\tNo items have been found.\n');
+            else
+                s2 = '';
+                for idx = 1 : obj.nbItems
+                    s2 = [s2 '\t\t' evalc('disp(obj.items(idx))')];
+                end
+            end
+            fprintf([s1 s2 '\n']);
+        end
+        
     end
 end

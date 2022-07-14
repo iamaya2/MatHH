@@ -51,5 +51,16 @@ classdef KPItem < handle & deepCopyThis
             % item. Requires no inputs.
             obj.isPacked = false;
         end
+    
+        % ----- ---------------------------------------------------- -----
+        % Methods for overloading functionality
+        % ----- ---------------------------------------------------- -----
+        function disp(obj)
+            if obj.isPacked, packStr = 'Packed'; else, packStr = 'Unpacked'; end
+            textStr = sprintf('Item %d: Profit = %.2f, Weight = %.2f, Status = %d (%s)\n',...
+                obj.ID, obj.profit, obj.weight, obj.isPacked, packStr);
+            fprintf(textStr)
+        end
+        
     end
 end
