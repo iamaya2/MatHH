@@ -2,7 +2,7 @@ classdef problemDomain < handle
     properties (Abstract, Constant)
         problemFeatures % Cell array with ID:Name format
         problemSolvers % Cell array with ID:Name format
-        problemType % Strign for identifying the domain
+        problemType % String for identifying the domain
     end
     
     methods (Abstract, Static)

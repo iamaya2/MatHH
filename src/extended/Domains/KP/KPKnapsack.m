@@ -45,7 +45,7 @@ classdef KPKnapsack < handle & deepCopyThis
         function checkValidity(obj)
             % checkValidity   Method for determining if the knapsack is
             % valid (has free capacity). It sets the isUsable property and
-            % requires no inputs. If the knapsack is invalid, it also
+            % requires no inputs. If the knapsack is overloaded, it also
             % displays a warning.
             %
             % Note: Matlab adds a reserved property callid isValid for
@@ -54,6 +54,8 @@ classdef KPKnapsack < handle & deepCopyThis
             if obj.currentWeight > obj.capacity
                 warning('The capacity of knapsack %d has been exceeded!',obj.ID)
                 obj.isUsable = false;
+            elseif obj.currentWeight == obj.capacity
+                obj.isUsable = false; % No warning since it is OK.
             else
                 obj.isUsable = true;
             end
