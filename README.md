@@ -14,7 +14,7 @@ In order to properly use `MatHH` and the examples shown in this document, the fo
 It is also necessary to define the training instances that will be used. To this end, we suggest using the `BaseInstances` package (available at: [Github](https://github.com/iamaya2/BaseInstances)), which contains some instances that can be used with this framework.   
 
 ### File organization
-Seeking to facilitate the maintenance of the required packages, the root folder of each package should be located at the same level. Hence, the following structure is suggested:
+Seeking to facilitate the maintenance of the required packages, the root folder of each package should be located at the same level. Moreover, let us assume a folder name 'outsiderCode' in which we will include our work. Hence, the following structure is suggested:
 
 ```
 \BaseInstances
@@ -25,6 +25,7 @@ Seeking to facilitate the maintenance of the required packages, the root folder 
 		\Utils
    			\distance
    			...
+	\outsiderCode 	<---------	Use this folder to store your codes	
 ```   
    
 ***Note**: remember you can use `addpath(genpath(pathString))` for temporarily adding these packages to Matlab's search path, so that you can put your codes in different folders.*
