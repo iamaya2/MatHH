@@ -1,3 +1,5 @@
+
+classdef KPItem < handle & deepCopyThis
 %% KPItem   Class for defining items for the Knapsack Problem
 %
 % A KPItem can be created in the following ways:
@@ -9,7 +11,6 @@
 %
 % 2. From another KPItem. In this case the user only needs to provide an
 %                         object and the class returns a deep copy of it.
-classdef KPItem < handle & deepCopyThis
     properties
         ID = NaN; % Identifier of this item
         isPacked = false; % Flag for knowing item status

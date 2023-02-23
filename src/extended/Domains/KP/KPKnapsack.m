@@ -48,7 +48,7 @@ classdef KPKnapsack < handle & deepCopyThis
             % requires no inputs. If the knapsack is overloaded, it also
             % displays a warning.
             %
-            % Note: Matlab adds a reserved property callid isValid for
+            % Note: Matlab adds a reserved property called isValid for
             % assessing if a handle object is valid. So, that property
             % cannot be used in this method.
             if obj.currentWeight > obj.capacity
@@ -96,7 +96,7 @@ classdef KPKnapsack < handle & deepCopyThis
             % updateCurrentWeight   Method for updating current weight of
             % the knapsack. Has two operating modes. If no arguments are given,
             % the weight of all object is summed up. It can also receive 
-            % the ammount to increase/decrease.
+            % the amount to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
             % could reduce performance when multiple updates are required.
@@ -113,7 +113,7 @@ classdef KPKnapsack < handle & deepCopyThis
             % updateCurrentProfit   Method for updating current profit of
             % the knapsack. Has two operating modes. If no arguments are given,
             % the profit of all items is summed up. It can also receive 
-            % the ammount to increase/decrease.
+            % the amount to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
             % could reduce performance when multiple updates are required.
@@ -130,7 +130,7 @@ classdef KPKnapsack < handle & deepCopyThis
         function updateLength(obj, varargin)
             % updateLength   Method for updating current number of items in
             % the knapsack. Has two operating modes. If no arguments are given,
-            % the whole vector is analized. It can also receive the ammount
+            % the whole vector is analyzed. It can also receive the amount
             % to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
