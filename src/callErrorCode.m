@@ -10,6 +10,8 @@ function callErrorCode(errCode)
 %     ---\ 100: Undefined heuristic ID.
 %     ---\ 101: Undefined instance dataset.
 %     ---\ 102: Invalid input for constructor.
+%     ---\ 103: Failed equality test.
+%     ---\ 104: Failed independence test.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -31,6 +33,10 @@ else
             error('Undefined instance dataset. Aborting!')
         case 102
             error('Invalid input for constructor. Aborting!')
+        case 103
+            error('Equality test failed to pass (objects are not equal when they should be, or they are equal when they should not). Aborting!')    
+        case 104
+            error('Independence test failed to pass (objects are not independent when they should be, or they are independent when they should not). Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

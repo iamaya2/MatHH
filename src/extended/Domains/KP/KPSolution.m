@@ -9,7 +9,7 @@ classdef KPSolution < problemSolution
 %                         object and the method returns a KPSolution based
 %                         on this object. 
     properties
-        knapsack = KPKnapsack(); % Dummy knapsack for storing the solution
+        knapsack % Cannot be initialized here since it will assign the same object to all instances
     end
     
     methods
@@ -17,14 +17,15 @@ classdef KPSolution < problemSolution
         % ---- CONSTRUCTOR ----
         % ---- ------------------------ ----
         function obj = KPSolution(varargin)
+            obj.knapsack = KPKnapsack(); % Dummy knapsack for storing the solution
             if nargin > 0
                 if isa(varargin{1},'KPSolution') % From another solution
                     oldObj = varargin{1};
-                    obj = KPSolution();
+%                     obj = KPSolution();
                     oldObj.deepCopy(obj);
                 elseif isa(varargin{1},'KPKnapsack') % A given knapsack object
                     baseKP = varargin{1};
-                    obj = KPSolution();
+%                     obj = KPSolution();
                     baseKP.deepCopy(obj.knapsack);
                 else
                     callErrorCode(102) % Invalid input for constructor

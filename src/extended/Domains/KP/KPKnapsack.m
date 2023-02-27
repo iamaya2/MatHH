@@ -1,4 +1,4 @@
-%% KPKnapsack   Class for defining knapsacks for the Knapsack Problem
+% KPKnapsack   Class for defining knapsacks for the Knapsack Problem
 %
 % A KPKnapsack can be created in the following ways:
 %
