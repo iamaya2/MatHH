@@ -38,8 +38,11 @@ function allArea = PlotZones(Rules, varargin)
 %    model.
 
 
+% Default values:
 rX = 1; rY = 2;
 plotRules = false;
+
+% Input processing:
 if nargin < 2
     points = 0:0.01:1;
     toEuclid = true;
@@ -79,28 +82,37 @@ if size(Rules,2) == 2
     rY = rX;
 end
 
-Action = Rules(:,end);
-ActionMarker = "s";
-ActionSize = 12;
+
+% Internal parameters:
+Action = Rules(:,end);  % To-Do: Validate and remove this
+ActionMarker = "s";     % To-Do: Validate and remove this
+ActionSize = 12;        % To-Do: Validate and remove this
 
 [X, Y] = meshgrid(points);
 vX = X(:);
 vY = Y(:);
 % allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
-allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
+allColors = [0 0 0; ...             % ID == 1
+             0.85 0 0; ...          % ID == 2
+             0 0 0.85; ...          % ID == 3
+             0.85 0 0.85; ...       % ID == 4
+             0.75 * ones(1,3);  ... % ID == 5
+             0.5 * ones(1,3);];     % ID == 6
 
 allActionIDs = getActionIDs([vX vY], Rules(:,[rX rY end]), toEuclid ); % Evaluate all points
 
 zz = [vX vY];
 uniqueActions = unique(allActionIDs);
-allArea = nan(1,max(uniqueActions)); % Allocate memory for each area, considering that some selectors may not include all solvers
+maxActionID = max(uniqueActions);
+allArea = nan(1,maxActionID); % Allocate memory for each area, considering that some selectors may not include all solvers
+allColors = copper(maxActionID); %hsv, parula, gray, hot, bone, copper, pink, winter
 
 for idA = uniqueActions'
     validIDs = allActionIDs == idA; % Gets positions with ID = idA
     P = zz(validIDs,:);
     [k, area] = boundary(P,0.985); % Generate the boundary for this action
     allArea(idA) = area; % Stores volume for this action
-    tr = patch(P(k,1), P(k,2), allColors(idA+1,:), 'FaceAlpha', 0.5); % Creates patch using boundary points
+    tr = patch(P(k,1), P(k,2), allColors(idA,:), 'FaceAlpha', 0.5); % Creates patch using boundary points
     tr.EdgeColor=tr.FaceColor; tr.EdgeAlpha = 0.75; tr.LineStyle=':';
     hold on
 end

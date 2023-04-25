@@ -36,12 +36,16 @@ end
 %         toGrayscale = varargin{2};        
 % end
 
-% allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
-allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
-
 RuleX = Rules(:,rX);
 RuleY = Rules(:,rY);
 Action = Rules(:,end);
+
+% allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
+% allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
+maxActionID = max(Action);
+allColors = summer(maxActionID);
+
+
 for idx = 1 : length(RuleX)
     if forCIM, ActionSize = 5; else, ActionSize = 15; end
     if toGrayscale
@@ -57,7 +61,7 @@ for idx = 1 : length(RuleX)
     else
         selectedAction = Action(idx);
         if selectedAction >= 0, ActionMarker = ActionMarkerVec(selectedAction+1); end
-        ActionColor = allColors(Action(idx)+1,:);
+        ActionColor = allColors(Action(idx),:);
 %         switch selectedAction
 %             case 0
 %                 ActionColor = [0 0 0];
