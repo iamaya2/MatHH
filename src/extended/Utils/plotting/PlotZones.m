@@ -41,6 +41,7 @@ function allArea = PlotZones(Rules, varargin)
 % Default values:
 rX = 1; rY = 2;
 plotRules = false;
+plotColormap = @(x) hsv(x);
 
 % Input processing:
 if nargin < 2
@@ -63,6 +64,18 @@ elseif nargin < 5
     else    
         rY = selectedFeatures(2);
     end
+elseif nargin < 6
+    points = varargin{1};
+    toEuclid = varargin{2};
+    selectedFeatures = varargin{3};
+    rX = selectedFeatures(1);
+    if length(selectedFeatures) == 1
+        warning('A single feature was provided. Plotting against the same feature in both axis to enhance readability')
+        rY = rX;
+    else    
+        rY = selectedFeatures(2);
+    end
+    plotRules = varargin{4};
 else
     points = varargin{1};
     toEuclid = varargin{2};
@@ -75,6 +88,7 @@ else
         rY = selectedFeatures(2);
     end
     plotRules = varargin{4};
+    plotColormap = varargin{5};
 end
 
 if size(Rules,2) == 2
@@ -105,7 +119,7 @@ zz = [vX vY];
 uniqueActions = unique(allActionIDs);
 maxActionID = max(uniqueActions);
 allArea = nan(1,maxActionID); % Allocate memory for each area, considering that some selectors may not include all solvers
-allColors = copper(maxActionID); %hsv, parula, gray, hot, bone, copper, pink, winter
+allColors = plotColormap(maxActionID); 
 
 for idA = uniqueActions'
     validIDs = allActionIDs == idA; % Gets positions with ID = idA
@@ -117,9 +131,9 @@ for idA = uniqueActions'
     hold on
 end
 
-plot([0 0 1 1 0],[0 1 1 0 0],'-k','LineWidth',0.25);
+plot([0 0 1 1 0],[0 1 1 0 0],'-k','LineWidth',0.25); % Black bounding box
 
-if plotRules, PlotRules(Rules,[rX rY]); end % Plots rules (if desired)
+if plotRules, PlotRules(Rules,[rX rY],false,plotColormap); end % Plots rules (if desired)
 
 xlabel(['F_' num2str(rX)])
 ylabel(['F_' num2str(rY)])

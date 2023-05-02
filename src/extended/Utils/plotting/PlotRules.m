@@ -3,9 +3,11 @@ function PlotRules(Rules, varargin)
 
 
 % Common parameters
-ActionMarkerVec = ["o" "s" "d" "h" ">" "p" "+" "*"];
+ActionMarkerVec = ["o" "s" "d" "h" ">" "p"];
+nbMarkers = length(ActionMarkerVec);
 toGrayscale = false;
 rX = 1; rY = 2;
+plotColormap = @(x) hsv(x);
 
 forCIM = false;
 
@@ -15,26 +17,11 @@ if length(varargin) >= 1
     rY = selectedFeatures(2);
     if length(varargin) >= 2
         toGrayscale = varargin{2};
+        if length(varargin) >= 3
+            plotColormap = varargin{3};
+        end
     end
 end
-
-% Outdated
-% switch (nargin)
-%     case 1
-%         ColorID = -1;
-%         toGrayscale = false;
-%         ActionMarkerVec = ["o" "s" "d" "h" ">" "p" "+" "*"];
-%     case 2
-%         ColorID = -1;
-%         toGrayscale = false;
-%         ActionMarkerVec = repmat(varargin{1}, size(Rules,1), 1);
-%     case 3
-%         ColorID = varargin{1};
-%         toGrayscale = varargin{2};
-%     case 4
-%         ColorID = varargin{1};
-%         toGrayscale = varargin{2};        
-% end
 
 RuleX = Rules(:,rX);
 RuleY = Rules(:,rY);
@@ -43,7 +30,7 @@ Action = Rules(:,end);
 % allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
 % allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
 maxActionID = max(Action);
-allColors = summer(maxActionID);
+allColors = plotColormap(maxActionID);
 
 
 for idx = 1 : length(RuleX)
@@ -60,7 +47,10 @@ for idx = 1 : length(RuleX)
         end
     else
         selectedAction = Action(idx);
-        if selectedAction >= 0, ActionMarker = ActionMarkerVec(selectedAction+1); end
+        if selectedAction >= 0
+            tempAction = mod(selectedAction,nbMarkers);
+            ActionMarker = ActionMarkerVec(tempAction+1); 
+        end
         ActionColor = allColors(Action(idx),:);
 %         switch selectedAction
 %             case 0
