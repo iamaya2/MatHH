@@ -1,4 +1,4 @@
-classdef JSSPActivity < handle
+classdef JSSPActivity < handle & deepCopyThis
     % JSSPActivity   Class for creating activity objects
     %  Each object of this class represents a component (task) that must be
     %  carried out in order to complete a job of the JSSP instance. So, it

@@ -41,7 +41,7 @@ classdef JSSP < handle
     %    
     properties               
         % Dummy instance for indicating the class of objects associated with instances.
-        instances           = JSSPInstance(); 
+        instances; 
         
         % Cell array containing a description of the available features and the IDs used for using them.
         %   Uses dictionary-style format for linking IDs and features:
@@ -72,7 +72,7 @@ classdef JSSP < handle
     
     methods
         function obj = JSSP()
-            
+            obj.instances           = JSSPInstance(); 
         end
         
     end
@@ -80,7 +80,7 @@ classdef JSSP < handle
     
     methods (Static)
 
-        function newInstance = cloneInstance(JSSPInstance)
+        function newInstance = cloneInstance(oldInstance)
             % cloneInstance   Static method for duplicating an instance. 
             %   Both of them (original and copy) are independent. It is
             %   recommended to do such a copy before solving an instance, as
@@ -91,7 +91,13 @@ classdef JSSP < handle
             %      newInstance: The cloned instance
             %   See also JSSPINSTANCE.RESET, CREATEDUMMYINSTANCE,
             %   CREATEJSSPINSTANCEFROMINSTANCE
-            newInstance = createJSSPInstanceFromInstance(JSSPInstance);
+            
+            % old version
+%             newInstance = createJSSPInstanceFromInstance(oldInstance);
+            
+            % new version
+            newInstance = JSSPInstance();
+            oldInstance.deepCopy(newInstance);
         end
         
         function instance = createDummyInstance()
