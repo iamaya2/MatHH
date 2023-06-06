@@ -38,8 +38,12 @@ function allArea = PlotZones(Rules, varargin)
 %    model.
 
 
+% Default values:
 rX = 1; rY = 2;
 plotRules = false;
+plotColormap = @(x) hsv(x);
+
+% Input processing:
 if nargin < 2
     points = 0:0.01:1;
     toEuclid = true;
@@ -60,6 +64,18 @@ elseif nargin < 5
     else    
         rY = selectedFeatures(2);
     end
+elseif nargin < 6
+    points = varargin{1};
+    toEuclid = varargin{2};
+    selectedFeatures = varargin{3};
+    rX = selectedFeatures(1);
+    if length(selectedFeatures) == 1
+        warning('A single feature was provided. Plotting against the same feature in both axis to enhance readability')
+        rY = rX;
+    else    
+        rY = selectedFeatures(2);
+    end
+    plotRules = varargin{4};
 else
     points = varargin{1};
     toEuclid = varargin{2};
@@ -72,6 +88,7 @@ else
         rY = selectedFeatures(2);
     end
     plotRules = varargin{4};
+    plotColormap = varargin{5};
 end
 
 if size(Rules,2) == 2
@@ -79,35 +96,44 @@ if size(Rules,2) == 2
     rY = rX;
 end
 
-Action = Rules(:,end);
-ActionMarker = "s";
-ActionSize = 12;
+
+% Internal parameters:
+Action = Rules(:,end);  % To-Do: Validate and remove this
+ActionMarker = "s";     % To-Do: Validate and remove this
+ActionSize = 12;        % To-Do: Validate and remove this
 
 [X, Y] = meshgrid(points);
 vX = X(:);
 vY = Y(:);
 % allColors = [0 0 0; 1 1 0; 0 1 0; 1 0 0; 0 0 1; 1 0 1;];
-allColors = [0 0 0; 0.85 0 0; 0 0 0.85; 0.85 0 0.85; 0.75 * ones(1,3);  0.5 * ones(1,3);];
+allColors = [0 0 0; ...             % ID == 1
+             0.85 0 0; ...          % ID == 2
+             0 0 0.85; ...          % ID == 3
+             0.85 0 0.85; ...       % ID == 4
+             0.75 * ones(1,3);  ... % ID == 5
+             0.5 * ones(1,3);];     % ID == 6
 
 allActionIDs = getActionIDs([vX vY], Rules(:,[rX rY end]), toEuclid ); % Evaluate all points
 
 zz = [vX vY];
 uniqueActions = unique(allActionIDs);
-allArea = nan(1,max(uniqueActions)); % Allocate memory for each area, considering that some selectors may not include all solvers
+maxActionID = max(uniqueActions);
+allArea = nan(1,maxActionID); % Allocate memory for each area, considering that some selectors may not include all solvers
+allColors = plotColormap(maxActionID); 
 
 for idA = uniqueActions'
     validIDs = allActionIDs == idA; % Gets positions with ID = idA
     P = zz(validIDs,:);
     [k, area] = boundary(P,0.985); % Generate the boundary for this action
     allArea(idA) = area; % Stores volume for this action
-    tr = patch(P(k,1), P(k,2), allColors(idA+1,:), 'FaceAlpha', 0.5); % Creates patch using boundary points
+    tr = patch(P(k,1), P(k,2), allColors(idA,:), 'FaceAlpha', 0.5); % Creates patch using boundary points
     tr.EdgeColor=tr.FaceColor; tr.EdgeAlpha = 0.75; tr.LineStyle=':';
     hold on
 end
 
-plot([0 0 1 1 0],[0 1 1 0 0],'-k','LineWidth',0.25);
+plot([0 0 1 1 0],[0 1 1 0 0],'-k','LineWidth',0.25); % Black bounding box
 
-if plotRules, PlotRules(Rules,[rX rY]); end % Plots rules (if desired)
+if plotRules, PlotRules(Rules,[rX rY],false,plotColormap); end % Plots rules (if desired)
 
 xlabel(['F_' num2str(rX)])
 ylabel(['F_' num2str(rY)])

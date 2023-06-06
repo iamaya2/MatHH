@@ -23,7 +23,7 @@ classdef JSSPJob < handle & deepCopyThis
     %      nbActivities
     %      
     properties       
-        activities = JSSPActivity(nan,nan); % The activities to schedule (the order of machines to be scheduled and the processing times of the operations performed by each machine)
+        activities  % The activities to schedule (the order of machines to be scheduled and the processing times of the operations performed by each machine)
         jobID = nan; % An ID given to the job as to differentiate it from others
         lastScheduledActivity % JSSPActivity that was scheduled last
         lastScheduledTime = 0; % Time instant in which the lastScheduledActivity was assigned
@@ -38,6 +38,7 @@ classdef JSSPJob < handle & deepCopyThis
             % JSSPJob   Constructor
             %  This function receives machIDs and procTimes from the class
             %  object JSSPActivity, and creates the corresponding job
+            jobObj.activities = JSSPActivity(nan,nan);
             if nargin > 0        
                 nbAct = length(machIDs); 
                 jobObj.activities(nbAct) = JSSPActivity(machIDs(end),procTimes(end),nbAct); 

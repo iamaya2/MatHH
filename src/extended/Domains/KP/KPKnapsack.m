@@ -1,4 +1,4 @@
-%% KPKnapsack   Class for defining knapsacks for the Knapsack Problem
+% KPKnapsack   Class for defining knapsacks for the Knapsack Problem
 %
 % A KPKnapsack can be created in the following ways:
 %
@@ -45,15 +45,17 @@ classdef KPKnapsack < handle & deepCopyThis
         function checkValidity(obj)
             % checkValidity   Method for determining if the knapsack is
             % valid (has free capacity). It sets the isUsable property and
-            % requires no inputs. If the knapsack is invalid, it also
+            % requires no inputs. If the knapsack is overloaded, it also
             % displays a warning.
             %
-            % Note: Matlab adds a reserved property callid isValid for
+            % Note: Matlab adds a reserved property called isValid for
             % assessing if a handle object is valid. So, that property
             % cannot be used in this method.
             if obj.currentWeight > obj.capacity
                 warning('The capacity of knapsack %d has been exceeded!',obj.ID)
                 obj.isUsable = false;
+            elseif obj.currentWeight == obj.capacity
+                obj.isUsable = false; % No warning since it is OK.
             else
                 obj.isUsable = true;
             end
@@ -94,7 +96,7 @@ classdef KPKnapsack < handle & deepCopyThis
             % updateCurrentWeight   Method for updating current weight of
             % the knapsack. Has two operating modes. If no arguments are given,
             % the weight of all object is summed up. It can also receive 
-            % the ammount to increase/decrease.
+            % the amount to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
             % could reduce performance when multiple updates are required.
@@ -111,7 +113,7 @@ classdef KPKnapsack < handle & deepCopyThis
             % updateCurrentProfit   Method for updating current profit of
             % the knapsack. Has two operating modes. If no arguments are given,
             % the profit of all items is summed up. It can also receive 
-            % the ammount to increase/decrease.
+            % the amount to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
             % could reduce performance when multiple updates are required.
@@ -128,7 +130,7 @@ classdef KPKnapsack < handle & deepCopyThis
         function updateLength(obj, varargin)
             % updateLength   Method for updating current number of items in
             % the knapsack. Has two operating modes. If no arguments are given,
-            % the whole vector is analized. It can also receive the ammount
+            % the whole vector is analyzed. It can also receive the amount
             % to increase/decrease.
             % 
             % Note that the first one always provide the correct value but it
@@ -140,6 +142,27 @@ classdef KPKnapsack < handle & deepCopyThis
             else
                 obj.nbItems = obj.nbItems + varargin{1};
             end
+        end
+        
+        % ----- ---------------------------------------------------- -----
+        % Methods for overloading functionality
+        % ----- ---------------------------------------------------- -----
+        function disp(obj)
+            % Header with main info
+            useStr = 'Not usable';
+            if obj.isUsable, useStr = 'Usable'; end
+            s1 = sprintf('Knapsack %d:\n\tState: %s\n\tCurrent weight: %2.f/%2.f\n\tCurrent profit: %.2f\n\tContents:\n', ...
+                obj.ID, useStr, obj.currentWeight, obj.capacity, obj.currentProfit);
+            % Process items
+            if obj.nbItems == 0
+                s2 = sprintf('\t\tNo items have been found.\n');
+            else
+                s2 = '';
+                for idx = 1 : obj.nbItems
+                    s2 = [s2 '\t\t' evalc('disp(obj.items(idx))')];
+                end
+            end
+            fprintf([s1 s2 '\n']);
         end
         
     end

@@ -1,4 +1,4 @@
-classdef JSSPInstance < handle
+classdef JSSPInstance < handle & deepCopyThis 
     % JSSPInstance   Class definition for creating instances of the JSSP
     %  Each object of this class represents a problem instance (set of jobs
     %  that must be scheduled).
@@ -34,8 +34,8 @@ classdef JSSPInstance < handle
         nbMachines % Number of machines associated with the instance
         status = 'Undefined'; % Instance status (text). Can be: Undefined (empty), Pending, Solved
         solution % JSSPSchedule object with the current solution
-        instanceData = JSSPJob(); % JSSPJob array with the original instance
-        pendingData = JSSPJob(); % JSSPJob array with what remains of the instance
+        instanceData % JSSPJob array with the original instance
+        pendingData % JSSPJob array with what remains of the instance
         features = []; % Vector with the current feature values of the instance
         updatingData % Hyper-matrix with updated rawData, according to the activities that has been already scheduled
         jobRegister % Vector with one element per job. Indicates the number of activities that has been scheduled for each job.
@@ -60,6 +60,9 @@ classdef JSSPInstance < handle
             %     Processing times. Second layer: Machine sequence
             %  - Outputs:
             %      instance - The JSSPInstance object
+            instance.instanceData = JSSPJob();
+            instance.pendingData = JSSPJob(); 
+            instance.solution = JSSPSchedule();
             if nargin > 0
                 if isnumeric(instanceData) % If given raw data:
                 [instance.nbJobs, ~] = size(instanceData(:,:,1));

@@ -1,4 +1,4 @@
-classdef JSSPSchedule < handle  % Only one schedule should be around
+classdef JSSPSchedule < handle & deepCopyThis % Only one schedule should be around
     % JSSPSchedule   Class for handling schedule objects for the JSSP
     %  This class represents a schedule object with the information of
     %  machines and activities that have been scheduled. The schedule is
@@ -24,7 +24,7 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         nbMachines % number of machines
         nbMaxJobs = NaN; % Number of maximum jobs
         makespan = NaN; % Time taken to complete all jobs
-        schedule = JSSPMachine(); % Matrix of scheduled activities. Rows: Machines. Columns: Scheduled activities        
+        schedule; % Matrix of scheduled activities. Rows: Machines. Columns: Scheduled activities        
         schColorMap % Colormap used for differentiating jobs within the schedule       
     end        
     
@@ -41,6 +41,7 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
             %  This function assign to the object job the number of machines
             %  avaiable and creates an empty schedule of size equal to the
             %  number of machines
+            jobObj.schedule = JSSPMachine();
             if nargin > 0                
                 jobObj.nbMachines = nbMachines;
                 jobObj.nbMaxJobs = nbMaxJobs;
@@ -58,12 +59,18 @@ classdef JSSPSchedule < handle  % Only one schedule should be around
         % ----- ---------------------------------------------------- -----
         function newSchedule = clone(obj)
             % clone   Method for cloning the object so they are independent
+            
+            % new version: 
             newSchedule = JSSPSchedule(obj.nbMachines, obj.nbMaxJobs);
-            for idx = 1 : newSchedule.nbMachines
-                newSchedule.schedule(idx,1) = obj.schedule(idx,1).clone(); % Empty column of actitivities
-            end
-            newSchedule.schColorMap = obj.schColorMap;
-            newSchedule.makespan = obj.makespan;
+            obj.deepCopy(newSchedule);
+            
+            % old version
+%             newSchedule = JSSPSchedule(obj.nbMachines, obj.nbMaxJobs);
+%             for idx = 1 : newSchedule.nbMachines
+%                 newSchedule.schedule(idx,1) = obj.schedule(idx,1).clone(); % Empty column of actitivities
+%             end
+%             newSchedule.schColorMap = obj.schColorMap;
+%             newSchedule.makespan = obj.makespan;
         end
         
         %function timeIndex = getTimeslot(obj, machineID, activityLength)            

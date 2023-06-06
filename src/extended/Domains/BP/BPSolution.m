@@ -6,7 +6,7 @@
 %                         created object and the method returns a deep copy of such solution.
 classdef BPSolution < problemSolution
     properties
-        sets = BPSet(); % Sets with the corresponding elements for the solution
+        sets; % Sets with the corresponding elements for the solution
     end
     
     methods
@@ -14,6 +14,7 @@ classdef BPSolution < problemSolution
         % ---- CONSTRUCTOR ----
         % ---- ------------------------ ----
         function obj = BPSolution(varargin)
+            obj.sets = BPSet(); % Sets with the corresponding elements for the solution
             if nargin > 0
                 if isa(varargin{1},'BPSolution') % From another solution
                     oldObj = varargin{1};

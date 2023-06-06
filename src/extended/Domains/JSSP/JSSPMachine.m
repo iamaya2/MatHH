@@ -1,4 +1,4 @@
-classdef JSSPMachine < handle
+classdef JSSPMachine < handle & deepCopyThis
     % JSSPMachine   Class for creating machine objects for the JSSP
     %  This class creates the objects in which the JSSPActivity objects of
     %  JSSPJob objects will be scheduled.
@@ -14,7 +14,7 @@ classdef JSSPMachine < handle
     %   
     %   All JSSPMachine Methods are for dependent properties.
     properties
-        activities = JSSPActivity;
+        activities
         makespan = NaN; % Current machine makespan (total time)
         jobList
     end
@@ -28,15 +28,23 @@ classdef JSSPMachine < handle
             % JSSPMachine   Constructor 
             % Machine initializes to default values
             
-            % Empty on purpose
+            % Initializes 'activities' so that it targets a different
+            % memory reference
+            obj.activities = JSSPActivity();
         end
         
         function newMachine = clone(obj)
             % clone   Method for cloning a machine
+            
+            %old version (both activities target same obj)
+%             newMachine = JSSPMachine();
+%             newMachine.activities = obj.activities;
+%             newMachine.jobList = obj.jobList;
+%             newMachine.makespan = obj.makespan;
+
+            % new version
             newMachine = JSSPMachine();
-            newMachine.activities = obj.activities;
-            newMachine.jobList = obj.jobList;
-            newMachine.makespan = obj.makespan;
+            obj.deepCopy(newMachine);            
         end
         
         

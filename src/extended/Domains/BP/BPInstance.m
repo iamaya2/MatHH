@@ -12,11 +12,11 @@ classdef BPInstance < problemInstance
     properties        
         features = NaN; % Vector of current feature values
         ID = NaN ; % Scalar for differentiating among instances
-        items = BPItem(); % A vector with all BPItem objects
+        items; % A vector with all BPItem objects
         load = 0; % Scalar with the current total load of this instance
         maxLoad = 0; % Scalar with the max total load of the instance
         nbItems = 0; % Number of elements within the instance
-        solution = BPSolution(); % A solution object for the BP problem
+        solution; % A solution object for the BP problem
         status = 'Undefined'; % Initial status of the instance
     end
     
@@ -25,6 +25,8 @@ classdef BPInstance < problemInstance
         % ---- CONSTRUCTOR ----
         % ---- ------------------------ ----
         function obj = BPInstance(varargin)            
+            obj.items = BPItem(); % A vector with all BPItem objects
+            obj.solution = BPSolution(); % A solution object for the BP problem
             if nargin > 0
                 if isnumeric(varargin{1}) % just the values and ID
                     givenValues = varargin{1};

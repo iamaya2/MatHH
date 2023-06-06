@@ -49,14 +49,17 @@ classdef deepCopyThis < matlab.mixin.Copyable
             nbProps = length(allProps);
             for idx = 1 : nbProps
                 if ~allProps(idx).NonCopyable
-                    thisOldProp = oldObj.(allProps(idx).Name);
-                    newObj.(allProps(idx).Name) = [thisOldProp];
-                    if isa(thisOldProp,'deepCopyThis')
-                        nbCopies = length(thisOldProp);
+                    thisOldSubObj = oldObj.(allProps(idx).Name);
+                    %newObj.(allProps(idx).Name) = [thisOldSubObj];
+                    if isa(thisOldSubObj,'deepCopyThis')
+%                     if isa(thisOldSubObj,'handle')
+                        nbCopies = length(thisOldSubObj);
                         for idy = 1 : nbCopies
-                            newObj.(allProps(idx).Name)(idy) = eval(class(thisOldProp));
+                            newObj.(allProps(idx).Name)(idy) = eval(class(thisOldSubObj));
                             oldObj.(allProps(idx).Name)(idy).deepCopy(newObj.(allProps(idx).Name)(idy));
                         end
+                    else
+                        newObj.(allProps(idx).Name) = [thisOldSubObj];
                     end
                 end
             end
