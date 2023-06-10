@@ -12,3 +12,4 @@ for idx = 1 : nbJobs
 end
 newInstanceCopy = JSSPInstance(JSSPdata);
 end
+
