@@ -31,8 +31,8 @@ classdef problemDomain < handle
     %
     % See also: ProblemInstance, problemSolution
     properties (Abstract, Constant)
-        problemFeatures % Cell array with ID:Name format
-        problemSolvers % Cell array with ID:Name format
+        problemFeatures % Dictionary with ID:Handle format (requires R2022b)
+        problemSolvers % Dictionary with ID:Handle format (requires R2022b)
         problemType % String for identifying the domain
     end
     

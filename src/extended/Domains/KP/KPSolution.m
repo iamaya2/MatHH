@@ -10,6 +10,7 @@ classdef KPSolution < problemSolution
 %                         on this object. 
     properties
         knapsack % Cannot be initialized here since it will assign the same object to all instances
+        discarded % Cannot be initialized here since it will assign the same object to all instances
     end
     
     methods
@@ -18,6 +19,7 @@ classdef KPSolution < problemSolution
         % ---- ------------------------ ----
         function obj = KPSolution(varargin)
             obj.knapsack = KPKnapsack(); % Dummy knapsack for storing the solution
+            obj.discarded = KPItem.empty; % Empty vector of KPItems
             if nargin > 0
                 if isa(varargin{1},'KPSolution') % From another solution
                     oldObj = varargin{1};

@@ -1,4 +1,3 @@
-
 classdef KPItem < handle & deepCopyThis
 %% KPItem   Class for defining items for the Knapsack Problem
 %
@@ -13,7 +12,8 @@ classdef KPItem < handle & deepCopyThis
 %                         object and the class returns a deep copy of it.
     properties
         ID = NaN; % Identifier of this item
-        isPacked = false; % Flag for knowing item status
+        isPacked = false; % Flag for knowing if item in bag
+        isProcessed = false; % Flag indicating if the item has been considered
         profit = NaN; % Profit earned if this item is packed
         weight = NaN; % Weight added by packing this item
     end
@@ -52,14 +52,27 @@ classdef KPItem < handle & deepCopyThis
             % item. Requires no inputs.
             obj.isPacked = false;
         end
+
+        function doneProcessing(obj)
+            % doneProcessing  Method for updating the processing status of the
+            % item. Requires no inputs.
+            obj.isProcessed = true;
+        end
+        
+        function doneUnprocessing(obj)
+            % doneUnprocessing  Method for updating the processing status of the
+            % item. Requires no inputs.
+            obj.isProcessed = false;
+        end
     
         % ----- ---------------------------------------------------- -----
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
         function disp(obj)
             if obj.isPacked, packStr = 'Packed'; else, packStr = 'Unpacked'; end
-            textStr = sprintf('Item %d: Profit = %.2f, Weight = %.2f, Status = %d (%s)\n',...
-                obj.ID, obj.profit, obj.weight, obj.isPacked, packStr);
+            if obj.isProcessed, procStr = 'Processed'; else, procStr = 'Not processed'; end
+            textStr = sprintf('Item %d: Profit = %.2f, Weight = %.2f, Status = %s | %s\n',...
+                obj.ID, obj.profit, obj.weight, packStr, procStr);
             fprintf(textStr)
         end
         

@@ -71,6 +71,7 @@ classdef KPKnapsack < handle & deepCopyThis
             obj.updateCurrentProfit(thisItem.profit);
             obj.updateLength(1);
             thisItem.donePacking();
+            thisItem.doneProcessing();
             obj.checkValidity();
         end
         
@@ -88,6 +89,7 @@ classdef KPKnapsack < handle & deepCopyThis
                 obj.updateCurrentProfit(-thisItem.profit);
                 obj.updateLength(-1);
                 thisItem.doneUnpacking();
+                thisItem.doneUnprocessing();
                 obj.checkValidity();
             end            
         end

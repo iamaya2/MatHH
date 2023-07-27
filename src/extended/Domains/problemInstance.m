@@ -19,11 +19,11 @@ classdef problemInstance < handle & deepCopyThis
     %     properties        
     %       % Required by the abstract class:
     %           features = NaN;             % Vector of current feature values    
-    %           solution = BPSolution();    % A solution object for the BP problem
+    %           solution;    % A solution object for the BP problem (initialize in constructor)
     %           status = 'Undefined';       % Initial status of the instance
     %       % Additional properties for this particular problem domain:
     %           ID = NaN ;                  % Scalar for differentiating among instances
-    %           items = BPItem();           % A vector with all BPItem objects
+    %           items;           % A vector with all BPItem objects (initialize in constructor)
     %           load = 0;                   % Scalar with the current total load of this instance
     %           maxLoad = 0;                % Scalar with the max total load of the instance
     %           nbItems = 0;                % Number of elements within the instance
@@ -35,7 +35,8 @@ classdef problemInstance < handle & deepCopyThis
     %
     % See also: ProblemDomain, problemSolution    
     properties (Abstract)
-        features % Current feature values of the instance
+        features % Dictionary with ID:Value format (requires R2022b)          
+        nbFeatures % Number of features that the instance considers. Equal to length(features)
         solution % Solution object (able to store partial and full solutions)
         status % Current status of the instance (Undefined, Pending, Solved)
     end
