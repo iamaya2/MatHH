@@ -123,8 +123,7 @@ classdef KP < problemDomain
             end
         end
 
-        function featureValue = featANWRI (instance)
-            callErrorCode(0)
+        function featureValue = featANWRI (instance)            
             % featANWRI   Method for calculating the ANWRI feature
             % Input: Current instance
             % Output: Feature value
@@ -139,65 +138,191 @@ classdef KP < problemDomain
             end
         end
 
-        function featureValue = featNWPCRI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+        function featureValue = featNWPCRI (instance)            
+            % featNWPCRI   Method for calculating the NWPCRI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allWeights = instance.getWeightRemainingItems();
+            allProfits = instance.getProfitRemainingItems();
+            nbItems = length(allWeights);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                corrMatrix = corrcoef(allWeights,allProfits);
+                featureValue = corrMatrix(1,2); % Coefficient (crossed interaction)
+                featureValue = featureValue/2 + 0.5; % Normalization
+            end
         end
 
-        function featureValue = featMNPRI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+        function featureValue = featMNPRI (instance)         
+            % featMNPRI   Method for calculating the MNPRI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getProfitRemainingItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = median(allData) / max(allData);
+            end
         end
 
         function featureValue = featMNWRI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featMNWRI   Method for calculating the MNWRI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getWeightRemainingItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = median(allData) / max(allData);
+            end
         end
 
         function featureValue = featSNPRI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featSNPRI   Method for calculating the SNPRI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getProfitRemainingItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 0; % Default value since one item yields 0 also
+            else
+                featureValue = std(allData) / max(allData);
+            end
         end
 
         function featureValue = featSNWRI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featSNWRI   Method for calculating the SNWRI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getWeightRemainingItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 0; % Default value since one item yields 0 also
+            else
+                featureValue = std(allData) / max(allData);
+            end
         end
 
         % --- For packed items
-        function featureValue = featANPPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+        function featureValue = featANPPI (instance)            
+            % featANPPI   Method for calculating the ANPPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getProfitPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = mean(allData) / max(allData);
+            end
         end
 
         function featureValue = featANWPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featANWPI   Method for calculating the ANWPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getWeightPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = mean(allData) / max(allData);
+            end
         end
 
         function featureValue = featNWPCPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featNWPCPI   Method for calculating the NWPCPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allWeights = instance.getWeightPackedItems();
+            allProfits = instance.getProfitPackedItems();
+            nbItems = length(allWeights);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                corrMatrix = corrcoef(allWeights,allProfits);
+                featureValue = corrMatrix(1,2); % Coefficient (crossed interaction)
+                featureValue = featureValue/2 + 0.5; % Normalization
+            end
         end
 
         function featureValue = featMNPPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featMNPPI   Method for calculating the MNPPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getProfitPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = median(allData) / max(allData);
+            end
         end
 
         function featureValue = featMNWPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featMNWPI   Method for calculating the MNWPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getWeightPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 1; % Default value since one item yields 1 also
+            else
+                featureValue = median(allData) / max(allData);
+            end
         end
 
         function featureValue = featSNPPI (instance)
-            callErrorCode(0)
-            featureValue = nan;
+            % featSNPPI   Method for calculating the SNPPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getProfitPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 0; % Default value since one item yields 0 also
+            else
+                featureValue = std(allData) / max(allData);
+            end
         end
 
         function featureValue = featSNWPI (instance)            
-            callErrorCode(0)
-            featureValue = nan;
+            % featSNWPI   Method for calculating the SNWPI feature
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            allData = instance.getWeightPackedItems();
+            nbItems = length(allData);
+            if nbItems == 0
+                featureValue = 0; % Default value since one item yields 0 also
+            else
+                featureValue = std(allData) / max(allData);
+            end
         end
 
         % ---- ------------------------ ----
