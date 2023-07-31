@@ -35,6 +35,7 @@ classdef problemInstance < handle & deepCopyThis
     %
     % See also: ProblemDomain, problemSolution    
     properties (Abstract)
+        bestSolution % A solution object with the information about the best solution (if available)
         features % Dictionary with ID:Value format (requires R2022b)          
         nbFeatures % Number of features that the instance considers. Equal to length(features)
         solution % Solution object (able to store partial and full solutions)

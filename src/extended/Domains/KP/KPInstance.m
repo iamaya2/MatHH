@@ -1,6 +1,7 @@
 classdef KPInstance < problemInstance
     properties
         % Inherited (Abstract)
+        bestSolution;
         features 
         nbFeatures = NaN;
         solution;
@@ -32,6 +33,7 @@ classdef KPInstance < problemInstance
             %    used by default.
             %
             % See also: KPITEM
+            obj.bestSolution = KPSolution(); % initialize best solution holder
             obj.features = dictionary();
             obj.solution = KPSolution(); % initializes solution
             obj.items = KPItem.empty;
