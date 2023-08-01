@@ -135,6 +135,29 @@ classdef KPInstance < problemInstance
             profitValues = [obj.solution.discarded.profit];
         end
 
+        function attemptToPack(obj, thisItem)
+            % attemptToPack  Method for processing an item
+            % 
+            % Requires a single input: the KPItem to process. If the item
+            % fits within the knapsack, it is added to the solution.
+            % Otherwise, it is added to the array of discarded KPItems. 
+            %
+            % See also: KPKnapsack, KPItem
+            currentKP = obj.solution.knapsack;
+            if currentKP.currentWeight + thisItem.weight <= currentKP.capacity
+                % It fits
+                currentKP.packItem(thisItem);
+            else
+                % It does not fit
+                obj.solution.discarded = [obj.solution.discarded thisItem];
+                thisItem.doneUnpacking();
+                thisItem.doneProcessing();                
+            end
+            thisID = find(obj.items == thisItem, 1); % Find at most 1 item
+            obj.items = [obj.items(1:thisID-1) obj.items(thisID+1:end)]; % Remove it
+        end
+
+        
         % ---- ------------------------ ----
         % ---- SUPPORT (INNER) METHODS ----
         % ---- ------------------------ ----

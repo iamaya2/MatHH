@@ -55,5 +55,9 @@ classdef KPSolution < problemSolution
             metricName = 'Profit';
         end
         
+        % ---- ------------------------ ----
+        % ---- OTHER METHODS ----
+        % ---- ------------------------ ----        
+        
     end
 end

@@ -68,8 +68,9 @@ classdef KP < problemDomain
         function stepHeuristic(instance, heurID, varargin) 
             % stepHeuristic   (WIP) For using a single heuristic for a
             % single solution step.
-            if heurID < max(KP.problemSolvers.keys) % Validate ID
-                selectedHeuristic = KP.problemSolvers{heurID}; % Get handle
+            if heurID <= max(KP.problemSolvers.keys) % Validate ID
+                selectedHeuristicCell = KP.problemSolvers(heurID); % Get handle
+                selectedHeuristic = selectedHeuristicCell{1};
                 selectedHeuristic(instance); % Apply heuristic
             else
                 callErrorCode(100)
@@ -87,21 +88,50 @@ classdef KP < problemDomain
             % Input: The instance to modify
             % Output: None (the object is modified directly)
             %
-            % See also: KP.problemSolvers
-            callErrorCode(0)
-
+            % See also: KP.problemSolvers            
+            instance.attemptToPack(instance.items(1))
         end
 
         function heurMaP(instance)
-            callErrorCode(0)  
+            % heurMaP   Max Profit heuristic
+            % This heuristic tries to pack items with the highest profit
+            % first.
+            % 
+            % Input: The instance to modify
+            % Output: None (the object is modified directly)
+            %
+            % See also: KP.problemSolvers              
+            allProfits = [instance.items.profit];
+            [~,itemID] = max(allProfits);
+            instance.attemptToPack(instance.items(itemID));
         end
 
         function heurMiW(instance)
-            callErrorCode(0)
+            % heurMiW   Min Weight heuristic
+            % This heuristic tries to pack items with the lowest weight
+            % first.
+            % 
+            % Input: The instance to modify
+            % Output: None (the object is modified directly)
+            %
+            % See also: KP.problemSolvers              
+            allWeights = [instance.items.weight];
+            [~,itemID] = min(allWeights);
+            instance.attemptToPack(instance.items(itemID));
         end
 
         function heurMPW(instance)
-            callErrorCode(0)
+            % heurMPW   Max Profit per Weight heuristic
+            % This heuristic tries to pack items with the highest profit
+            % per weight ratio first.
+            % 
+            % Input: The instance to modify
+            % Output: None (the object is modified directly)
+            %
+            % See also: KP.problemSolvers              
+            allPWRatios = [instance.items.profit] ./ [instance.items.weight];
+            [~,itemID] = max(allPWRatios);
+            instance.attemptToPack(instance.items(itemID));
         end
 
         % ---- ------------------------ ----
