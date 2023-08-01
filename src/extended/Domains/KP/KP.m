@@ -66,12 +66,22 @@ classdef KP < problemDomain
         end
 
         function stepHeuristic(instance, heurID, varargin) 
-            % stepHeuristic   (WIP) For using a single heuristic for a
-            % single solution step.
+            % stepHeuristic   (WIP) Uses a given heuristic for a single step.
+            %
+            %  This method validates the given ID and throws an error if it
+            %  is not. Afterward, it applies the given heuristic for a
+            %  solution step and validates if the problem instance has been
+            %  completed. 
             if heurID <= max(KP.problemSolvers.keys) % Validate ID
                 selectedHeuristicCell = KP.problemSolvers(heurID); % Get handle
                 selectedHeuristic = selectedHeuristicCell{1};
                 selectedHeuristic(instance); % Apply heuristic
+                % Validate if the instance has been completely solved
+                if isempty(instance.items)
+                    instance.status = "Solved";
+                else
+                    instance.status = "Pending";
+                end
             else
                 callErrorCode(100)
             end
