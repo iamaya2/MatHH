@@ -22,7 +22,7 @@ classdef sequenceBasedSelectionHH < selectionHH
     properties
         % Most properties are inherited from the selectionHH superclass. Only
         % the following properties are specific to this class:
-        nbSolvers       = NaN;
+%        nbSolvers       = NaN;
         currentStep     = 1;
         currentInc      = 1;
         modelLength     = NaN;
