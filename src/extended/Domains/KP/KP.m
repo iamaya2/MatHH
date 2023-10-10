@@ -75,13 +75,7 @@ classdef KP < problemDomain
             if heurID <= max(KP.problemSolvers.keys) % Validate ID
                 selectedHeuristicCell = KP.problemSolvers(heurID); % Get handle
                 selectedHeuristic = selectedHeuristicCell{1};
-                selectedHeuristic(instance); % Apply heuristic
-                % Validate if the instance has been completely solved
-                if isempty(instance.items)
-                    instance.status = "Solved";
-                else
-                    instance.status = "Pending";
-                end
+                selectedHeuristic(instance); % Apply heuristic (checks internally if completely solved)
             else
                 callErrorCode(100)
             end

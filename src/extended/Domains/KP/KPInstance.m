@@ -2,7 +2,7 @@ classdef KPInstance < problemInstance
     properties
         % Inherited (Abstract)
         bestSolution;
-        features 
+        features % Dictionary. Key: Feature ID. Value: Feature value
         nbFeatures = NaN;
         solution;
         status = 'Undefined';        
@@ -155,6 +155,13 @@ classdef KPInstance < problemInstance
             end
             thisID = find(obj.items == thisItem, 1); % Find at most 1 item
             obj.items = [obj.items(1:thisID-1) obj.items(thisID+1:end)]; % Remove it
+            
+            % Validate if the instance has been completely solved
+            if isempty(obj.items)
+                obj.status = "Solved";
+            else
+                obj.status = "Pending";
+            end
         end
 
         

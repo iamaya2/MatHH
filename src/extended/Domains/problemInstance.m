@@ -53,5 +53,14 @@ classdef problemInstance < handle & deepCopyThis
             % this instance. Requires no inputs.
             fitness = obj.solution.getSolutionPerformanceMetric();
         end
+
+        function solvedStatus = hasBeenSolved(obj)
+            % hasBeenSolved   Method for assessing whether the
+            % problemInstance object has been completely solved. Requires
+            % no inputs. Returns true if the instance is solved and false
+            % otherwise.
+            solvedStatus = false;
+            if strcmp(obj.status,'Solved'), solvedStatus = true; end
+        end        
     end
 end
