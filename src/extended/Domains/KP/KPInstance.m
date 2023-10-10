@@ -88,12 +88,16 @@ classdef KPInstance < problemInstance
             else
                 selectedKeys = obj.features.keys;
             end
+            featureValues = nan(size(selectedKeys));
+            idx = 1;
             for thisKey = selectedKeys(:)' % Force row vector
                 thisFeatureCell = KP.problemFeatures(thisKey); % Returns cell array
                 thisFeature = thisFeatureCell{1}; % Get the function handle from cell
                 obj.features(thisKey) = thisFeature(obj);
+                featureValues(idx) = obj.features(thisKey);
+                idx = idx + 1;
             end
-            featureValues = obj.features.values;
+%             featureValues = obj.features.values;
         end
     
         % ---- ------------------------ ----

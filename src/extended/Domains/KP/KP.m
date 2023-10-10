@@ -60,18 +60,67 @@ classdef KP < problemDomain
         end
 
         function instanceSet = loadInstanceSet(setID) 
-            % loadInstanceSet   (WIP) For easy instance loading. Not yet
-            % implemented.
-            callErrorCode(0)
+            % loadInstanceSet   (WIP) Method for easy instance loading. 
+            %
+            % Requires the BaseInstances repo (check Github) to be located
+            % at the same level than the root folder for the framework. For
+            % example: 
+            % 
+            % \MatHH
+            %   \src
+            %   ...
+            % \BaseInstances
+            %   \Knapsack
+            %   ...
+            %
+            % Available datasets: 
+            %   Toy - Provides access to four toy instances
+            % 
+            % Input: 
+            %   setID - A string or char array with the name of the dataset
+            %   that will be loaded (see the list of available datasets)
+            %
+            %   TO-DO: Add more datasets
+            %
+            % Output: 
+            %   instanceSet - The set of KPInstance objects, given in a
+            %   cell array
+            %
+            % See also: KPINSTANCE
+            
+            
+            switch lower(setID)
+                case 'toy'
+                    % --- Load instances from disk
+                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy01.mat', 'toy01')
+                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy02.mat', 'toy02')
+                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy03.mat', 'toy03')
+                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy04.mat', 'toy04')
+                    % --- Create instance dataset
+                    instanceSet = {toy01, toy02, toy03, toy04};
+                otherwise
+                    callErrorCode(101) % Undefined dataset
+            end
         end
 
         function stepHeuristic(instance, heurID, varargin) 
-            % stepHeuristic   (WIP) Uses a given heuristic for a single step.
+            % stepHeuristic   Uses a given heuristic for a single step.
             %
             %  This method validates the given ID and throws an error if it
-            %  is not. Afterward, it applies the given heuristic for a
-            %  solution step and validates if the problem instance has been
-            %  completed. 
+            %  is not a valid solver ID. Afterward, it applies the given 
+            %  heuristic for a solution step. When updating, the instance 
+            %  internally checks if it has been completely solved, and
+            %  udpates as necessary.
+            %
+            %  Inputs:
+            %   instance - The instance object that will be stepped (must
+            %   be a valid KPInstance object)
+            %   heurID - The ID of the heuristic to use (must be a valid
+            %   key from the dictionary of heuristics)
+            %  
+            %  Outputs: None
+            % 
+            % See also: KP.PROBLEMSOLVERS
             if heurID <= max(KP.problemSolvers.keys) % Validate ID
                 selectedHeuristicCell = KP.problemSolvers(heurID); % Get handle
                 selectedHeuristic = selectedHeuristicCell{1};
@@ -181,7 +230,7 @@ classdef KP < problemDomain
             allWeights = instance.getWeightRemainingItems();
             allProfits = instance.getProfitRemainingItems();
             nbItems = length(allWeights);
-            if nbItems == 0
+            if nbItems == 0 || nbItems == 1
                 featureValue = 1; % Default value since one item yields 1 also
             else
                 corrMatrix = corrcoef(allWeights,allProfits);
@@ -290,10 +339,10 @@ classdef KP < problemDomain
             allWeights = instance.getWeightPackedItems();
             allProfits = instance.getProfitPackedItems();
             nbItems = length(allWeights);
-            if nbItems == 0
+            if nbItems == 0 || nbItems == 1
                 featureValue = 1; % Default value since one item yields 1 also
             else
-                corrMatrix = corrcoef(allWeights,allProfits);
+                corrMatrix = corrcoef(allWeights,allProfits);                
                 featureValue = corrMatrix(1,2); % Coefficient (crossed interaction)
                 featureValue = featureValue/2 + 0.5; % Normalization
             end
