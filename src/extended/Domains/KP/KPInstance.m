@@ -97,7 +97,6 @@ classdef KPInstance < problemInstance
                 featureValues(idx) = obj.features(thisKey);
                 idx = idx + 1;
             end
-%             featureValues = obj.features.values;
         end
     
         % ---- ------------------------ ----

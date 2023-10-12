@@ -11,8 +11,10 @@ basepath = '..\..\..\';
 matInstancePath = [basepath '..\..\BaseInstances\Knapsack\files\mat\'];
 txtInstancePath = [basepath '..\..\BaseInstances\Knapsack\files\txt\'];
 toSave = true; % Flag for defining if instances will be stored on disk
+toBruteForce = true; % Flag for defining if instance must be brute-forced 
 
 % Dataset-specific data
+% Brute-forceable (use Alienware since it will take quite some time)
 allDatasets = {'GA_Generated';...
                 'Kreher';
                 'LowDimensional';...
@@ -20,10 +22,12 @@ allDatasets = {'GA_Generated';...
                 'Mix50\Test2';
                 'Mix50\Training';
                 'Pisinger_Hard\20';
-                'Pisinger_Hard\50';
-                'Pisinger_Hard\100';
-                'Pisinger_Hard\200';
                 'Random'};
+%
+% Not brute-forceable (due to size)
+% allDatasets = {'Pisinger_Hard\50';
+%                 'Pisinger_Hard\100';
+%                 'Pisinger_Hard\200'};
 
 %% Loads required packages
 addpath(basepath); % Adds root folder (without subfolders)
@@ -34,14 +38,27 @@ addpath(genpath([basepath 'extended\Utils'])); % Adds assorted utilities
 %% Main process
 for idx = 1:length(allDatasets)
     thisDataset = allDatasets{idx};
+    fprintf('Processing %s dataset... ', thisDataset)
     allFiles = readInstanceFolder([txtInstancePath thisDataset '\']);
     nbFiles = length(allFiles);
+    fprintf('Done! Found %d instances...\n', nbFiles)
     allInstances = cell(1,nbFiles); % Allocate memory
     for idy = 1 : nbFiles
+        fprintf('\tConverting instance %d/%d... ', idy, nbFiles)
         thisFile = allFiles{idy};
         allInstances{idy} = processInstance([txtInstancePath ...
-                                            thisDataset '\' thisFile]);         
+                                            thisDataset '\' thisFile]);        
+        fprintf('Done!\n')
     end
+    
+        % Brute-force instances
+    if toBruteForce
+        bestSolutionPerInstance = KP_instanceBruteForceSolver(allInstances);    
+        for idy = 1 : nbFiles
+            allInstances{idy}.bestSolution = bestSolutionPerInstance(idy);
+        end
+    end
+
     % Save instances
     if toSave  
         fullSavingPath = [matInstancePath thisDataset];

@@ -23,11 +23,9 @@ classdef KPSolution < problemSolution
             if nargin > 0
                 if isa(varargin{1},'KPSolution') % From another solution
                     oldObj = varargin{1};
-%                     obj = KPSolution();
                     oldObj.deepCopy(obj);
                 elseif isa(varargin{1},'KPKnapsack') % A given knapsack object
                     baseKP = varargin{1};
-%                     obj = KPSolution();
                     baseKP.deepCopy(obj.knapsack);
                 else
                     callErrorCode(102) % Invalid input for constructor
@@ -46,18 +44,30 @@ classdef KPSolution < problemSolution
         
         function fitness = getSolutionPerformanceMetric(obj)
             % getSolutionPerformanceMetric   Method for returning the
-            % profit yielded by the knapsack object            
-            fitness = obj.knapsack.currentProfit;
+            % negative of the profit yielded by the knapsack object. The
+            % negative value is used since the optimization/training
+            % procedure considers a minimization problem.
+            fitness = -obj.knapsack.currentProfit;
             obj.knapsack.checkValidity(); % displays warning if not valid
         end
-        
-        function metricName = getSolutionPerformanceMetricName(obj)
-            metricName = 'Profit';
-        end
+                
         
         % ---- ------------------------ ----
         % ---- OTHER METHODS ----
         % ---- ------------------------ ----        
         
+    end
+
+    methods (Static)
+        % ---- ------------------------ ----
+        % ---- INHERITED METHODS ----
+        % ---- ------------------------ ----           
+        function metricName = getSolutionPerformanceMetricName()
+            % getSolutionPerformanceMetricName   Method that returns a
+            % string with the name of the performance metric for this
+            % domain. In this case, it returns 'Profit'. This string can be
+            % used for plots and alike.
+            metricName = 'Profit';
+        end
     end
 end

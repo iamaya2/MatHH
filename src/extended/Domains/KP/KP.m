@@ -59,8 +59,8 @@ classdef KP < problemDomain
             s = sprintf('0/1 Knapsack Problem');
         end
 
-        function instanceSet = loadInstanceSet(setID) 
-            % loadInstanceSet   (WIP) Method for easy instance loading. 
+        function allInstances = loadInstanceSet(setID) 
+            % loadInstanceSet   Method for easy instance loading. 
             %
             % Requires the BaseInstances repo (check Github) to be located
             % at the same level than the root folder for the framework. For
@@ -68,39 +68,93 @@ classdef KP < problemDomain
             % 
             % \MatHH
             %   \src
+            %       \extended
+            %       \outsiderCode
+            %           \ yourfile.m <-- You must be at this level
             %   ...
             % \BaseInstances
             %   \Knapsack
             %   ...
             %
-            % Available datasets: 
-            %   Toy - Provides access to four toy instances
+            % Available datasets:           
+            %   GA      - A set with 100 instances generated using a genetic
+            %   algorithm and targetting each low-level heuristic
+            %   Kreher  - A dataset with 8 instances
+            %   LowDim  - A dataset with 9 low dimensional instances
+            %   MixTe1  - A subset with 400 test instances from the Mix50
+            %   dataset
+            %   MixTe2  - A subset with 200 test instances from the Mix50
+            %   dataset
+            %   MixTr1  - A subset with 400 training instances from the 
+            %   Mix50 dataset
+            %   Pis20   - A dataset with 600 hard-to-solve instances
+            %   published by Pisinger and considering 20 items each
+            %   Pis50   - A dataset with 600 hard-to-solve instances
+            %   published by Pisinger and considering 50 items each
+            %   Pis100  - A dataset with 600 hard-to-solve instances
+            %   published by Pisinger and considering 100 items each
+            %   Pis200  - A dataset with 600 hard-to-solve instances
+            %   published by Pisinger and considering 200 items each
+            %   Random  - A dataset with 100 random instances
+            %   Toy     - Provides access to four toy instances
             % 
             % Input: 
             %   setID - A string or char array with the name of the dataset
-            %   that will be loaded (see the list of available datasets)
-            %
-            %   TO-DO: Add more datasets
+            %   that will be loaded (see the list of available datasets)            
             %
             % Output: 
-            %   instanceSet - The set of KPInstance objects, given in a
+            %   allInstances - The set of KPInstance objects, given in a
             %   cell array
             %
             % See also: KPINSTANCE
             
-            
+            baseMatPath = '..\..\..\BaseInstances\Knapsack\files\mat\';
             switch lower(setID)
+                case 'ga'
+                    load([baseMatPath 'GA_Generated\instanceDataset.mat'], 'allInstances')
+
+                case 'kreher'
+                    load([baseMatPath 'Kreher\instanceDataset.mat'], 'allInstances')
+
+                case 'lowdimensional'
+                    load([baseMatPath 'LowDimensional\instanceDataset.mat'], 'allInstances')
+
+                case 'mixte1'
+                    load([baseMatPath 'Mix50\Test1\instanceDataset.mat'], 'allInstances')
+
+                case 'mixte2'
+                    load([baseMatPath 'Mix50\Test2\instanceDataset.mat'], 'allInstances')
+
+                case 'mixtr1'
+                    load([baseMatPath 'Mix50\Training\instanceDataset.mat'], 'allInstances')
+
+                case 'pis20'
+                    load([baseMatPath 'Pisinger_Hard\20\instanceDataset.mat'], 'allInstances')
+
+                case 'pis50'
+                    load([baseMatPath 'Pisinger_Hard\50\instanceDataset.mat'], 'allInstances')
+
+                case 'pis100'
+                    load([baseMatPath 'Pisinger_Hard\100\instanceDataset.mat'], 'allInstances')
+
+                case 'pis200'
+                    load([baseMatPath 'Pisinger_Hard\200\instanceDataset.mat'], 'allInstances')
+
+                case 'random'                
+                    load([baseMatPath 'Random\instanceDataset.mat'], 'allInstances')
+                    
                 case 'toy'
                     % --- Load instances from disk
-                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy01.mat', 'toy01')
-                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy02.mat', 'toy02')
-                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy03.mat', 'toy03')
-                    load('..\..\..\BaseInstances\Knapsack\files\mat\Toy\toy04.mat', 'toy04')
+                    load([baseMatPath 'Toy\toy01.mat'], 'toy01')
+                    load([baseMatPath 'Toy\toy02.mat'], 'toy02')
+                    load([baseMatPath 'Toy\toy03.mat'], 'toy03')
+                    load([baseMatPath 'Toy\toy04.mat'], 'toy04')
                     % --- Create instance dataset
-                    instanceSet = {toy01, toy02, toy03, toy04};
+                    allInstances = {toy01, toy02, toy03, toy04};
+
                 otherwise
                     callErrorCode(101) % Undefined dataset
-            end
+            end            
         end
 
         function stepHeuristic(instance, heurID, varargin) 

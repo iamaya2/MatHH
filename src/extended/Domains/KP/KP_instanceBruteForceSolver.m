@@ -1,41 +1,25 @@
-%% File for brute forcing KP instances
-%% Cleanup
-clc
-clear
-close all
-
-%% Global variables
-basepath = '..\..\..\';
-matInstancePath = [basepath '..\..\BaseInstances\Knapsack\files\mat\Toy\'];
-toSave = true; % For defining if best solutions are updated
-
-%% Loads required packages
-addpath(basepath); % Adds root folder (without subfolders)
-addpath([basepath 'extended\Domains\']); % Adds common domain classes (abstract)
-addpath(genpath([basepath 'extended\Domains\KP'])); % Adds KP domain functionality
-addpath(genpath([basepath 'extended\Utils'])); % Adds assorted utilities
-
-%% Load instance files while brute-forcing them
-%  --- Define instances to load
-allInstances = {'toy01', 'toy02', 'toy03', 'toy04'};
+%% Function for brute forcing KP instances
+function bestSolutionPerInstance = KP_instanceBruteForceSolver(allInstances)
+% Prevent warnings
+warningState = warning().state;
+warning('off')
 %  --- Sweep instances
 nbInstances = length(allInstances);
 bestSolutionPerInstance = KPSolution.empty();
 for idI = 1 : nbInstances
     % --- --- Select instance
-    thisInstanceName = allInstances{idI};
-    % --- --- Load instance
-    fprintf('Attempting to load instance %s ... ', thisInstanceName)
-    load([matInstancePath thisInstanceName '.mat'])
-    thisInstance = eval(thisInstanceName);
-    fprintf('OK!\n')
+    thisInstance = allInstances{idI};
     % --- --- Brute force instance
     nbItems = length(thisInstance.items);
     allSolutions = KPSolution.empty();
-    fprintf('Brute-forcing instance %s... ', thisInstanceName)
+    fprintf('Brute-forcing instance %d/%d... \n', idI, nbInstances)
     for idx = 1 : nbItems
+        fprintf('\tTesting combinations with %d elements... ', idx)
         testCombinations = nchoosek([thisInstance.items], idx);
-        for idC = 1 : size(testCombinations,1)
+        nbCombinations = size(testCombinations,1);
+        fprintf('Generated a total of %d combinations... Testing them... ', nbCombinations)
+        validFlag = zeros(1, nbCombinations);
+        for idC = 1 : nbCombinations
             newSolution = KPSolution();
             newSolution.knapsack.capacity = thisInstance.capacity;
             newSolution.knapsack.ID = thisInstance.solution.knapsack.ID;
@@ -45,9 +29,18 @@ for idI = 1 : nbInstances
             newSolution.knapsack.updateCurrentProfit();
             newSolution.knapsack.checkValidity();
             allSolutions = [allSolutions; newSolution];
+            % Check if the solution is valid
+            if newSolution.knapsack.isUsable || newSolution.knapsack.currentWeight == newSolution.knapsack.capacity
+                validFlag(idC) = 1;
+            end
+        end
+        fprintf('Done!\n')
+        if ~any(validFlag)
+            fprintf('\t --- Detected stagnation (all combinations of these elements are invalid). Aborting search! ---\n')
+            break
         end
     end
-    fprintf('done! Tested a total of %d solutions...\n', length(allSolutions))
+    fprintf('Done! Tested a total of %d solutions...\n', length(allSolutions))
     % --- --- Identify valid solutions
     allValidSolutions = [];
     bestValue = -inf;
@@ -64,9 +57,8 @@ for idI = 1 : nbInstances
     bestSolutionString = formattedDisplayText(bestSolution.knapsack);
     fprintf('\tBest solution found:\n%s\n', bestSolutionString);
     bestSolutionPerInstance(idI) = bestSolution;
-    % --- --- Update file
-    if toSave
-        thisInstance.bestSolution = bestSolution;
-        save([matInstancePath thisInstanceName '.mat'],thisInstanceName)
-    end
+    
 end
+
+% Restore warnings to original state
+warning(warningState)
