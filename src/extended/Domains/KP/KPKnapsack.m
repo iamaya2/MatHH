@@ -65,12 +65,13 @@ classdef KPKnapsack < handle & deepCopyThis
             % packItem  Method for packing items within a KPKnapsack object.
             % Requires a single input, which is a KPItem object.
             % Automatically updates the knapsack length (number of
-            % elements), the current weight and the status of the KPItem. 
+            % elements), the current weight and the status of the KPItem.           
             obj.items = [obj.items thisItem];
             obj.updateCurrentWeight(thisItem.weight);
             obj.updateCurrentProfit(thisItem.profit);
             obj.updateLength(1);
             thisItem.donePacking();
+            thisItem.doneProcessing();
             obj.checkValidity();
         end
         
@@ -81,13 +82,14 @@ classdef KPKnapsack < handle & deepCopyThis
             % elements), the current weight and the status of the KPItem. 
             itemID = find(obj.items == thisItem, 1); % Moves at most one item
             if isempty(itemID)
-                error('The requested KPItem cannot be found within KPKnasack %d. Check that contents match. Aborting!', obj.ID)
+                error('The requested KPItem cannot be found within KPKnapsack %d. Check that contents match. Aborting!', obj.ID)
             else
                 obj.items = [obj.items(1:itemID-1) obj.items(itemID+1:end)];
                 obj.updateCurrentWeight(-thisItem.weight);
                 obj.updateCurrentProfit(-thisItem.profit);
                 obj.updateLength(-1);
                 thisItem.doneUnpacking();
+                thisItem.doneUnprocessing();
                 obj.checkValidity();
             end            
         end

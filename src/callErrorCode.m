@@ -37,6 +37,8 @@ else
             error('Equality test failed to pass (objects are not equal when they should be, or they are equal when they should not). Aborting!')    
         case 104
             error('Independence test failed to pass (objects are not independent when they should be, or they are independent when they should not). Aborting!')
+		case 105
+            error('Logic test failed to pass (check argument given in logic test). Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

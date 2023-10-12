@@ -19,11 +19,11 @@ classdef problemInstance < handle & deepCopyThis
     %     properties        
     %       % Required by the abstract class:
     %           features = NaN;             % Vector of current feature values    
-    %           solution = BPSolution();    % A solution object for the BP problem
+    %           solution;    % A solution object for the BP problem (initialize in constructor)
     %           status = 'Undefined';       % Initial status of the instance
     %       % Additional properties for this particular problem domain:
     %           ID = NaN ;                  % Scalar for differentiating among instances
-    %           items = BPItem();           % A vector with all BPItem objects
+    %           items;           % A vector with all BPItem objects (initialize in constructor)
     %           load = 0;                   % Scalar with the current total load of this instance
     %           maxLoad = 0;                % Scalar with the max total load of the instance
     %           nbItems = 0;                % Number of elements within the instance
@@ -35,7 +35,9 @@ classdef problemInstance < handle & deepCopyThis
     %
     % See also: ProblemDomain, problemSolution    
     properties (Abstract)
-        features % Current feature values of the instance
+        bestSolution % A solution object with the information about the best solution (if available)
+        features % Dictionary with ID:Value format (requires R2022b)          
+        nbFeatures % Number of features that the instance considers. Equal to length(features)
         solution % Solution object (able to store partial and full solutions)
         status % Current status of the instance (Undefined, Pending, Solved)
     end
@@ -51,5 +53,14 @@ classdef problemInstance < handle & deepCopyThis
             % this instance. Requires no inputs.
             fitness = obj.solution.getSolutionPerformanceMetric();
         end
+
+        function solvedStatus = hasBeenSolved(obj)
+            % hasBeenSolved   Method for assessing whether the
+            % problemInstance object has been completely solved. Requires
+            % no inputs. Returns true if the instance is solved and false
+            % otherwise.
+            solvedStatus = false;
+            if strcmp(obj.status,'Solved'), solvedStatus = true; end
+        end        
     end
 end
