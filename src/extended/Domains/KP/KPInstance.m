@@ -7,8 +7,12 @@ classdef KPInstance < problemInstance
         solution;
         status = 'Undefined';        
         % Own (Extra)
+        % --- Base properties
         items; % List of KPItems within the instance
         capacity = NaN; % Knapsack capacity
+        % --- Memory-related properties
+        memory  % Matrix for storing historical feature values 
+        memorySize = 1; % Number of historical feature values to preserve
     end
     
     methods
@@ -48,12 +52,18 @@ classdef KPInstance < problemInstance
                     if nargin > 2 % ... and feature IDs
                         % User defined:
                         selectedIDs = varargin{3}; 
+                        % Memory-related code
+                        if nargin > 3 % user gave memory size
+                            obj.memorySize = varargin{4};
+                        end
                     else % If no IDs are given, default to all
                         selectedIDs = KP.problemFeatures.keys;
                     end
                     obj.getFeatureVector(selectedIDs);
                     obj.nbFeatures = obj.features.numEntries;                    
                     obj.solution = KPSolution(KPKnapsack(obj.capacity,1));
+                    % Memory-related code
+                    obj.memory = nan(obj.memorySize, length(selectedIDs));
                 else
                     callErrorCode(102); % Invalid input
                 end
@@ -88,15 +98,32 @@ classdef KPInstance < problemInstance
             else
                 selectedKeys = obj.features.keys;
             end
+            % Feature update 
+            % --- Historical data
+            % --- --- Older values
+            for idx = obj.memorySize : -1 : 2
+                obj.memory(idx,:) = obj.memory(idx-1,:);
+            end                        
+            % --- Current values
             featureValues = nan(size(selectedKeys));
+            oldFeatureValues = nan(size(selectedKeys));
             idx = 1;
-            for thisKey = selectedKeys(:)' % Force row vector
+            for thisKey = sort(selectedKeys(:)') % Forces sorted row vector
                 thisFeatureCell = KP.problemFeatures(thisKey); % Returns cell array
                 thisFeature = thisFeatureCell{1}; % Get the function handle from cell
+                if obj.features.isConfigured
+                    if obj.features.isKey(thisKey)
+                        oldFeatureValues(idx) = obj.features(thisKey);
+                    end
+                end
+                % --- --- Current values (continued)
                 obj.features(thisKey) = thisFeature(obj);
                 featureValues(idx) = obj.features(thisKey);
                 idx = idx + 1;
             end
+            % --- Historical data
+            % --- --- Most recent value (validates first pass)
+            obj.memory(1,:) = oldFeatureValues;
         end
     
         % ---- ------------------------ ----
@@ -167,11 +194,41 @@ classdef KPInstance < problemInstance
             end
         end
 
+        function setFeatures(obj, featureIDs)
+            % setFeatures   Method for redefining the set of features
+            % available for the instance. Should be used by HHs to customize
+            % instances so that they only contain features of interest.
+            obj.features = dictionary();
+            obj.getFeatureVector(featureIDs);
+            obj.nbFeatures = obj.features.numEntries;
+        end
+
+        % ---- ------------------------ ----
+        % ---- MEMORY-RELATED METHODS ----
+        % ---- ------------------------ ----
+
+        function setMemorySize(obj, newSize)
+            % setMemorySize   This method resets the memory of the
+            % instance and changes it to a new size. It reinitializes the
+            % memory to NaN values, but the rest of the instance is
+            % unaffected.
+            obj.memorySize = newSize;
+            obj.memory = nan(newSize, obj.nbFeatures);
+        end
         
         % ---- ------------------------ ----
         % ---- SUPPORT (INNER) METHODS ----
         % ---- ------------------------ ----
-        
+        function featureValues = getCurrentFeatureValues(obj)
+            % getCurrentFeatureValues   Returns a vector with the current
+            % feature values
+            selectedKeys = sort(obj.features.keys);
+            featureValues = nan(size(selectedKeys));
+            for idx = 1 : length(selectedKeys)
+                thisKey = selectedKeys(idx); 
+                featureValues(idx) = obj.features(thisKey);
+            end
+        end
         
 
     end
