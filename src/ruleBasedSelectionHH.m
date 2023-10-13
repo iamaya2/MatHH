@@ -99,7 +99,6 @@ classdef ruleBasedSelectionHH < selectionHH
             % -\ ---\ targetProblem: function handle to static class of the
             %                        problem domain (e.g. JSSP, BP)
             obj.hhType = 'Rule-based'; % Always true
-%             targetProblem = "job shop scheduling"; % Default domain
             targetProblemHandle = @JSSP;
             Rules = 2;  % Default number of rules
             defaultFeatures = true; % Flag for using default features
@@ -130,8 +129,6 @@ classdef ruleBasedSelectionHH < selectionHH
             else                
                 obj.assignProblem(targetProblemHandle); % new approach
             end
-%             obj.targetProblemText = obj.targetProblem.disp(); % moved to
-%             assignproblem method
             if defaultFeatures, selectedFeatures = 1:length(obj.availableFeatures); end % Default: Use all features 
             if defaultSolvers, selectedSolvers = 1:length(obj.availableSolvers); end 
             obj.assignFeatures(selectedFeatures); 

@@ -44,6 +44,7 @@ classdef problemInstance < handle & deepCopyThis
     
     methods (Abstract)
        featureValues = getFeatureVector(obj, varargin) % Updates and return feature values, given a set of feature IDs
+       featureValues = getCurrentFeatureValues(obj) % Returns current feature values for the IDs associated with the instance
     end
     
     methods
