@@ -239,7 +239,7 @@ classdef ruleBasedSelectionHH < selectionHH
             end
         end
         
-        function heuristicID = getRuleAction(obj, ruleID, instance)
+        function heuristicID = getRuleAction(obj, ruleID)
             % getRuleAction   Method for returning the action ID of a given
             % rule. It corresponds to the last column of the selector. 
             %
@@ -254,7 +254,7 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicID = obj.value(ruleID, end); 
         end
         
-        function stepData = getStepData(obj, instance, heuristicID)
+        function stepData = getStepData(~, instance, heuristicID)
             % getStepData   Method for generating step data for partial
             % solutions. 
             %
@@ -266,8 +266,6 @@ classdef ruleBasedSelectionHH < selectionHH
             % Outputs:
             %    stepData - Structure with the information from this step
             
-%             stepData = struct('featureValues', instance.features,...
-%             stepData = struct('featureValues', instance.getFeatureVector(obj.featureIDs),...
              stepData = struct('featureValues', instance.getCurrentFeatureValues(),...
                                     'selectedSolver', heuristicID,...
                                     'solution', instance.solution.clone()); 
@@ -280,7 +278,7 @@ classdef ruleBasedSelectionHH < selectionHH
             %
             % -\ Required inputs:
             % -\ ---\ solution: A vectorized solution model (as given by
-            %                   UPSO)
+            %                   an optimizer, e.g., UPSO)
             % -\ Optional inputs:
             % -\ ---\ instances: A set of instances for testing the model.
             %                    If no instances are given, the framework
@@ -296,21 +294,19 @@ classdef ruleBasedSelectionHH < selectionHH
                 instances = obj.trainingInstances;
             end            
             currentModel = reshape(solution, obj.nbRules, obj.nbFeatures+1);
-            currentSelection = round(currentModel(:,end)); % Round action IDs
-            currentModel(:,end) = obj.solverIDs(currentSelection); % Translates to action IDs
-            obj.setModel(currentModel)
+            currentSelection = round(currentModel(:,end)); % Ensures integer IDs
+            currentModel(:,end) = obj.solverIDs(currentSelection); % Translates to the actual action IDs
+            obj.setModel(currentModel) % Updates the HH object to reflect the current model
             solvedInstances = obj.solveInstanceSet(instances);
             fitness = 0;
             nbInstances = length(solvedInstances);
-            for idx = 1 : nbInstances
-%             for thisInstance = instances                
+            for idx = 1 : nbInstances              
                 thisInstance = solvedInstances{idx};
                 fitness = fitness + thisInstance.getSolutionPerformanceMetric();
             end                        
         end
         
         % ----- Model initializer
-%         function initializeModel(obj, nbRules, nbFeatures, nbSolvers)
         function initializeModel(obj, nbRules)
             % INITIALIZEMODEL  Method for generating a random solution for
             % the current hh model
@@ -320,30 +316,7 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.hasInitialized = true;
         end 
 		
-%         function initializeModel_one_to_one(obj, nbRules, nbFeatures, nbSolvers)
-%             % INITIALIZEMODEL  Method for generating a random solution for
-%             % the current hh model
-%              
-%             Heuristic_selector = ["MaxProfit" "MinWeight" "ProfitWeightRatio" "Markovitz"];
-%             obj.featurevalues = rand(nbRules, nbFeatures);
-%             obj.value = [obj.featurevalues Heuristic_selector'];
-%             obj.nbRules = nbRules; 
-%             obj.nbFeatures = nbFeatures;
-%             obj.nbSolvers = nbSolvers;
-%         end 
-        
-% --------------- This must be UPDATED ASAP -------------
-% --------------- This method should NOT be commented -------------
-        % ----- Print overloader for disp()
-%         function printExtraData(obj)            
-%             fprintf('\tCurrent model:       \n\t')
-%             modelString = repmat('\t%.4f', 1, obj.nbFeatures+1);
-%             modelString = [modelString '\n\t'];
-%             fprintf(modelString, obj.value')
-%             fprintf('\n');
-%         end
-
-        
+       
         function [fH2, fH] = plotFeatureMap(obj, instanceSet, opMode, varargin)
             % PLOTFEATUREMAP   Method for plotting the distribution of
             % feature values for a given set of instances, when solved with
@@ -473,17 +446,13 @@ classdef ruleBasedSelectionHH < selectionHH
             yPts = [valMin(2)-0.1 midPoints2 valMax(2)+0.1];
             
             
-%             fH.delete
             figure
             
             fH2 = surf(xPts,yPts,histData','edgecolor','none','facecolor','interp','FaceAlpha',0.65);
             set(gca,'View',[0 90])
             colorbar
-%             colormap(jet)
             colormap(summer)
             grid off
-%             axis equal
-%             axis([min(xPts) max(xPts) min(yPts) max(yPts) 0 1])
             box on
             xlabel(['F_' num2str(features(1))])
             ylabel(['F_' num2str(features(2))])
@@ -496,7 +465,7 @@ classdef ruleBasedSelectionHH < selectionHH
             
         end
         
-        function plotFeatureTrack(obj, data)
+        function plotFeatureTrack(~, data)
             nbPts = length(data(:,1));
             hold on, 
             plot3(data(:,1),data(:,2),ones(nbPts,1),'k--')
@@ -565,8 +534,7 @@ classdef ruleBasedSelectionHH < selectionHH
             % features.
             obj.value = model;
             [obj.nbRules, obj.nbFeatures] = size(model); 
-            obj.nbFeatures = obj.nbFeatures -1; % Fix for the action column
-            %obj.nbSolvers = max(model(:,end)); % At least the max action
+            obj.nbFeatures = obj.nbFeatures -1; % Fix for the action column           
         end 
                 
         % ----- Hyper-heuristic solver
@@ -582,7 +550,7 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.getRuleAction(activeRule, instance); 
+                heuristicID = obj.getRuleAction(activeRule); 
                 %heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
                 stepData = obj.getStepData(instance, heuristicID);
 %                 stepData = struct('featureValues', instance.features,...
