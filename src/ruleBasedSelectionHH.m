@@ -31,14 +31,13 @@ classdef ruleBasedSelectionHH < selectionHH
     
     %  ruleBasedSelectionHH Properties:     
     %    
-    %   nbRules - Number of rules for the HH
-    %   nbFeatures - Number of features for the HH
-    %   nbSolvers - Number of available solvers for the HH
-    % 	featurevalues - Vector containing the current feature values. To-Do: Remove this if unused
+    %   availableFeatures - Contains information about the features
+    %   available to the HH for the problem domain it has been assigned
+    %   to
     %   featureIDs - Vector with the ID of the features that the model uses
-    %   heuristicVector - TO-DEL? Stores information about heuristic usage (not yet implemented)    
-    %   HHRules - TO-DO: Complete description
-    %   instances - Stores information returned by getInstances
+    %   nbFeatures - Integer with the number of features that the HH
+    %   considers
+    %   nbRules - Integer with the number of rules for the HH model
     %
     %  ruleBasedSelectionHH Methods: 
     %
@@ -62,27 +61,19 @@ classdef ruleBasedSelectionHH < selectionHH
     %   train(obj, criterion, varargin) -
     %    
     
-    properties
-        % Most properties are inherited from the selectionHH superclass. Only
-        % the following properties are specific to this class:
-        
-        % String vector of features that can be used for analyzing the problem state (problem dependent; see each COP for more details)    
-        availableFeatures; 
-        nbRules         = NaN; % Number of rules for the HH model
-        nbFeatures      = NaN; % Number of features for the HH model
-%         nbSolvers       = NaN; % Number of available solvers for the HH
-        featurevalues % Vector containing the current feature values. To-Do: Remove this if unused
+    properties        
+        % String vector of features that can be used for analyzing the 
+        % problem state (problem dependent; see each COP for more details)    
+        availableFeatures;         
         featureIDs % Vector with the ID of the features that the model uses
-        hasInitialized = false; % Flag for indicating if the model reflects the feature and solver assignment
-        heuristicVector % Stores information about heuristic usage (not yet implemented)
-        HHRules % TO-DO: Complete description
-        instances % Stores information returned by getInstances
-        %     description            % shows training method, and instances used        
+        nbFeatures      = NaN; % Number of features for the HH model
+        nbRules         = NaN; % Number of rules for the HH model        
+        
+        % The following properties need some work: 
+
+        heuristicVector % Stores information about heuristic usage (TO-DO: Change by method that scans performance data)
     end
-    
-    properties (Dependent)
-        % TO-DO: Put any dependent properties here (calculated on-the-fly)
-    end
+      
     
     % ----- ---------------------------------------------------- -----
     %                       Methods
@@ -144,7 +135,8 @@ classdef ruleBasedSelectionHH < selectionHH
         function assignFeatures(obj,featureArray)
             % assignFeatures  Method for assigning the feature IDs that the
             % HH shall use. Requires a single input, which is a vector of
-            % feature IDs
+            % feature IDs (integers). Restores the initialization status of the HH
+            % since it does not enforce reinitialization.
              obj.featureIDs = featureArray;
              obj.nbFeatures = length(featureArray);
              obj.hasInitialized = false;
@@ -152,138 +144,23 @@ classdef ruleBasedSelectionHH < selectionHH
         
         function assignSolvers(obj, solverIDs)
             % assignSolvers  Method for defining a custom solver subset.
-            % Requires a single input, which is a vector of solver IDs.
+            % Requires a single input, which is a vector of solver IDs
+            % (integers). Restores the initialization status of the HH
+            % since it does not enforce reinitialization.
             obj.solverIDs = solverIDs;
             obj.nbSolvers = length(solverIDs);
             obj.hasInitialized = false;
         end
         
         function newHH = clone(obj)
-            % clone   Method for providing a clone of a rule-based HH
-            warning('This method is deprecated. Use the constructor instead.')
-            
-%             % -- Old code -- ... leaving it commented in case something breaks... 
-%             newHH = ruleBasedSelectionHH(obj.nbRules, obj.targetProblemText);            
-%             newHH.nbFeatures        = obj.nbFeatures; % Number of features for the HH
-%             newHH.nbSolvers         = obj.nbSolvers; % Number of available solvers for the HH
-%             newHH.featurevalues     = obj.featurevalues; % Vector containing the current feature values. To-Do: Remove this if unused
-%             newHH.featureIDs        = obj.featureIDs; % Vector with the ID of the features that the model uses            
-%             newHH.HHRules           = obj.HHRules; % TO-DO: Complete description
-%             newHH.instances         = obj.instances; % Stores information returned by getInstances
-%             newHH.trainingInstances = obj.trainingInstances;
-%             newHH.trainingMethod    = obj.trainingMethod;
-%             newHH.trainingParameters = obj.trainingParameters;
-%             newHH.testingInstances  = obj.testingInstances;
-%             newHH.performanceData   = obj.performanceData;
-%             newHH.status            = obj.status;            
-%             newHH.value             = obj.value;
-%             
-%             % ToDo: Change this by a for-loop that iterates across
-%             % properties... in the meantime: 
-%             newHH.oracle            = obj.oracle;    
-%             newHH.trainingPerformance = obj.trainingPerformance;
-%             newHH.trainingSolution  = obj.trainingSolution;
-%             newHH.trainingStats     = obj.trainingStats;            
-%             % -- End Old code --
-            % -- New code --
+            % clone   (deprecated) Method for providing a clone of a 
+            % rule-based HH.
+            %
+            % Since it has been deprecated, please clone objects using the
+            % constructor directly and passing the object to be cloned.
+            callErrorCode(3) % Deprecated method            
             newHH = ruleBasedSelectionHH(obj);
         end
-        
-        % ----- Instance seeker
-        function allinstances = getInstances(obj, instanceType, varargin)
-            % GETINSTANCES  Method for extracting one kind of instances from the model (not yet implemented)
-            %  instanceType: String containing the kind of instances that
-            %  will be extracted. Can be: Training, Testing
-            
-            % ------------------------------------------------------
-%             The following code is commented because should be unused.
-%             Test and if everything works, delete this block:
-%              switch  lower(instanceType)              
-%                 case 'preliminary'
-%                     addpath(genpath('InstanceRepository/PreliminaryInstances'))
-%                     if nargin == 3 
-%                         ChoseInstances=varargin{1};
-%                     else 
-%                        warning("Must choose one of three kind of preliminary instances: 1 - LPTvsSPT, 2 - SPTvsLPT, 3 - Random");
-%                        ChoseInstances=input("Write the kind of preliminary instances to load");
-%                     end
-% %                     disp(ChoseInstances) 
-%                     switch ChoseInstances 
-%                         case 1
-%                             for idx=1:30
-%                                 address="JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"LPTvsSPT.mat";
-%                                 JSSPInstance = {};
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=JSSPInstance{1};
-%                             end
-%                         case 2
-%                             for idx=1:30
-%                                 address="JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"SPTvsLPT.mat";
-%                                 JSSPInstance = {};
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=JSSPInstance{1};
-%                             end
-%                         case 3    
-%                             for idx=1:30
-%                                 address="JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"MPAvsLPA.mat";
-%                                 cell = {}; 
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=cell{1};
-%                             end
-%                         case 4    
-%                             for idx=1:30
-%                                 address="JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"LPAvsMPA.mat";
-%                                 cell = {}; 
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=cell{1};
-%                             end
-%                         case 5    
-%                             for idx=1:45
-%                                 address="JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"Random.mat";
-%                                 %JSSPInstance = {}; 
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=generatedInstance;
-%                             end     
-%                         case 6
-%                             for idx=1:30
-%                                 address=["GeneratedJSSPInstance_2020_May_27_19_04_33_3jobs_4machs_Inst"+num2str(idx)+".mat"];
-%                                 instance = {};
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=instance;
-%                             end
-%                         case 7
-%                             for idx=1:30
-%                                 address=["JSSPInstanceJ3M4T10T210Rep"+num2str(idx)+"AllvsMPA.mat"];
-%                                 instance = {};
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=instance;
-%                             end    
-%                         otherwise
-%                             warning("Selected preliminary instance kind is not defined, program will load 30 random instances by default")
-%                             for idx=1:30
-%                                 address="GeneratedJSSPInstance_2020_May_27_19_04_33_3jobs_4machs_Inst"+num2str(idx)+".mat";
-%                                 instance = {};
-%                                 load(address)
-% %                                 allinstances{idx}=import(address);
-%                                 allinstances{idx}=instance;
-%                             end    
-%                     end
-%                  rmpath(genpath('InstanceRepository/PreliminaryInstances'))
-%                 otherwise
-%                     warning("defined instance Types: {'preliminary'}")
-%                     
-%              end 
-%              obj.instances=allinstances;
-%              % ------------------------------------------------------
-        end  
-        
         
         % ----- Rule selector for the model
         function closestRule = getClosestRule(obj, instance)
@@ -292,29 +169,10 @@ classdef ruleBasedSelectionHH < selectionHH
             % (as indicated by the problem features in use). Receives a
             % single input, which is the instance to analyze.
             
-            % --------------- ANALYZE/IMPROVE THIS CODE ------------
-            switch obj.problemType
-                case 'a' %'JSSP' (for testing purposes)
-                    featureValues = nan(1,obj.nbFeatures);
-                    for f=1:obj.nbFeatures
-                        featureValues(f)=normalizeFeature(CalculateFeature(instance, obj.featureIDs(f)),obj.featureIDs(f));
-                    end
-                    instance.features=featureValues;
-                    currentFeatures = instance.features;
-                otherwise
-                    currentFeatures = instance.getFeatureVector(obj.featureIDs); 
-            end
-            %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            for i = 1:size(obj.value,1)                
-                dist(i)  = sqrt(sum((obj.value(i,1:end-1) - currentFeatures) .^ 2));
-            end
-            [~, closestRule] = min(dist);
-            %disp(dist)
-            
-            % --------------- CONFLICTING VERSION: ------------
-            %allDistances = distRadialKernel(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            %allDistances = dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
-            %[~, closestRule] = min(allDistances);
+            currentFeatures = instance.getFeatureVector(obj.featureIDs); 
+            allDistances = dist2(obj.value(:,1:end-1),repmat(currentFeatures,obj.nbRules,1));
+            [~, closestRule] = min(allDistances);
+
         end
         
         function performanceMetrics = getPerformanceDataMetrics(obj)
@@ -330,14 +188,18 @@ classdef ruleBasedSelectionHH < selectionHH
         
         
         function selectedRule = getRouletteRule(obj, instance, type)
-            % getRouletteRule  Method for selecting a rule. Uses a
+            % getRouletteRule  (WIP) Method for selecting a rule. Uses a
             % probability based on the distance of each rule to the current
             % state. Closest rule = highest probability. Considers
             % different types of roulettes:
             %   raw: Base roulette-wheel selection
             %   exponentialRanking: Roulette based on the exponential
             %   rankings of entries
+            %
+            % WIP: This method must be updated to reflect the possibility
+            % of using traditional Euclidean distance, or the Radial one. 
             
+            callErrorCode(0) % WIP message
             allDistances = 1./distRadialKernel(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
 %             allDistances = 1./dist2(obj.value(:,1:end-1),repmat(instance.features,obj.nbRules,1));
             if any(allDistances==Inf), selectedRule = find(allDistances==Inf,1); return, end
