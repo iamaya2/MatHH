@@ -537,98 +537,34 @@ classdef ruleBasedSelectionHH < selectionHH
             obj.nbFeatures = obj.nbFeatures -1; % Fix for the action column           
         end 
                 
-        % ----- Hyper-heuristic solver
-        %function instance = solveInstance(obj, instance)
+        % ----- Hyper-heuristic solver       
 		function [SolvedInstance, performanceData] = solveInstance(obj, instance)
-            % SOLVEINSTANCE  Method for solving a single instance with the current version of the HH (not yet implemented)           
-			
+            % SOLVEINSTANCE  Method for solving a single instance with the 
+            % current version of the HH			
             performanceData = {};
-			% --------------- This must be UPDATED ASAP -------------
-			counter = 1;
-            
-            
-            heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.getRuleAction(activeRule); 
-                %heuristicID = obj.value(activeRule,end); % Must change this by a getRuleAction method
+                heuristicID = obj.getRuleAction(activeRule);                 
                 stepData = obj.getStepData(instance, heuristicID);
-%                 stepData = struct('featureValues', instance.features,...
-%                                     'selectedSolver', heuristicID,...
-%                                     'solution', instance.solution.clone()); % Must change this by a getStepData method
                 performanceData = [performanceData stepData];
-                heuristicVector2(counter) = heuristicID;
-                counter = counter +1;
-                obj.targetProblem.stepHeuristic(instance, heuristicID);
-                %instance.stepInstance(heuristicID);
-            end     
-            %disp(heuristicVector)
-            obj.heuristicVector=heuristicVector2;
+                obj.targetProblem.stepHeuristic(instance, heuristicID);                
+            end                 
             SolvedInstance = instance;
             stepData = struct('featureValues', instance.getCurrentFeatureValues,...
-                'selectedSolver', NaN,...
-                'solution', instance.solution);
-            performanceData = [performanceData stepData]; % Values associated to the solved instance
-			
-			% --------------- CONFLICTING VERSION: ------------
-%            ruleType = 2; % to-change: put this as a general property
- %           while ~strcmp(instance.status, 'Solved')
-  %              activeRule = obj.getRule(instance, ruleType);
-   %             heuristicID = obj.value(activeRule,end);
-    %            obj.targetProblem.stepHeuristic(instance, heuristicID);
-     %       end            
+                'selectedSolver', NaN, 'solution', instance.solution);
+            performanceData = [performanceData stepData]; % Values associated to the solved instance						        
         end 
         
-		
-		function Instance = step(obj, instance)
-            % SOLVEINSTANCE  Method for solving a single instance with the current version of the HH (not yet implemented)            
-%             logOp=false; 
-%             for i=1:length(instance.jobRegister)
-%                 if instance.jobRegister(i)>0
-%                     logOp=true;
-%                 end
-%             end
-%             
-%             if logOp==false;
-%                 counter=1;
-%             else
-%                 counter = counter +1;
-%             end
-            
-           % disp(counter)
-            
-            heuristicVector2=[]; % se necesita modificar para tener el historial de todas las heuristicas sobre todas las instancias
-            
-                activeRule = obj.getClosestRule(instance);
-                heuristicID = obj.value(activeRule,end);
-               % heuristicVector2(counter) = heuristicID;
-                %counter = counter +1;
-                obj.targetProblem.stepHeuristic(instance, heuristicID);
-                %instance.stepInstance(heuristicID);
-              
-            %disp(heuristicVector2)
-            %obj.heuristicVector=heuristicVector2;
-            Instance = instance;
-        end 
-        
-        
-        function solveInstanceSet_noCloning(obj,instances)
-            for i=1:length(instances)
-                obj.solveInstance(instances{i})
-            end
-        end
-        
-        
-               
         
         % ----- Instance asigner
         function setInstances(obj, instanceType, instances)
-            % SETINSTANCES  Method for assigning one kind of instances to the model (not yet implemented)
+            % SETINSTANCES  (WIP) Method for assigning one kind of 
+            % instances to the model
             %  instanceType: String containing the kind of instances that
             %                will be extracted. Can be: Training, Testing
             %  instances:    Cell array with the instances that will be
             %                assigned
-            
+            callErrorCode(0)
         end 
                 
 
