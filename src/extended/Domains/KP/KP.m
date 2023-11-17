@@ -15,7 +15,7 @@ classdef KP < problemDomain
         % 12: Median Normalized Weight of Packed Items (MNWPI)
         % 13: Standard dev. Normalized Profit of Packed Items (SNPPI)
         % 14: Standard dev. Normalized Weight of Packed Items (SNWPI)
-        problemFeatures = dictionary(1:14, ...
+        problemFeatures = dictionary([1:14 101:102], ...
             {@(inst) KP.featANPRI(inst), @(inst) KP.featANWRI(inst), ...
             @(inst) KP.featNWPCRI(inst), ...
             @(inst) KP.featMNPRI(inst), @(inst) KP.featMNWRI(inst), ...
@@ -24,6 +24,7 @@ classdef KP < problemDomain
             @(inst) KP.featNWPCPI(inst), ...
             @(inst) KP.featMNPPI(inst), @(inst) KP.featMNWPI(inst), ...
             @(inst) KP.featSNPPI(inst), @(inst) KP.featSNWPI(inst), ...
+            @(inst) KP.featANPRIM1(inst), @(inst) KP.featANWRIM1(inst),  ...
             });
 
         % Dictionary with ID:Handle format (requires R2022b). Entries:
@@ -461,6 +462,33 @@ classdef KP < problemDomain
                 featureValue = std(allData) / max(allData);
             end
         end
+
+
+        % --- For memory (shifted one time step)
+        function featureValue = featANPRIM1 (instance)
+            % featANPRIM1   Memory-based version of the ANPRI feature (1
+            % step)
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            callErrorCode(0) % WIP
+            recoveredState = instance.memory(1);
+            featureValue = recoveredState(1);
+        end
+
+        function featureValue = featANWRIM1 (instance)            
+            % featANWRIM1   Memory-based version of the ANWRI feature (1
+            % step)
+            % Input: Current instance
+            % Output: Feature value
+            %
+            % See also: KP.problemFeatures
+            callErrorCode(0) % WIP
+            recoveredState = instance.memory(1);
+            featureValue = recoveredState(2);
+        end
+
 
         % ---- ------------------------ ----
         % ---- OTHER METHODS ----

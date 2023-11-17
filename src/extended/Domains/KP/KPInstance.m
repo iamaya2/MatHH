@@ -11,7 +11,7 @@ classdef KPInstance < problemInstance
         items; % List of KPItems within the instance
         capacity = NaN; % Knapsack capacity
         % --- Memory-related properties
-        memory  % Matrix for storing historical feature values 
+        memory  % Dictionary for storing historical feature values (one dict per memory slot)
         memorySize = 1; % Number of historical feature values to preserve
     end
     
@@ -38,7 +38,8 @@ classdef KPInstance < problemInstance
             %
             % See also: KPITEM
             obj.bestSolution = KPSolution(); % initialize best solution holder
-            obj.features = dictionary();
+            obj.features = dictionary(); % Empty dictionary
+            obj.memory = dictionary(); % Empty dictionary
             obj.solution = KPSolution(); % initializes solution
             obj.items = KPItem.empty;
             if nargin > 0
@@ -63,7 +64,7 @@ classdef KPInstance < problemInstance
                     obj.nbFeatures = obj.features.numEntries;                    
                     obj.solution = KPSolution(KPKnapsack(obj.capacity,1));
                     % Memory-related code
-                    obj.memory = nan(obj.memorySize, length(selectedIDs));
+                    obj.memory = dictionary(1:obj.memorySize,dictionary);
                 else
                     callErrorCode(102); % Invalid input
                 end
@@ -165,9 +166,9 @@ classdef KPInstance < problemInstance
             % --- Historical data
             % --- --- Older values
             for idx = obj.memorySize : -1 : 2
-                obj.memory(idx,:) = obj.memory(idx-1,:);
+                obj.memory(idx) = obj.memory(idx-1);
             end                        
-            obj.memory(1,:) = obj.getCurrentFeatureValues();
+            obj.memory(1) = obj.features;
             obj.updateFeatureValues(obj.features.keys)
 
             % Validate if the instance has been completely solved
@@ -197,7 +198,7 @@ classdef KPInstance < problemInstance
             % memory to NaN values, but the rest of the instance is
             % unaffected.
             obj.memorySize = newSize;
-            obj.memory = nan(newSize, obj.nbFeatures);
+            obj.memory = dictionary(1:newSize, dictionary);
         end
         
         % ---- ------------------------ ----
