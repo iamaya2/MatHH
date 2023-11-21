@@ -13,6 +13,8 @@ function callErrorCode(errCode)
 %     ---\ 102: Invalid input for constructor.
 %     ---\ 103: Failed equality test.
 %     ---\ 104: Failed independence test.
+%     ---\ 105: Failed logic test.
+%     ---\ 106: Memory size (for HH) not properly defined.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -42,6 +44,8 @@ else
             error('Independence test failed to pass (objects are not independent when they should be, or they are independent when they should not). Aborting!')
 		case 105
             error('Logic test failed to pass (check argument given in logic test). Aborting!')
+        case 106
+            error('The memory size (for the HH) has not been properly defined. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

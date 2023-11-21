@@ -1,5 +1,8 @@
 classdef KP < problemDomain
     properties (Constant)
+        % List of default feature IDs (those that do not rely on memory)
+        defaultFeatureIDs = 1:14;     
+
         % Dictionary with ID:Handle format (requires R2022b). Entries:
         % 1: Average Normalized Profit of Remaining Items (ANPRI)
         % 2: Average Normalized Weight of Remaining Items (ANWRI)
@@ -15,7 +18,7 @@ classdef KP < problemDomain
         % 12: Median Normalized Weight of Packed Items (MNWPI)
         % 13: Standard dev. Normalized Profit of Packed Items (SNPPI)
         % 14: Standard dev. Normalized Weight of Packed Items (SNWPI)
-        problemFeatures = dictionary([1:14 101:102], ...
+        problemFeatures = dictionary([1:14 101:114], ...
             {@(inst) KP.featANPRI(inst), @(inst) KP.featANWRI(inst), ...
             @(inst) KP.featNWPCRI(inst), ...
             @(inst) KP.featMNPRI(inst), @(inst) KP.featMNWRI(inst), ...
@@ -24,7 +27,13 @@ classdef KP < problemDomain
             @(inst) KP.featNWPCPI(inst), ...
             @(inst) KP.featMNPPI(inst), @(inst) KP.featMNWPI(inst), ...
             @(inst) KP.featSNPPI(inst), @(inst) KP.featSNWPI(inst), ...
-            @(inst) KP.featANPRIM1(inst), @(inst) KP.featANWRIM1(inst),  ...
+            @(inst) KP.featMemoryBased(inst,1,1), @(inst) KP.featMemoryBased(inst,1,2),  ...
+            @(inst) KP.featMemoryBased(inst,1,3), @(inst) KP.featMemoryBased(inst,1,4),  ...
+            @(inst) KP.featMemoryBased(inst,1,5), @(inst) KP.featMemoryBased(inst,1,6),  ...
+            @(inst) KP.featMemoryBased(inst,1,7), @(inst) KP.featMemoryBased(inst,1,8),  ...
+            @(inst) KP.featMemoryBased(inst,1,9), @(inst) KP.featMemoryBased(inst,1,10),  ...
+            @(inst) KP.featMemoryBased(inst,1,11), @(inst) KP.featMemoryBased(inst,1,12),  ...
+            @(inst) KP.featMemoryBased(inst,1,13), @(inst) KP.featMemoryBased(inst,1,14),  ...
             });
 
         % Dictionary with ID:Handle format (requires R2022b). Entries:
@@ -465,28 +474,24 @@ classdef KP < problemDomain
 
 
         % --- For memory (shifted one time step)
-        function featureValue = featANPRIM1 (instance)
-            % featANPRIM1   Memory-based version of the ANPRI feature (1
-            % step)
-            % Input: Current instance
-            % Output: Feature value
-            %
-            % See also: KP.problemFeatures
-            callErrorCode(0) % WIP
-            recoveredState = instance.memory(1);
-            featureValue = recoveredState(1);
-        end
+%         function featureValue = featANPRIM1 (instance)
+%             % featANPRIM1   Memory-based version of the ANPRI feature (1
+%             % step)
+%             % Input: Current instance
+%             % Output: Feature value
+%             %
+%             % See also: KP.problemFeatures
+%             memShift = 1; featID = 1;
+%             featureValue = instance.processMemoryBasedFeature(memShift, featID);              
+%         end
 
-        function featureValue = featANWRIM1 (instance)            
-            % featANWRIM1   Memory-based version of the ANWRI feature (1
-            % step)
-            % Input: Current instance
-            % Output: Feature value
+        function featureValue = featMemoryBased (instance, memShift, featID)            
+            % featMemoryBased   Memory-based version of the base features 
+            % Input: Current instance, memory shift, and base feature ID
+            % Output: Shifted feature value 
             %
-            % See also: KP.problemFeatures
-            callErrorCode(0) % WIP
-            recoveredState = instance.memory(1);
-            featureValue = recoveredState(2);
+            % See also: KP.problemFeatures            
+            featureValue = instance.processMemoryBasedFeature(memShift, featID);              
         end
 
 

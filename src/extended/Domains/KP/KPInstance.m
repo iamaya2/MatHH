@@ -1,4 +1,4 @@
-classdef KPInstance < problemInstance
+classdef KPInstance < problemInstance    
     properties
         % Inherited (Abstract)
         bestSolution;
@@ -39,7 +39,7 @@ classdef KPInstance < problemInstance
             % See also: KPITEM
             obj.bestSolution = KPSolution(); % initialize best solution holder
             obj.features = dictionary(); % Empty dictionary
-            obj.memory = dictionary(); % Empty dictionary
+            obj.setMemorySize(obj.memorySize); % Empty dictionary by default
             obj.solution = KPSolution(); % initializes solution
             obj.items = KPItem.empty;
             if nargin > 0
@@ -55,16 +55,16 @@ classdef KPInstance < problemInstance
                         selectedIDs = varargin{3}; 
                         % Memory-related code
                         if nargin > 3 % user gave memory size
-                            obj.memorySize = varargin{4};
+%                             obj.memorySize = varargin{4};                            
+                            obj.memory = obj.setMemorySize(varargin{4});
                         end
-                    else % If no IDs are given, default to all
-                        selectedIDs = KP.problemFeatures.keys;
+                    else % If no IDs are given, use default 
+                        selectedIDs = KP.defaultFeatureIDs;
                     end
                     obj.updateFeatureValues(selectedIDs);
                     obj.nbFeatures = obj.features.numEntries;                    
                     obj.solution = KPSolution(KPKnapsack(obj.capacity,1));
-                    % Memory-related code
-                    obj.memory = dictionary(1:obj.memorySize,dictionary);
+                    
                 else
                     callErrorCode(102); % Invalid input
                 end
@@ -186,6 +186,7 @@ classdef KPInstance < problemInstance
             obj.features = dictionary();
             obj.updateFeatureValues(featureIDs);
             obj.nbFeatures = obj.features.numEntries;
+            obj.setMemorySize(obj.memorySize); % Flushes memory to ensure harmony
         end
 
         % ---- ------------------------ ----
@@ -195,10 +196,15 @@ classdef KPInstance < problemInstance
         function setMemorySize(obj, newSize)
             % setMemorySize   This method resets the memory of the
             % instance and changes it to a new size. It reinitializes the
-            % memory to NaN values, but the rest of the instance is
-            % unaffected.
+            % memory to NaN values, based on the currently selected features. 
+            % The rest of the instance is unaffected.
             obj.memorySize = newSize;
-            obj.memory = dictionary(1:newSize, dictionary);
+            if isnan(obj.nbFeatures)
+                defaultFeatureDict = dictionary;
+            else
+                defaultFeatureDict = dictionary(obj.features.keys,nan);
+            end           
+            obj.memory = dictionary(1:newSize, defaultFeatureDict);
         end
         
         % ---- ------------------------ ----
@@ -213,6 +219,17 @@ classdef KPInstance < problemInstance
                 thisKey = selectedKeys(idx); 
                 featureValues(idx) = obj.features(thisKey);
             end
+        end
+
+        function featureValue = processMemoryBasedFeature(obj, memShift, featID)
+            % processMemoryBasedFeature   Validates and retrieves memory
+            % information. Requires the memory shift and the feature ID.
+            if obj.memorySize >= memShift % Validate if enough memory
+                recoveredState = obj.memory(memShift);
+                featureValue = recoveredState(featID);
+            else
+                callErrorCode(106) % Wrong memory size
+            end  
         end
 
         function updateFeatureValues(obj, selectedKeys)
