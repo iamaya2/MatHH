@@ -226,7 +226,11 @@ classdef KPInstance < problemInstance
             % information. Requires the memory shift and the feature ID.
             if obj.memorySize >= memShift % Validate if enough memory
                 recoveredState = obj.memory(memShift);
-                featureValue = recoveredState(featID);
+                if recoveredState.isKey(featID)
+                    featureValue = recoveredState(featID);
+                else
+                    featureValue = nan;
+                end
             else
                 callErrorCode(106) % Wrong memory size
             end  
