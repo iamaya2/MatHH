@@ -12,7 +12,7 @@ classdef KPInstance < problemInstance
         capacity = NaN; % Knapsack capacity
         % --- Memory-related properties
         memory  % Dictionary for storing historical feature values (one dict per memory slot)
-        memorySize = 1; % Number of historical feature values to preserve
+        memorySize = 0; % Number of historical feature values to preserve
     end
     
     methods
