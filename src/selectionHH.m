@@ -1,4 +1,4 @@
-classdef selectionHH < handle
+classdef selectionHH < handle & deepCopyThis
     % selectionHH  -  Class definition for selection hyper-heuristics (superclass)
     %
     %   This class contains methods and properties that should be common to all
@@ -19,7 +19,9 @@ classdef selectionHH < handle
         % class of the problem domain and represent the full list of
         % supported solvers. Check the solverIDs property to see the IDs of
         % the solvers currently allowed for this HH.        
-        availableSolvers; 
+        availableSolvers;
+        % Flag for indicating if the HH has been initialized
+        hasInitialized = false; 
         hhType          = 'Undefined'; % Type of HH that will be used. Can be: Undefined (when new), Rule-based, Sequence-based, or others (pending update). Inherited from selectionHH class. 
         lastSolvedInstances = NaN    ; % Property with the instances solved in the last call to the solveInstanceSet method. Inherited from selectionHH class.
         nbSolvers       = NaN;         % Number of available solvers for the HH. Inherited from selectionHH class.
@@ -120,11 +122,14 @@ classdef selectionHH < handle
             obj.targetProblemText = obj.targetProblem.disp();
         end
         
-        % ----- Deep copy
+        % ----- Deep copy (deprecated)
         function cloneProperties(oldHH, newHH)
-            % cloneProperties   Method for moving the selectionHH
+            % cloneProperties   (deprecated) Method for moving the selectionHH
             % properties. Automatically sweeps all properties. Requires a
             % single input (the new/empty HH object).
+            %
+            % See also: DEEPCOPY
+            callErrorCode(3) % Deprecated method
             propertySet = properties(oldHH);
             for idx = 1:length(propertySet) 
                 newHH.(propertySet{idx}) = oldHH.(propertySet{idx});
