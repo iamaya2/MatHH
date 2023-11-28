@@ -14,7 +14,9 @@ classdef selectionHH < handle & deepCopyThis
     %                       Properties
     % ----- ---------------------------------------------------- -----
     properties        
-        % String vector of solvers (heuristics) that can be used for tackling each problem state (problem dependent; see each COP for more details). Inherited from selectionHH class.    
+        % String vector of solvers (heuristics) that can be used for tackling 
+        % each problem state (problem dependent; see each COP for more details). 
+        % Inherited from selectionHH class.    
         % The values passed to this property are requested from the main
         % class of the problem domain and represent the full list of
         % supported solvers. Check the solverIDs property to see the IDs of
@@ -29,6 +31,7 @@ classdef selectionHH < handle & deepCopyThis
         performanceData                % Information about the performance on the test set. Inherited from selectionHH class.
 		problemType     = 'Undefined'; % Problem type name. Inherited from selectionHH class.
         status          = 'New';       % HH status. Can be: New, Trained. Inherited from selectionHH class.
+        storageMode                    % Storage mode for the HH performance data. Defaults to Minimal. 
         solverIDs       = NaN;         % Vector with ID of each solver that the model will use. Inherited from selectionHH class.
         targetProblem   = 'Undefined'; % Problem domain for the HH. Can be: Undefined (when new), JSSP, or others (pending update). Inherited from selectionHH class.
         targetProblemHandle            % Function handle for multiple domain support. Inherited from selectionHH class.
@@ -56,6 +59,7 @@ classdef selectionHH < handle & deepCopyThis
         % Constructor
         % ----- ---------------------------------------------------- -----
         function obj = selectionHH(varargin)            
+            obj.storageMode = storageMode.Minimal;
             obj.trainingStats = struct('elapsedTime',NaN,'functionEvaluations',NaN,'performedIterations',NaN,'stoppingCriteria',NaN);
             obj.oracle = struct('isReady',false,'lastPerformance',NaN,'lastInstanceSolutions',NaN, 'lastBestSolvers', NaN, 'unsolvedInstances', NaN);
             if nargin > 0

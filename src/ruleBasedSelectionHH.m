@@ -106,6 +106,7 @@ classdef ruleBasedSelectionHH < selectionHH
                     if isfield(props,'targetProblemHandle'), targetProblemHandle = props.targetProblemHandle; end
                     if isfield(props,'selectedFeatures'), selectedFeatures = props.selectedFeatures; defaultFeatures = false; end
                     if isfield(props,'selectedSolvers'), selectedSolvers = props.selectedSolvers; defaultSolvers = false; end
+                    if isfield(props,'storageMode'), obj.storageMode = props.storageMode; end
                 else                        % Given for compatibility with older code
                     warning('Using deprecated constructor. Consider changing to a structure-based approach...')
                     isDeprecated = true;
@@ -254,21 +255,45 @@ classdef ruleBasedSelectionHH < selectionHH
             heuristicID = obj.value(ruleID, end); 
         end
         
-        function stepData = getStepData(~, instance, heuristicID)
+        function stepData = getStepData(obj, instance, heuristicID, stepType)
             % getStepData   Method for generating step data for partial
-            % solutions. 
+            % solutions.
             %
             % Inputs:
             %    instance - Problem instance that is being solved
             %    heuristicID - ID of the heuristic that was chosen at this
             %    step, which comes from the getRuleAction method
-            % 
+            %    stepType - Text indicating the kind of step (initial,
+            %    intermediate, or final). 
+            %
             % Outputs:
-            %    stepData - Structure with the information from this step
+            %    stepData - Structure with the information from this step.
+            %    Depends on the storageMode property of the HH. If the Full
+            %    option is selected, information about feature values, solver
+            %    selected, and intermediate solution, are stored. In case the
+            %    Minimal property is selected, only the feature values and the
+            %    selected solver are stored.
+
+            if strcmpi(stepType, 'initial')                
+                    thisFeatureValue = {};
+                    thisSelectedSolver = {};
+                    thisSolution = {};
+            elseif strcmpi(stepType, 'final') || strcmpi(stepType, 'intermediate')
+                    thisFeatureValue = instance.getCurrentFeatureValues;
+                    thisSelectedSolver = heuristicID;
+                    if obj.storageMode == storageMode.Full
+                        thisSolution = instance.solution.clone();
+                    end
+            else
+                error('Invalid step mode')
+            end
+
+            stepData = struct('featureValues', thisFeatureValue,...
+                'selectedSolver', thisSelectedSolver);
+            if obj.storageMode == storageMode.Full
+                stepData.solution = thisSolution; % Adds extra data
+            end
             
-             stepData = struct('featureValues', instance.getCurrentFeatureValues(),...
-                                    'selectedSolver', heuristicID,...
-                                    'solution', instance.solution.clone()); 
         end
         
         function [fitness, solvedInstances] = evaluateCandidateSolution(obj, solution, varargin)
@@ -545,13 +570,12 @@ classdef ruleBasedSelectionHH < selectionHH
             while ~strcmp(instance.status, 'Solved')                
                 activeRule = obj.getClosestRule(instance);
                 heuristicID = obj.getRuleAction(activeRule);                 
-                stepData = obj.getStepData(instance, heuristicID);
+                stepData = obj.getStepData(instance, heuristicID, 'intermediate');
                 performanceData = [performanceData stepData];
                 obj.targetProblem.stepHeuristic(instance, heuristicID);                
             end                 
             SolvedInstance = instance;
-            stepData = struct('featureValues', instance.getCurrentFeatureValues,...
-                'selectedSolver', NaN, 'solution', instance.solution);
+            stepData = obj.getStepData(instance, NaN, 'final');
             performanceData = [performanceData stepData]; % Values associated to the solved instance						        
         end 
         
