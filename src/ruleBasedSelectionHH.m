@@ -821,7 +821,7 @@ classdef ruleBasedSelectionHH < selectionHH
             %                            achieved for each instance
             % -\ ---\ bestSolverPerInstance: Vector with the ID of the best
             %                                solver for each instance
-            dummyProps = struct('nbRules',1,'targetProblemHandle',obj.targetProblemHandle);
+            dummyProps = struct('nbRules',1,'targetProblemHandle',obj.targetProblemHandle, 'storageMode', storageMode.Full);
             dummyHH = ruleBasedSelectionHH(dummyProps);
             % Check if custom heuristic IDs were given:
             if length(varargin) == 1                % they were
