@@ -15,6 +15,7 @@ function callErrorCode(errCode)
 %     ---\ 104: Failed independence test.
 %     ---\ 105: Failed logic test.
 %     ---\ 106: Memory size (for HH) not properly defined.
+%     ---\ 107: Invalid enumeration option.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -46,6 +47,8 @@ else
             error('Logic test failed to pass (check argument given in logic test). Aborting!')
         case 106
             error('The memory size (for the HH) has not been properly defined. Aborting!')
+        case 107
+            error('An invalid option for the enumeration has been provided. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end
