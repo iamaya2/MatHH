@@ -126,7 +126,7 @@ classdef KP < problemDomain
                 case 'kreher'
                     load([baseMatPath 'Kreher\instanceDataset.mat'], 'allInstances')
 
-                case 'lowdimensional'
+                case 'lowdim'
                     load([baseMatPath 'LowDimensional\instanceDataset.mat'], 'allInstances')
 
                 case 'mixte1'

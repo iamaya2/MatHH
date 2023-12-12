@@ -14,15 +14,20 @@ toSave = true; % Flag for defining if instances will be stored on disk
 toBruteForce = true; % Flag for defining if instance must be brute-forced 
 
 % Dataset-specific data
-% Brute-forceable (use Alienware since it will take quite some time)
-allDatasets = {'GA_Generated';...
+% Brute-forceable (for debugging and testing)
+allDatasets = {...
                 'Kreher';
-                'LowDimensional';...
-                'Mix50\Test1';...
-                'Mix50\Test2';
-                'Mix50\Training';
-                'Pisinger_Hard\20';
-                'Random'};
+               };
+
+% % Brute-forceable (use Alienware since it will take quite some time)
+% allDatasets = {'GA_Generated';...
+%                 'Kreher';
+%                 'LowDimensional';...
+%                 'Mix50\Test1';...
+%                 'Mix50\Test2';
+%                 'Mix50\Training';
+%                 'Pisinger_Hard\20';
+%                 'Random'};
 %
 % Not brute-forceable (due to size)
 % allDatasets = {'Pisinger_Hard\50';
