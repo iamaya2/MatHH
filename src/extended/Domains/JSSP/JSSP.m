@@ -9,6 +9,32 @@ classdef JSSP < handle
     %  features and help problemSolvers to check information about
     %  currently supported solvers.
     
+    properties (Constant)
+        % List of default feature IDs (those that do not rely on memory)
+        defaultFeatureIDs = 1:5; 
+
+        % Cell array containing a description of the available features and the IDs used for using them.
+        %   Uses dictionary-style format for linking IDs and features:
+        %       1:Mirsh222
+        %       2:Mirsh15
+        %       3:Mirsh29
+        %       4:Mirsh282
+        %       5:Mirsh95
+        problemFeatures     = {'1:Mirsh222', '2:Mirsh15','3:Mirsh29','4:Mirsh282', '5:Mirsh95'}; 
+        
+        % Cell array containing a description of the available solvers and the IDs used for them.
+        %   Uses dictionary-style format for linking IDs and solvers:
+        %       1:LPT
+        %       2:SPT
+        %       3:MPA
+        %       4:LPA
+        problemSolvers      = {'1:LPT', '2:SPT','3:MPA','4:LPA'}; 
+        
+        % String with the name of the problem, i.e. JSSP, for
+        % identification purposes.
+        problemType         = 'JSSP'; 
+    end
+
     %   
     %  JSSP Properties:
     %   instances - Dummy instance for indicating the class of objects
@@ -41,28 +67,7 @@ classdef JSSP < handle
     %    
     properties               
         % Dummy instance for indicating the class of objects associated with instances.
-        instances; 
-        
-        % Cell array containing a description of the available features and the IDs used for using them.
-        %   Uses dictionary-style format for linking IDs and features:
-        %       1:Mirsh222
-        %       2:Mirsh15
-        %       3:Mirsh29
-        %       4:Mirsh282
-        %       5:Mirsh95
-        problemFeatures     = {'1:Mirsh222', '2:Mirsh15','3:Mirsh29','4:Mirsh282', '5:Mirsh95'}; 
-        
-        % Cell array containing a description of the available solvers and the IDs used for them.
-        %   Uses dictionary-style format for linking IDs and solvers:
-        %       1:LPT
-        %       2:SPT
-        %       3:MPA
-        %       4:LPA
-        problemSolvers      = {'1:LPT', '2:SPT','3:MPA','4:LPA'}; 
-        
-        % String with the name of the problem, i.e. JSSP, for
-        % identification purposes.
-        problemType         = 'JSSP'; 
+        instances;               
     end
     
     properties (Dependent)
@@ -91,11 +96,6 @@ classdef JSSP < handle
             %      newInstance: The cloned instance
             %   See also JSSPINSTANCE.RESET, CREATEDUMMYINSTANCE,
             %   CREATEJSSPINSTANCEFROMINSTANCE
-            
-            % old version
-%             newInstance = createJSSPInstanceFromInstance(oldInstance);
-            
-            % new version
             newInstance = JSSPInstance();
             oldInstance.deepCopy(newInstance);
         end

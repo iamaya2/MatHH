@@ -82,17 +82,8 @@ classdef JSSPSchedule < handle & deepCopyThis % Only one schedule should be arou
             machineID = targetJob.activities(1).machineID;
             activityLength = targetJob.activities(1).processingTime;
             selectedMachine = obj.schedule(machineID); % Machine object
-            currMakespan = obj.makespan;
-            
-            %debugging
-%             if machineID == 1
-            if targetJob.jobID == 3
-%                 pause(0.5)
-            end
+            currMakespan = obj.makespan;            
             if isnan(currMakespan) % Fix for when the schedule is too young
-%                 if selectedMachine == 0, timeIndex = targetJob.lastScheduledTime;
-%                 else, timeIndex = 2; 
-%                 end
                 timeIndex = 0;
                 return
             elseif targetJob.lastScheduledTime > currMakespan % Expansion required
@@ -122,44 +113,8 @@ classdef JSSPSchedule < handle & deepCopyThis % Only one schedule should be arou
                         end
                     end
                     timeIndex = max(emptyRanges(1,end),fixedStart); % no valid gap found
-%                     validColumns = emptyRanges(1,:) >= fixedStart; % This should not be here
-%                     validTimes = emptyRanges(1,validColumns);                    
-%                     timeIndex = validTimes(validGaps); % This should be the location...
                 end                                               
             end
-%             if obj.makespan == 1 % Fix for when the schedule is too young
-%                 if selectedMachine == 0, timeIndex = targetJob.lastScheduledTime;
-%                 else, timeIndex = 2; 
-%                 end
-%                 return
-%             elseif targetJob.lastScheduledTime > obj.makespan
-%                 timeIndex = targetJob.lastScheduledTime;
-%                 return
-%             else                
-%                 fixedStart = targetJob.lastScheduledTime;
-%                 zerosIdx = selectedMachine(fixedStart:end) == 0; % Normalize scheduleIdentify empty spaces
-%                 diffIdx = diff(zerosIdx);
-%                 startIdx = find(diffIdx==1); % Identify start of zero regions
-%                 endIdx = find(diffIdx==-1); % Identify end of zero regions
-%                 if isempty(startIdx) && isempty(endIdx) % All full or all empty
-% %                     if selectedMachine(1) == 0, timeIndex = 1; % Empty,                         
-%                     if selectedMachine(fixedStart) == 0, timeIndex = fixedStart; % Empty,
-%                     else, timeIndex = obj.makespan + 1; % Full
-%                     end
-%                     return
-%                 elseif isempty(startIdx), startIdx = 0; 
-%                 elseif isempty(endIdx), timeIndex = startIdx(1)+fixedStart; return
-%                 end
-%                 if endIdx(1) < startIdx(1), startIdx = [0 startIdx]; end % Correct zero start
-%                 if endIdx(end) < startIdx(end), endIdx = [endIdx startIdx(end)+activityLength]; end % Correct zero end
-%                 for idx = 1:length(startIdx)      % This needs completion...
-%                     if endIdx(idx)-startIdx(idx) >= activityLength % Enough space?
-%                         timeIndex = startIdx(idx)+fixedStart; % +1 because of diff offset
-%                         return
-%                     end
-%                 end
-%                 timeIndex = obj.makespan+1; % If full, set at end of schedule
-%             end
         end
         
         

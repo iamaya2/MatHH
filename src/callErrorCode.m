@@ -16,6 +16,7 @@ function callErrorCode(errCode)
 %     ---\ 105: Failed logic test.
 %     ---\ 106: Memory size (for HH) not properly defined.
 %     ---\ 107: Invalid enumeration option.
+%     ---\ 108: Invalid feature ID.
 if errCode < 100
     warning('Warning code %d detected. The following issue has occurred: ', errCode)
     switch errCode
@@ -49,6 +50,8 @@ else
             error('The memory size (for the HH) has not been properly defined. Aborting!')
         case 107
             error('An invalid option for the enumeration has been provided. Aborting!')
+        case 108
+            error('Undefined feature ID. Aborting!')
         otherwise
             error('Error code %d has not been defined yet. Aborting!', errCode)
     end

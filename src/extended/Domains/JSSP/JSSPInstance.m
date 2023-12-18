@@ -29,7 +29,9 @@ classdef JSSPInstance < handle & deepCopyThis
     %   disp(obj, varargin) - Prints instance information    
     %
     
-    properties
+    properties       
+        featureIDs = NaN; % Defaults to no valid IDs
+        nbFeatures = 0; % No features by default
         nbJobs % Number of jobs within the instance
         nbMachines % Number of machines associated with the instance
         status = 'Undefined'; % Instance status (text). Can be: Undefined (empty), Pending, Solved
@@ -40,6 +42,9 @@ classdef JSSPInstance < handle & deepCopyThis
         updatingData % Hyper-matrix with updated rawData, according to the activities that has been already scheduled
         jobRegister % Vector with one element per job. Indicates the number of activities that has been scheduled for each job.
         rawInstanceData % Hyper-matrix containing the raw data of the original (unsolved) instance
+        % --- Memory-related properties
+        memory = []; % Matrix for storing memory-based features
+        memorySize = 0; % Defaults to no memory
     end
     
     properties (Dependent)
@@ -64,6 +69,7 @@ classdef JSSPInstance < handle & deepCopyThis
             instance.pendingData = JSSPJob(); 
             instance.solution = JSSPSchedule();
             if nargin > 0
+                selectedFeatures = JSSP.defaultFeatureIDs;
                 if isnumeric(instanceData) % If given raw data:
                 [instance.nbJobs, ~] = size(instanceData(:,:,1));
                 instance.nbMachines = max(max(instanceData(:,:,2)));
@@ -112,12 +118,14 @@ classdef JSSPInstance < handle & deepCopyThis
                         rawData(idx,1:thisJobNbOps,1) = thisJobProcTimes;
                         rawData(idx,1:thisJobNbOps,2) = thisJobMachOrders;
                     end
-                    instanceData = rawData; % Warning: overwrites input job data. Should be improved.
-                    
+                    instanceData = rawData; % Warning: overwrites input job data. Should be improved.                    
+                    % Feature customization
+                    if length(varargin)==2 
+                        selectedFeatures = varargin{2};                      
+                    end 
                 else
                     callErrorCode(102); % Invalid input
-                end
-                
+                end                
                 % Common process
                 instance.status = 'Pending';
                 instance.solution = JSSPSchedule(instance.nbMachines, instance.nbJobs);                
@@ -126,8 +134,8 @@ classdef JSSPInstance < handle & deepCopyThis
 %                 for i=1:size(instanceData(:,:,1)) % this should be moved up to the branch for the raw data, or modified to be generic
                 for i=1:instance.nbJobs % testing this out to make it general
                     instance.jobRegister(i)=0;
-                end
-                instance.gettingFeatures(true); % Defines initial feature values
+                end                
+                instance.setFeatures(selectedFeatures); % Initial features                 
             end
         end
         
@@ -136,6 +144,16 @@ classdef JSSPInstance < handle & deepCopyThis
         % Calculate Features
         % ----- ---------------------------------------------------- -----
         
+        function setFeatures(obj, selectedFeatures)
+            % setFeatures   Assigns a list of feature IDs and updates the
+            % number of features and the feature values
+            obj.featureIDs = selectedFeatures; % Stores selected IDs
+            obj.nbFeatures = length(selectedFeatures); % Updates number of features
+            obj.setMemorySize(obj.memorySize); % Flushes memory
+            obj.features = nan(1,obj.nbFeatures); % Flushes feature vector
+            obj.updateFeatureValues(); % Initial feature values            
+        end
+
         function allFeatures = calculateFeature(obj, featureIDs)
             nbFeaturesToCalculate = length(featureIDs);
             allFeatures = nan(1,nbFeaturesToCalculate);
@@ -171,6 +189,15 @@ classdef JSSPInstance < handle & deepCopyThis
             end
             
             obj.features = features;
+        end
+
+        function updateFeatureValues(obj)
+            % updateFeatureValues   Update the feature values of the
+            % instance for the assigned set of IDs.                                   
+            for idf = 1 : obj.nbFeatures                
+                thisFeatureID = obj.featureIDs(idf);
+                obj.features(idf) = normalizeFeature(CalculateFeature(obj,thisFeatureID),thisFeatureID);
+            end            
         end
         
         % ----- ---------------------------------------------------- -----
@@ -217,15 +244,36 @@ classdef JSSPInstance < handle & deepCopyThis
 %             [~, rawInstanceData] = createJSSPInstanceFromInstance(obj);
         end
         
+
+        % ---- ------------------------ ----
+        % ---- MEMORY-RELATED METHODS ----
+        % ---- ------------------------ ----
+
+        function setMemorySize(obj, newSize)
+            % setMemorySize   This method resets the memory of the
+            % instance and changes it to a new size. It reinitializes the
+            % memory to NaN values, based on the currently selected features. 
+            % The rest of the instance is unaffected.
+            obj.memorySize = newSize;            
+            obj.memory = nan(newSize, obj.nbFeatures);
+        end
+
         % ----- ---------------------------------------------------- -----
         % Methods for overloading functionality
         % ----- ---------------------------------------------------- -----
+        function featureValues = getCurrentFeatureValues(obj)
+            featureValues = obj.features;
+        end
         function featureValues = getFeatureVector(obj, varargin)
-             if isempty(varargin)
+            % getFeatureVector   Recalculates the feature vector for the current
+            % state and stores memory data
+            obj.memory(2:end,:) = obj.memory(1:end-1,:);
+            obj.memory(1,:) = obj.features;
+            if isempty(varargin)
                 featureValues = obj.calculateFeature(1:length(JSSP.problemFeatures));
             else
                 featureValues = obj.calculateFeature(varargin{1});
-            end
+            end            
         end
    
         function makespan = getSolutionPerformanceMetric(obj)

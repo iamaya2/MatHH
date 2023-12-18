@@ -2,7 +2,7 @@
 % This file can be used to read base txt files and transform them into
 % usable KPInstance objects so that they can be used with the framework
 %% Cleanup
-clc
+% clc
 clear
 close all
 %% Paths and general variables

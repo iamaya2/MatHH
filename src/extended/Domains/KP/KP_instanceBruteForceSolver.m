@@ -19,7 +19,16 @@ for idI = 1 : nbInstances
         nbCombinations = size(testCombinations,1);
         fprintf('Generated a total of %d combinations... Testing them... ', nbCombinations)
         validFlag = zeros(1, nbCombinations);
+        timerID = tic();
         for idC = 1 : nbCombinations
+            currProgress = idC / nbCombinations * 100;
+            if mod(currProgress, 10) == 0
+                fprintf('%d%%... ', currProgress)
+            end
+            % Validate if feasible and only proceed when required
+            if thisInstance.capacity < sum([testCombinations(idC,:).weight])
+                continue
+            end
             newSolution = KPSolution();
             newSolution.knapsack.capacity = thisInstance.capacity;
             newSolution.knapsack.ID = thisInstance.solution.knapsack.ID;
@@ -34,7 +43,8 @@ for idI = 1 : nbInstances
                 validFlag(idC) = 1;
             end
         end
-        fprintf('Done!\n')
+        timeTaken = toc(timerID);
+        fprintf('Done! Time taken: %.2f seconds\n', timeTaken)        
         if ~any(validFlag)
             fprintf('\t --- Detected stagnation (all combinations of these elements are invalid). Aborting search! ---\n')
             break

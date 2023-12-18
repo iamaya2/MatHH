@@ -1,14 +1,15 @@
 function [normalizedFeature]= normalizeFeature(featureValue, featureID)
-
-    if featureID ==1 
-        normalizedFeature = featureValue/2; 
-    elseif featureID ==2 
+switch featureID
+    case 1
+        normalizedFeature = featureValue/2;
+    case 2
         normalizedFeature = featureValue/1.73;
-    elseif featureID ==3 
-        normalizedFeature = featureValue/2;    
-    elseif featureID ==4 
+    case 3
+        normalizedFeature = featureValue/2;
+    case 4
         normalizedFeature = featureValue/1.6875;
-    elseif featureID ==5 
+    case 5
         normalizedFeature = featureValue/1.5;
-    end
+    otherwise
+        normalizedFeature = featureValue; % No normalization unless known
 end

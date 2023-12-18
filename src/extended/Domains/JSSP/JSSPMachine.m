@@ -48,7 +48,6 @@ classdef JSSPMachine < handle & deepCopyThis
         end
         
         
-        % Testing...
         function scheduleJob(obj, selectedActivity, jobID, timeslot)
             % scheduleJob   Schedule upcoming activity of job with given ID at the given time slot                        
             selectedActivity.startTime = timeslot;
