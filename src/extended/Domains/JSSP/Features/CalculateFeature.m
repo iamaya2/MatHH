@@ -14,6 +14,10 @@ switch featID
         featureValue=Mirsh95(Instance);
     case num2cell(101:105) % equivalent to {101,102,...}        
         featureValue = processMemoryBasedFeature(Instance, 1, featID-100);
+    case num2cell(201:205) % equivalent to {201,202,...}        
+        featureValue = processMemoryBasedFeature(Instance, 2, featID-200);
+    case num2cell(301:305) % equivalent to {301,302,...}        
+        featureValue = processMemoryBasedFeature(Instance, 3, featID-300);
     otherwise
         callErrorCode(108) % Unknown feature ID
 end

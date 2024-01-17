@@ -687,6 +687,8 @@ classdef ruleBasedSelectionHH < selectionHH
                                 if isfield(props,'globalConf'), globalConf = props.globalConf; end
                                 if isfield(props,'unifyFactor'), unifyFactor = props.unifyFactor; end
                                 if isfield(props,'visualMode'), visualMode = props.visualMode; end
+                                if ~isfield(props, 'verboseMode'), props.verboseMode = true; end
+                                if ~isfield(props, 'maxStagIter'), props.maxStagIter = maxIter; end
                             elseif strcmpi(trainingMethod,'MAP-Elites')
                                 if isfield(props,'normalization'), normalization = props.normalization; end
                                 if isfield(props,'nbDimInt'), nbDimInt = props.nbDimInt; end
@@ -730,8 +732,8 @@ classdef ruleBasedSelectionHH < selectionHH
                     flim = [flimFeatures; flimActions];
                     
                     % UPSO properties
-                    properties = struct('visualMode', visualMode, 'verboseMode', true, ...
-                        'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', maxIter, ...
+                    properties = struct('visualMode', visualMode, 'verboseMode', props.verboseMode, ...
+                        'populationSize', populationSize, 'maxIter', maxIter, 'maxStagIter', props.maxStagIter, ...
                         'selfConf', selfConf, 'globalConf', globalConf, 'unifyFactor', unifyFactor);
                     
                     % Call to the optimizer
