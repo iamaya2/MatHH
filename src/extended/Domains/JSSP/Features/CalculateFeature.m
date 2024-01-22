@@ -18,6 +18,10 @@ switch featID
         featureValue = processMemoryBasedFeature(Instance, 2, featID-200);
     case num2cell(301:305) % equivalent to {301,302,...}        
         featureValue = processMemoryBasedFeature(Instance, 3, featID-300);
+    case num2cell(401:405) % equivalent to {401,402,...}        
+        featureValue = processMemoryBasedFeature(Instance, 4, featID-400);
+    case num2cell(501:505) % equivalent to {501,502,...}        
+        featureValue = processMemoryBasedFeature(Instance, 5, featID-500);    
     otherwise
         callErrorCode(108) % Unknown feature ID
 end
