@@ -442,6 +442,26 @@ classdef JSSP < handle
                     load([baseMatPath 'Tailored\Combined\instances_adv1_adv2_comb.mat'], 'instances_comb');
                     allInstances = instances_comb;
 
+                case 'tailoredj5m5o5'
+                    load([baseMatPath 'Tailored\Combined_J5M5O5\instances_J5M505_delta150.mat'], 'instances_J5M5O5_delta150');
+                    allInstances = instances_J5M5O5_delta150;
+
+                case 'tailoredj10m5o5'
+                    load([baseMatPath 'Tailored\Combined_J10M5O5\instances_J10M5O5_delta200.mat'], 'instances_J10M5O5_delta200');
+                    allInstances = instances_J10M5O5_delta200;
+
+                case 'tailoredj10m10o10'
+                    load([baseMatPath 'Tailored\Combined_J10M10O10\instances_J10M10O10_delta300.mat'], 'instances_J10M10O10_delta300');
+                    allInstances = instances_J10M10O10_delta300;
+
+                case 'tailoredj20m5o5'
+                    load([baseMatPath 'Tailored\Combined_J20M5O5\instances_J20M5O5_delta200.mat'], 'instances_J20M5O5_delta200');
+                    allInstances = instances_J20M5O5_delta200;
+
+                case 'tailoredj20m10o10'
+                    load([baseMatPath 'Tailored\Combined_J20M10O10\instances_J20M10O10_delta300.mat'], 'instances_J20M10O10_delta300');
+                    allInstances = instances_J20M10O10_delta300;    
+
                 otherwise
                     callErrorCode(101) % Undefined dataset
             end
