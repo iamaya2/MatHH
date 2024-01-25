@@ -123,6 +123,10 @@ classdef JSSPInstance < handle & deepCopyThis
                     if length(varargin)==2 
                         selectedFeatures = varargin{2};                      
                     end 
+                elseif isa(instanceData, 'JSSPInstance') % From another instance (i.e. deep clone)
+                    instance = JSSPInstance();
+                    instanceData.deepCopy(instance)
+                    return
                 else
                     callErrorCode(102); % Invalid input
                 end                

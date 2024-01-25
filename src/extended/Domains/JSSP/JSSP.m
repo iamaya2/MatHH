@@ -439,8 +439,8 @@ classdef JSSP < handle
                     load([baseMatPath 'ORLibrary\instanceDataset.mat'], 'allInstances')
 
                 case 'tailoredcombined'
-                    load([baseMatPath 'Tailored\Combined\instances_adv1_adv2_comb.mat'], 'instances_comb');
-                    allInstances = instances_comb;
+                    load([baseMatPath 'Tailored\Combined\instances_adv1_adv2_comb.mat'], 'newInstances');
+                    allInstances = newInstances;
 
                 case 'tailoredj5m5o5'
                     load([baseMatPath 'Tailored\Combined_J5M5O5\instances_J5M505_delta150.mat'], 'instances_J5M5O5_delta150');
