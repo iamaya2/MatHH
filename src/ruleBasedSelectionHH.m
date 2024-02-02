@@ -98,7 +98,8 @@ classdef ruleBasedSelectionHH < selectionHH
             if nargin >= 1                  
                 if isa(varargin{1},'ruleBasedSelectionHH') % From another HH
                     obj = ruleBasedSelectionHH();
-                    varargin{1}.cloneProperties(obj);
+                    varargin{1}.deepCopy(obj);
+%                     varargin{1}.cloneProperties(obj);
                     return
                 elseif isstruct(varargin{1})    % Pass arguments as a structure
                     props = varargin{1};

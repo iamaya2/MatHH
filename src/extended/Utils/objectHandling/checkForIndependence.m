@@ -28,6 +28,7 @@ for ido = 1 : length(obj1)
                 fprintf('\n')
                 nbInnerObjs = length(thisObj.(thisProp));
                 for idy = 1 : nbInnerObjs
+                    if isa(thisObj.(thisProp)(idy),'JSSP'), continue, end
                     checkForIndependence(thisObj.(thisProp)(idy),thatObj.(thisProp)(idy),result, thisDepth+1);
                 end
             end
