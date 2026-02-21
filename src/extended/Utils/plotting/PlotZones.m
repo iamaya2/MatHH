@@ -115,6 +115,12 @@ allColors = [0 0 0; ...             % ID == 1
 
 allActionIDs = getActionIDs([vX vY], Rules(:,[rX rY end]), toEuclid ); % Evaluate all points
 
+% New mode: Using contourf or contourc to generate zones and post-process with
+% polyshape or with existing code... current problem: contours are open when
+% arriving at the boundary of the data, so there is a mismatch between polyshape
+% and contourf...
+
+% Old mode: To-Do: Remove after testing
 zz = [vX vY];
 uniqueActions = unique(allActionIDs);
 maxActionID = max(uniqueActions);
